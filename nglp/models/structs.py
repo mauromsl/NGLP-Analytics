@@ -53,3 +53,38 @@ REQUEST_EVENT_STRUCT = {
         "ip"
     ]
 }
+"""
+Example Investigation event
+{
+    "event" : "investigation",
+    "object_type" : "splash page",
+    "object_id": ["12345"],
+    "url" : "/community/university-x/",
+    "method" : "get",
+    "referrer" : "https://cottagelabs.com/nglp",
+    "user_agent" : "Mozilla",
+    "ip" : "255.255.255.255"
+}
+"""
+INVESTIGATION_EVENT_STRUCT = {
+    "fields" : {
+        "event" : {"coerce" : "unicode_lower"},
+        "object_type": {"coerce" : "unicode_lower"},
+        "url" : {"coerce" : "unicode"},
+        "method" : {"coerce" : "unicode_lower", "allowed_values" : ["get"]},
+        "referrer": {"coerce" : "unicode"},
+        "user_agent" : {"coerce" : "unicode"},
+        "ip" : {"coerce" : "ip"}
+    },
+    "lists" : {
+        "object_id" : {"contains" : "field", "coerce": "unicode"}
+    },
+    "objects" : [],
+    "required": [
+        "event",
+        "object_type",
+        "object_id",
+        "url",
+        "ip"
+    ]
+}

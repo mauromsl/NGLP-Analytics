@@ -16,3 +16,12 @@ class TestEvents(TestCase):
         with self.assertRaises(SeamlessException):
             obj2 = events.RequestEvent(raw=request2)
 
+    def test_02_investigation_event(self):
+        request = EventFixtureFactory.investigation_event()
+        request2 = deepcopy(request)
+
+        obj = events.InvestigationEvent(raw=request)
+        request2["method"] = "put"
+        with self.assertRaises(SeamlessException):
+            obj2 = events.InvestigationEvent(raw=request2)
+
