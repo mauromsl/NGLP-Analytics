@@ -53,6 +53,8 @@ REQUEST_EVENT_STRUCT = {
         "ip"
     ]
 }
+
+
 """
 Example Investigation event
 {
@@ -66,6 +68,8 @@ Example Investigation event
     "ip" : "255.255.255.255"
 }
 """
+
+
 INVESTIGATION_EVENT_STRUCT = {
     "fields" : {
         "event" : {"coerce" : "unicode_lower"},

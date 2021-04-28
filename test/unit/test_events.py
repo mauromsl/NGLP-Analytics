@@ -21,6 +21,7 @@ class TestEvents(TestCase):
         request2 = deepcopy(request)
 
         obj = events.InvestigationEvent(raw=request)
+
         request2["method"] = "put"
         with self.assertRaises(SeamlessException):
             obj2 = events.InvestigationEvent(raw=request2)
