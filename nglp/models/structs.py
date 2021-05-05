@@ -222,31 +222,39 @@ LEAVE_EVENT = {
 }
 
 """
-Example data model event
+Example core data model event (using all the fields, even if they're not strictly allowed)
  
 {
-    "timestamp" : 2021-04-29T12:00:00Z,
+    "occurred_at" : 2021-04-29T12:00:00Z,
     "category" : "usage",
     "event" : "request",
     "object_type" : "file",
     "object_id": ["12345", "doi:10.12345/hello"],
     "format" : "application/pdf",
     "container": ["12346", "12347", "12348"],
-    "query": NA,
-    "share.source_id" : NA,
-    "share.subj_id" : NA,
+    "search_keywords": ["science", "subject:medicine"],
+    "share" : {
+        "source_id" : "twitter",
+        "subj_id" : "https://twitter.com/tweet/2"
+    },
     "url" : "/article/12345/download.pdf",
     "method" : "get",
     "referrer" : "https://cottagelabs.com/nglp",
     "user_agent" : "Mozilla",
-    "user_id" : NA,
-    "user_organisation" : NA,
+    "user_id" : "test321",
+    "user_org" : ["ror:sjdfwefwqlk"],
     "ip" : "255.255.255.255",
-    "lat" : "coordinate",
-    "lon" : "coordinate",
-    "city" : "edinburgh"
+    "location" : {
+        "lat" : "55.95",
+        "lon" : "3.19",
+    }
+    "city" : "Edinburgh"
     "country" : "gbr",
-    "source" : "
+    "source" : {
+        "identifier" : "https://cdl.dspace.org",
+        "type": "DSpace",
+        "archive_id" : "12345"
+    }
 }
 
 """
