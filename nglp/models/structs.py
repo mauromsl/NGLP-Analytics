@@ -220,3 +220,33 @@ LEAVE_EVENT = {
         "user_id"
     ]
 }
+
+"""
+Example data model event
+ 
+{
+    "timestamp" : 2021-04-29T12:00:00Z,
+    "category" : "usage",
+    "event" : "request",
+    "object_type" : "file",
+    "object_id": ["12345", "doi:10.12345/hello"],
+    "format" : "application/pdf",
+    "container": ["12346", "12347", "12348"],
+    "query": NA,
+    "share.source_id" : NA,
+    "share.subj_id" : NA,
+    "url" : "/article/12345/download.pdf",
+    "method" : "get",
+    "referrer" : "https://cottagelabs.com/nglp",
+    "user_agent" : "Mozilla",
+    "user_id" : NA,
+    "user_organisation" : NA,
+    "ip" : "255.255.255.255",
+    "lat" : "coordinate",
+    "lon" : "coordinate",
+    "city" : "edinburgh"
+    "country" : "gbr",
+    "source" : "
+}
+
+"""
