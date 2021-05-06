@@ -4,7 +4,9 @@ setup(
     name='nglp',
     version='1.0.0',
     packages=find_packages(),
-    install_requires=[],
+    install_requires=[
+        "Faker",
+    ],
     url='http://cottagelabs.com/',
     author='Cottage Labs',
     author_email='us@cottagelabs.com',
