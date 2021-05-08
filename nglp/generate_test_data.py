@@ -2,6 +2,7 @@ import random
 import json
 import datetime
 import click
+import warnings
 from faker import Faker
 from nglp.models import events
 from nglp.lib import data_dictionaries
@@ -51,6 +52,9 @@ class DataGenerator:
             raise ValueError(f"'number_of_records' should be an integer")
         if self.data_fill not in ALLOWED_PARAM_VALUES['data_fill']:
             raise ValueError(f"'data_fill' should be one of {ALLOWED_PARAM_VALUES['data_fill']}")
+        if self.add_records_with_error:
+            self.add_records_with_error = False
+            warnings.warn("Feature 'add_records_with_error' is not implemented.", UserWarning, stacklevel=2)
 
     def validate_model(self):
         if len(self.model.__seamless_struct__.objects) > 0 and self.error_if_model_unsupported:
