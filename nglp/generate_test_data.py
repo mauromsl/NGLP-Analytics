@@ -139,7 +139,7 @@ class DataGenerator:
         start = datetime.datetime.now()
         print(f"Start time: {start}")
         count = 0
-        pulse = self.number_of_records // 100
+        pulse = self.number_of_records // 100 if self.number_of_records > 100 else 1
         with open(self.filename, 'w') as output:
             output.write('[')
             first = True
