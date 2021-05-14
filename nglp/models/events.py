@@ -66,3 +66,14 @@ class LeaveEvent(SeamlessMixin):
 
     def __init__(self, raw=None):
         super(LeaveEvent, self).__init__(raw=raw)
+
+
+class CoreEvent(SeamlessMixin):
+    __SEAMLESS_STRUCT__ = [
+        structs.CORE_EVENT
+    ]
+
+    __SEAMLESS_COERCE__ = structs.COERCE
+
+    def __init__(self, raw=None):
+        super(CoreEvent, self).__init__(raw=raw)

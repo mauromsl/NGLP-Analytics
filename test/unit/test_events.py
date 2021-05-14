@@ -66,3 +66,64 @@ class TestEvents(TestCase):
         request2["object_type"] = "collection"
         with self.assertRaises(SeamlessException):
             obj2 = events.LeaveEvent(raw=request2)
+
+
+    def test_07_request_core_event(self):
+        request = EventFixtureFactory.request_core_event()
+        request2 = deepcopy(request)
+
+        obj = events.CoreEvent(raw=request)
+
+        request2["location"] = "france"
+        with self.assertRaises(SeamlessException):
+            obj2 = events.CoreEvent(raw=request2)
+
+    def test_08_investigation_core_event(self):
+        request = EventFixtureFactory.investigation_core_event()
+        request2 = deepcopy(request)
+
+        obj = events.CoreEvent(raw=request)
+
+        request2["location"] = "france"
+        with self.assertRaises(SeamlessException):
+            obj2 = events.CoreEvent(raw=request2)
+
+    def test_09_workflow_transition_core_event(self):
+        request = EventFixtureFactory.workflow_transition_core_event()
+        request2 = deepcopy(request)
+
+        obj = events.CoreEvent(raw=request)
+
+        request2["location"] = "france"
+        with self.assertRaises(SeamlessException):
+            obj2 = events.CoreEvent(raw=request2)
+
+    def test_10_export_core_event(self):
+        request = EventFixtureFactory.export_core_event()
+        request2 = deepcopy(request)
+
+        obj = events.CoreEvent(raw=request)
+
+        request2["location"] = "france"
+        with self.assertRaises(SeamlessException):
+            obj2 = events.CoreEvent(raw=request2)
+
+    def test_11_join_core_event(self):
+        request = EventFixtureFactory.join_core_event()
+        request2 = deepcopy(request)
+
+        obj = events.CoreEvent(raw=request)
+
+        request2["location"] = "france"
+        with self.assertRaises(SeamlessException):
+            obj2 = events.CoreEvent(raw=request2)
+
+    def test_12_leave_core_event(self):
+        request = EventFixtureFactory.leave_core_event()
+        request2 = deepcopy(request)
+
+        obj = events.CoreEvent(raw=request)
+
+        request2["location"] = "france"
+        with self.assertRaises(SeamlessException):
+            obj2 = events.CoreEvent(raw=request2)

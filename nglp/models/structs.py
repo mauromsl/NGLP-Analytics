@@ -258,3 +258,64 @@ Example core data model event (using all the fields, even if they're not strictl
 }
 
 """
+
+CORE_EVENT = {
+    "fields" : {
+        "occurred_at" : {"coerce" : "datetime"},
+        "category": {"coerce" : "unicode_lower"},
+        "event" : {"coerce" : "unicode_lower"},
+        "object_type": {"coerce" : "unicode_lower"},
+        "format" : {"coerce": "unicode_lower"},
+        "url" : {"coerce": "url"},
+        "method": {"coerce": "unicode_lower"},
+        "referrer": {"coerce": "unicode"},
+        "user_agent": {"coerce": "unicode"},
+        "user_id" : {"coerce" : "unicode"},
+        "ip": {"coerce": "ip"},
+        "city": {"coerce": "unicode"},
+        "country": {"coerce": "unicode"}
+    },
+    "lists" : {
+        "object_id" : {"contains" : "field", "coerce": "unicode"},
+        "container": {"contains": "field", "coerce": "unicode"},
+        "search_keywords": {"contains": "field", "coerce": "unicode_lower"}, # Ask CIC if they have a plan for
+        # capitalisation in search queries
+        "user_org": {"contains": "field", "coerce": "unicode"}
+    },
+    "objects" : ["share", "location", "source"],
+    "structs": {
+        "share": {
+            "fields": {
+                "source_id": {"coerce": "unicode"},
+                "subj_id": {"coerce": "unicode"}
+            }
+        },
+        "location": {
+            "fields": {
+                "lat": {"coerce": "float"},
+                "lon": {"coerce": "float"}
+            }
+        },
+        "source": {
+            "fields": {
+                "identifier": {"coerce": "unicode"},
+                "type": {"coerce": "unicode_lower"},
+                "archive_id": {"coerce": "unicode"}
+            },
+            "required": [
+                "identifier",
+                "type",
+                "archive_id"
+            ]
+        }
+    },
+    "required": [
+        "occurred_at",
+        "category",
+        "event",
+        "object_type",
+        "object_id",
+        "source"
+    ]
+}
+
