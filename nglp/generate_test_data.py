@@ -142,9 +142,12 @@ class DataGenerator:
         pulse = self.number_of_records // 100
         with open(self.filename, 'w') as output:
             output.write('[')
+            first = True
             for data in self.generate_data():
+                if not first:
+                    output.write(',')
+                first = False
                 json.dump(data, output, indent=2)
-                output.write(',')
                 count += 1
                 print('.', end="", flush=True) if count % pulse == 0 else ''
             output.write(']')
