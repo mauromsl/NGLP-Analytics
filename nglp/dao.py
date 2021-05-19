@@ -39,5 +39,7 @@ MAPPING_OPTS = {
 }
 
 class BaseDAO(object):
+    """Basic Data Access Object to be used by any objects which need to persist their
+    state in Elasticsearch"""
     def mappings(self):
         raise NotImplementedError()

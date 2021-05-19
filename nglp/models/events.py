@@ -5,6 +5,7 @@ from nglp.lib import es_data_mapping
 
 
 class RequestEvent(SeamlessMixin):
+    """Event which represents a "Request" event, which is a file download"""
     __SEAMLESS_STRUCT__ = [
         structs.REQUEST_EVENT_STRUCT
     ]
@@ -16,6 +17,7 @@ class RequestEvent(SeamlessMixin):
 
 
 class InvestigationEvent(SeamlessMixin):
+    """Event which represents an "Investigation" event, which is a page view"""
     __SEAMLESS_STRUCT__ =  [
         structs.INVESTIGATION_EVENT_STRUCT
     ]
@@ -27,6 +29,7 @@ class InvestigationEvent(SeamlessMixin):
 
 
 class WorkflowTransitionEvent(SeamlessMixin):
+    """Event which represents one of the range of workflow transition events"""
     __SEAMLESS_STRUCT__ =  [
         structs.WORKFLOW_TRANSITION_EVENT_STRUCT
     ]
@@ -38,6 +41,7 @@ class WorkflowTransitionEvent(SeamlessMixin):
 
 
 class ExportEvent(SeamlessMixin):
+    """Event which represents a metadata export from an item (e.g. for a reference manager)"""
     __SEAMLESS_STRUCT__ =  [
         structs.EXPORT_EVENT
     ]
@@ -49,6 +53,7 @@ class ExportEvent(SeamlessMixin):
 
 
 class JoinEvent(SeamlessMixin):
+    """Event which represents a staff member joining the editorial team for a journal"""
     __SEAMLESS_STRUCT__ =  [
         structs.JOIN_EVENT
     ]
@@ -60,6 +65,7 @@ class JoinEvent(SeamlessMixin):
 
 
 class LeaveEvent(SeamlessMixin):
+    """Event which represents a staff member leaving the editorial team for a journal"""
     __SEAMLESS_STRUCT__ =  [
         structs.LEAVE_EVENT
     ]
@@ -71,6 +77,8 @@ class LeaveEvent(SeamlessMixin):
 
 
 class CoreEvent(SeamlessMixin, BaseDAO):
+    """A core event model for the main analytics index, which can act as a container for
+    any of the other events, plus additional context information required for analytics."""
     __SEAMLESS_STRUCT__ = [
         structs.CORE_EVENT
     ]
