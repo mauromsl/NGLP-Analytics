@@ -1,5 +1,7 @@
 from nglp.lib.seamless import SeamlessMixin
 from nglp.models import structs
+from nglp.dao import BaseDAO, MAPPING_OPTS
+from nglp.lib import es_data_mapping
 
 
 class RequestEvent(SeamlessMixin):
@@ -68,7 +70,7 @@ class LeaveEvent(SeamlessMixin):
         super(LeaveEvent, self).__init__(raw=raw)
 
 
-class CoreEvent(SeamlessMixin):
+class CoreEvent(SeamlessMixin, BaseDAO):
     __SEAMLESS_STRUCT__ = [
         structs.CORE_EVENT
     ]
@@ -77,3 +79,6 @@ class CoreEvent(SeamlessMixin):
 
     def __init__(self, raw=None):
         super(CoreEvent, self).__init__(raw=raw)
+
+    def mappings(self):
+        return es_data_mapping.create_mapping(self.__seamless_struct__.raw, MAPPING_OPTS)
