@@ -14,6 +14,7 @@ EVENTS_SELECTOR = {
     'leave': events.LeaveEvent,
     'export': events.ExportEvent,
     'workflow_transition': events.WorkflowTransitionEvent,
+    'core': events.CoreEvent
 }
 
 ALLOWED_PARAM_VALUES = {
@@ -31,18 +32,19 @@ class DataGenerator:
     dg.write_data()
     """
 
-    def __init__(self, event_type, number_of_records, data_fill='mix', add_records_with_error=False,
+    def __init__(self, event_type, number_of_records, is_core=False, data_fill='mix', add_records_with_error=False,
                  error_if_model_unsupported=True, filename=None):
         self.event_type = event_type
         self.number_of_records = number_of_records
+        self.is_core = is_core
         self.data_fill = data_fill
         self.add_records_with_error = add_records_with_error
         self.filename = filename
         self.error_if_model_unsupported = error_if_model_unsupported
         self.validate_params()
         self.set_filename()
-        self.model = EVENTS_SELECTOR.get(self.event_type)()
-        self.validate_model()
+        self.model = EVENTS_SELECTOR.get(self.event_type)() if is_core is False else events.CoreEvent()
+        # self.validate_model()
         self.fake = Faker()
 
     def validate_params(self):
@@ -79,15 +81,32 @@ class DataGenerator:
             'event': random.choices(data_dictionaries.EVENT_TYPES, k=length),
             'object_type': random.choices(data_dictionaries.OBJECT_TYPES, k=length),
             'object_id': random.choices([self.fake.bothify(text='????-########'), self.fake.uuid4()], k=length),
-            'ip': random.choices([self.fake.ipv4(), self.fake.ipv6()], weights=[0.7, 0.3], k=length)
+            'ip': random.choices([self.fake.ipv4(), self.fake.ipv6()], weights=[0.7, 0.3], k=length),
+            # need to come back to this urgently. not sure how to handle objects.
+            'share.source_id': random.choices(data_dictionaries.SOURCE_ID_TYPES, k=1),
+            'source.type': random.choices(data_dictionaries.DATA_SOURCE_TYPES, k=length),
+            'search_keywords': random.choices(self.fake.words(nb=8), k=length),
+            'container': [[self.fake.hexify(text="^^^^^^")] for i in range(length)]
         }
         fake_data_by_type = {
+            'occurred_at': self.fake.iso8601(),
             'format': self.fake.mime_type(),
             'url': self.fake.uri(),
             'method': self.fake.http_method(),
             'referrer': self.fake.uri(),
-            'user_agent': self.fake.user_agent()
-        }
+            'user_agent': self.fake.user_agent(),
+            'user_id': self.fake.hexify(text="^^^^^^^^^^^^"),
+            'user_org': self.fake.hexify(text="ror:^^^^^^^"),
+            'location': self.fake.location_on_land(),
+            'source.archive_id': self.fake.hexify(text="^^^^^")
+            }
+        aggregate_data_by_type = {
+            'category': data_dictionaries.CATEGORY_TYPES[random_data_by_type['event'][0]],
+            'share.subj_id': data_dictionaries.SUBJ_ID_TYPES[random_data_by_type["share.source_id"][0]],
+            'source.identifier': (fake_data_by_type["user_org"] + random_data_by_type["source.type"][0] +
+                                  self.fake.password(
+                length=8, special_chars=False))
+            }
         # If given a set of allowed values to choose from, compute that first
         fake_data = []
         if allowed_values:
@@ -98,15 +117,25 @@ class DataGenerator:
             fake_data = []
             for _ in range(length):
                 fake_data.append(fake_data_by_type[data_type])
+        elif data_type in aggregate_data_by_type:
+            fake_data = aggregate_data_by_type[data_type]
         return fake_data[0] if (single and fake_data) else fake_data
 
     def full_data_generator(self):
-        # This method will generate fake data for all the fields in the model
-        data = {}
-        for key, val in self.model.__seamless_struct__.fields:
-            data[key] = self.get_fake_data(key, single=True, allowed_values=val.get('allowed_values', None))
-        for key, val in self.model.__seamless_struct__.lists:
-            data[key] = self.get_fake_data(key, single=False, allowed_values=val.get('allowed_values', None))
+        def recurse(struct, path):
+            # This method will generate fake data for all the fields in the model
+            data = {}
+            for key, val in struct.fields:
+                data[key] = self.get_fake_data(".".join(path + [key]), single=True, allowed_values=val.get(
+                    'allowed_values', None))
+            for key, val in struct.lists:
+                data[key] = self.get_fake_data(".".join(path + [key]), single=False, allowed_values=val.get('allowed_values', None))
+            for key in struct.substructs.keys():
+                substruct = struct.substruct(key)
+                data[key] = recurse(substruct, path + [key])
+            return data
+        path = []
+        data = recurse(self.model.__seamless_struct__, path)
         return data
 
     def minimal_data_generator(self):
@@ -199,9 +228,9 @@ class DataGenerator:
               help='Filename to save the json generated test data. '
                    'If no filename is provided, the default filename has the pattern '
                    '{event_type}-{number_of_records}-{dt} or {event_type}-{number_of_records}-with-errors-{dt}.json')
-def generate_test_data(event_type, number_of_records, data_fill='mix', add_records_with_error=False,
+def generate_test_data(event_type, number_of_records, is_core=False, data_fill='mix', add_records_with_error=False,
                        error_if_model_unsupported=True, filename=None):
-    dg = DataGenerator(event_type, number_of_records, data_fill, add_records_with_error,
+    dg = DataGenerator(event_type, number_of_records, is_core, data_fill, add_records_with_error,
                        error_if_model_unsupported, filename)
     dg.write_data()
 
