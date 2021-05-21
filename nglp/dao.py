@@ -1,12 +1,10 @@
 from elasticsearch import Elasticsearch
 
-# FIXME: this is ok while we're still in early stage dev, but very soon this is going to need to
-# go out to a configuration file, and the live version is going to need to not be committed to git
+from nglp.config import settings
+
 CONNECTION = Elasticsearch(
-    [
-        "https://admin:admin@localhost:9200/"
-    ],
-    verify_certs=False
+    settings.es_hosts,
+    verify_certs=settings.es_verify_certs
 )
 
 STRING_EXACT = {
@@ -49,6 +47,7 @@ MAPPING_OPTS = {
     }
 }
 
+
 class BaseDAO(object):
     """Basic Data Access Object to be used by any objects which need to persist their
     state in Elasticsearch"""
@@ -61,6 +60,7 @@ class BaseDAO(object):
 
     def initialise_index(self):
         mappings = self.mappings()
-        CONNECTION.indices.create(index=self.__index_type__, body={
-            "mappings" : mappings
-        })
+        if not CONNECTION.indices.exists(index=self.__index_type__):
+            CONNECTION.indices.create(index=self.__index_type__, body={
+                "mappings" : mappings
+            })
