@@ -3,6 +3,7 @@ import json
 
 from nglp.dao import CONNECTION
 from nglp.models.events import CoreEvent
+from nglp.initialise import initialise
 
 BATCH_SIZE = 100
 
@@ -13,6 +14,10 @@ BATCH_SIZE = 100
               help='The input file containing the test data.',
               )
 def load_test_data(input):
+    # make sure the app is initialised
+    initialise()
+
+    # import the test data
     with open(input, "r", encoding="utf-8") as f:
         data = json.loads(f.read())
         batch = []
