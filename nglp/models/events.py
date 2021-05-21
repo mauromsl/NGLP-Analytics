@@ -79,6 +79,9 @@ class LeaveEvent(SeamlessMixin):
 class CoreEvent(SeamlessMixin, BaseDAO):
     """A core event model for the main analytics index, which can act as a container for
     any of the other events, plus additional context information required for analytics."""
+
+    __index_type__ = "event"
+
     __SEAMLESS_STRUCT__ = [
         structs.CORE_EVENT
     ]
