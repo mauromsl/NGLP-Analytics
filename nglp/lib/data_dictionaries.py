@@ -1,3 +1,5 @@
+import enum
+
 EVENT_TYPES = [
     'request',
     'investigation',
@@ -23,34 +25,35 @@ CATEGORY_TYPES = {
 }
 
 SOURCE_ID_TYPES = [
-    'Crossref metadata',
-    'DataCite metadata',
-    'F1000Prime',
-    'Hypothes.is',
-    'The Lens (Cambia)',
-    'Newsfeed',
-    'Reddit',
-    'Reddit Links',
-    'Stack Exchange Network',
-    'Twitter',
-    'Wikipedia',
-    'Wordpress.com'
+    "Crossref metadata",
+    "DataCite metadata",
+    "F1000Prime",
+    "Hypothes.is",
+    "The Lens (Cambia)",
+    "Newsfeed",
+    "Reddit",
+    "Reddit Links",
+    "Stack Exchange Network",
+    "Twitter",
+    "Wikipedia",
+    "Wordpress.com"
 ]
 
 SUBJ_ID_TYPES = {
-    'Crossref metadata': 'crossref.org/',
-    'DataCite metadata': 'datacite.org/',
-    'F1000Prime': 'facultyopinions.com/',
-    'Hypothes.is': 'web.hypothes.is/',
-    'The Lens (Cambia)': 'lens.org/',
-    'Newsfeed': 'newsfeed.url/',
-    'Reddit': 'reddit.com/',
-    'Reddit Links': 'reddit.com/',
-    'Stack Exchange Network': 'stackexchange.com/',
-    'Twitter': 'twitter.com/',
-    'Wikipedia': 'wikipedia.com/',
-    'Wordpress.com': 'wordpress.com/'
+    "Crossref metadata": 'crossref.org/',
+    "DataCite metadata": 'datacite.org/',
+    "F1000Prime": 'facultyopinions.com/',
+    "Hypothes.is": 'web.hypothes.is/',
+    "The Lens (Cambia)": 'lens.org/',
+    "Newsfeed": 'newsfeed.url/',
+    "Reddit": 'reddit.com/',
+    "Reddit Links": 'reddit.com/',
+    "Stack Exchange Network": 'stackexchange.com/',
+    "Twitter": 'twitter.com/',
+    "Wikipedia": 'wikipedia.com/',
+    "Wordpress.com": 'wordpress.com/'
 }
+
 
 DATA_SOURCE_TYPES = [
     'dspace',
@@ -58,3 +61,4 @@ DATA_SOURCE_TYPES = [
     'janeway',
     'wdp'
 ]
+

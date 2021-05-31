@@ -3,6 +3,7 @@ import json
 import datetime
 import click
 import warnings
+import enum
 from faker import Faker
 from nglp.models import events
 from nglp.lib import data_dictionaries
@@ -77,19 +78,19 @@ class DataGenerator:
             max_len = 7
             weights = [2**(max_len-i) for i in range(1, max_len+1)]
             length = random.choices(range(1, max_len+1), weights=weights, k=1)[0]
+
         random_data_by_type = {
             'event': random.choices(data_dictionaries.EVENT_TYPES, k=length),
             'object_type': random.choices(data_dictionaries.OBJECT_TYPES, k=length),
             'object_id': random.choices([self.fake.bothify(text='????-########'), self.fake.uuid4()], k=length),
             'ip': random.choices([self.fake.ipv4(), self.fake.ipv6()], weights=[0.7, 0.3], k=length),
-            # need to come back to this urgently. not sure how to handle objects.
-            'share.source_id': random.choices(data_dictionaries.SOURCE_ID_TYPES, k=1),
+            'share.source_id': random.choices(data_dictionaries.SOURCE_ID_TYPES, k=length),
             'source.type': random.choices(data_dictionaries.DATA_SOURCE_TYPES, k=length),
-            'search_keywords': random.choices(self.fake.words(nb=8), k=length),
-            'container': [[self.fake.hexify(text="^^^^^^")] for i in range(length)]
+            'container': random.choices(self.fake.hexify(text="^^^^^^^^"), k=length),
+            'search_keywords': random.choices(self.fake.words(nb=8), k=length)
         }
         fake_data_by_type = {
-            'occurred_at': self.fake.iso8601(),
+            'occurred_at': str(self.fake.date_time_between(start_date="-1y")),
             'format': self.fake.mime_type(),
             'url': self.fake.uri(),
             'method': self.fake.http_method(),
@@ -97,16 +98,10 @@ class DataGenerator:
             'user_agent': self.fake.user_agent(),
             'user_id': self.fake.hexify(text="^^^^^^^^^^^^"),
             'user_org': self.fake.hexify(text="ror:^^^^^^^"),
-            'location': self.fake.location_on_land(),
+            'city': self.fake.location_on_land(),
             'source.archive_id': self.fake.hexify(text="^^^^^")
             }
-        aggregate_data_by_type = {
-            'category': data_dictionaries.CATEGORY_TYPES[random_data_by_type['event'][0]],
-            'share.subj_id': data_dictionaries.SUBJ_ID_TYPES[random_data_by_type["share.source_id"][0]],
-            'source.identifier': (fake_data_by_type["user_org"] + random_data_by_type["source.type"][0] +
-                                  self.fake.password(
-                length=8, special_chars=False))
-            }
+
         # If given a set of allowed values to choose from, compute that first
         fake_data = []
         if allowed_values:
@@ -115,19 +110,40 @@ class DataGenerator:
             fake_data = random_data_by_type[data_type]
         elif data_type in fake_data_by_type:
             fake_data = []
-            for _ in range(length):
+            for i in range(length):
                 fake_data.append(fake_data_by_type[data_type])
-        elif data_type in aggregate_data_by_type:
-            fake_data = aggregate_data_by_type[data_type]
         return fake_data[0] if (single and fake_data) else fake_data
 
     def full_data_generator(self):
+
+        stored_data = {}
+
         def recurse(struct, path):
             # This method will generate fake data for all the fields in the model
             data = {}
+
+
             for key, val in struct.fields:
                 data[key] = self.get_fake_data(".".join(path + [key]), single=True, allowed_values=val.get(
                     'allowed_values', None))
+                if key == "event":
+                    data["category"] = data_dictionaries.CATEGORY_TYPES[data["event"]]
+                elif key == "user_org":
+                    stored_data["user_org"] = data["user_org"]
+                elif key == "identifier":
+                    data["identifier"] = (stored_data["user_org"] + "/" + data["type"] + "/" +
+                                  self.fake.password(length=8, special_chars=False))
+                elif key == "subj_id":
+                    data["subj_id"] = data_dictionaries.SUBJ_ID_TYPES[data["source_id"]]
+                elif key == "city":
+                    stored_data["geo"] = data["city"]
+                    data["city"] = stored_data["geo"][2]
+                elif key == "country":
+                    data["country"] = stored_data["geo"][3]
+                elif key == "lat":
+                    data["lat"] = stored_data["geo"][0]
+                elif key == "lon":
+                    data["lon"] = stored_data["geo"][1]
             for key, val in struct.lists:
                 data[key] = self.get_fake_data(".".join(path + [key]), single=False, allowed_values=val.get('allowed_values', None))
             for key in struct.substructs.keys():
@@ -153,14 +169,14 @@ class DataGenerator:
 
     def generate_data(self):
         if self.data_fill == 'full':
-            for _ in range(self.number_of_records):
+            for i in range(self.number_of_records):
                 yield self.full_data_generator()
         elif self.data_fill == 'minimal':
-            for _ in range(self.number_of_records):
+            for i in range(self.number_of_records):
                 yield self.minimal_data_generator()
         else:
             # data_fill is mix
-            for _ in range(self.number_of_records):
+            for i in range(self.number_of_records):
                 yield random.choices([self.full_data_generator(), self.minimal_data_generator()])[0]
 
     def write_data(self):

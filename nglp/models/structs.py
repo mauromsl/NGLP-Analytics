@@ -273,14 +273,14 @@ CORE_EVENT = {
         "user_id" : {"coerce" : "unicode"},
         "ip": {"coerce": "ip"},
         "city": {"coerce": "unicode"},
-        "country": {"coerce": "unicode"}
+        "country": {"coerce": "unicode"},
+        "user_org": {"coerce": "unicode"}
     },
     "lists" : {
         "object_id" : {"contains" : "field", "coerce": "unicode"},
         "container": {"contains": "field", "coerce": "unicode"},
-        "search_keywords": {"contains": "field", "coerce": "unicode_lower"}, # Ask CIC if they have a plan for
+        "search_keywords": {"contains": "field", "coerce": "unicode_lower"} # Ask CIC if they have a plan for
         # capitalisation in search queries
-        "user_org": {"contains": "field", "coerce": "unicode"}
     },
     "objects" : ["share", "location", "source"],
     "structs": {
@@ -298,8 +298,8 @@ CORE_EVENT = {
         },
         "source": {
             "fields": {
-                "identifier": {"coerce": "unicode"},
                 "type": {"coerce": "unicode_lower"},
+                "identifier": {"coerce": "unicode"},
                 "archive_id": {"coerce": "unicode"}
             },
             "required": [
