@@ -86,7 +86,7 @@ class DataGenerator:
             'ip': random.choices([self.fake.ipv4(), self.fake.ipv6()], weights=[0.7, 0.3], k=length),
             'share.source_id': random.choices(data_dictionaries.SOURCE_ID_TYPES, k=length),
             'source.type': random.choices(data_dictionaries.DATA_SOURCE_TYPES, k=length),
-            'container': random.choices(self.fake.hexify(text="^^^^^^^^"), k=length),
+            'container': random.choices([self.fake.hexify(text="^^^^^"), self.fake.hexify(text="^^^^^"), self.fake.hexify(text="^^^^^^^^")], k=length),
             'search_keywords': random.choices(self.fake.words(nb=8), k=length)
         }
         fake_data_by_type = {
