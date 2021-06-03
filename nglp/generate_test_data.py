@@ -115,9 +115,9 @@ class DataGenerator:
         return fake_data[0] if (single and fake_data) else fake_data
 
     def full_data_generator(self):
-
+        # Some fields data relies on other fields. This is to store fields that have already ben generated. Otherwise
+        # recurse will generate a whole new set of data, so the dependant data might not be correct.
         stored_data = {}
-
         def recurse(struct, path):
             # This method will generate fake data for all the fields in the model
             data = {}
@@ -155,16 +155,48 @@ class DataGenerator:
         return data
 
     def minimal_data_generator(self):
-        # This method will generate fake data for all the required fields in the model
-        data = {}
-        for key, val in self.model.__seamless_struct__.fields:
-            if key not in self.model.__seamless_struct__.required:
-                continue
-            data[key] = self.get_fake_data(key, single=True, allowed_values=val.get('allowed_values', None))
-        for key, val in self.model.__seamless_struct__.lists:
-            if key not in self.model.__seamless_struct__.required:
-                continue
-            data[key] = self.get_fake_data(key, single=False, allowed_values=val.get('allowed_values', None))
+
+        stored_data = {}
+
+        def recurse(struct, path):
+            # This method will generate fake data for all the fields in the model
+            data = {}
+
+            for key, val in struct.fields:
+                if key not in struct.required:
+                    continue
+                data[key] = self.get_fake_data(".".join(path + [key]), single=True, allowed_values=val.get(
+                    'allowed_values', None))
+                if key == "event":
+                    data["category"] = data_dictionaries.CATEGORY_TYPES[data["event"]]
+                elif key == "user_org":
+                    stored_data["user_org"] = data["user_org"]
+                elif key == "identifier":
+                    data["identifier"] = (stored_data["user_org"] + "/" + data["type"] + "/" +
+                                          self.fake.password(length=8, special_chars=False))
+                elif key == "subj_id":
+                    data["subj_id"] = data_dictionaries.SUBJ_ID_TYPES[data["source_id"]]
+                elif key == "city":
+                    stored_data["geo"] = data["city"]
+                    data["city"] = stored_data["geo"][2]
+                elif key == "country":
+                    data["country"] = stored_data["geo"][3]
+                elif key == "lat":
+                    data["lat"] = stored_data["geo"][0]
+                elif key == "lon":
+                    data["lon"] = stored_data["geo"][1]
+            for key, val in struct.lists:
+                if key not in struct.required:
+                    continue
+                data[key] = self.get_fake_data(".".join(path + [key]), single=False,
+                                               allowed_values=val.get('allowed_values', None))
+            for key in struct.substructs.keys():
+                substruct = struct.substruct(key)
+                data[key] = recurse(substruct, path + [key])
+                return data
+
+        path = []
+        data = recurse(self.model.__seamless_struct__, path)
         return data
 
     def generate_data(self):
