@@ -3,7 +3,9 @@
 env/
 venv/
 
-.brackets.json
+# Generated json files
+*.json
+
 *.pyc
 *.egg-info/*
 src*
