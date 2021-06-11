@@ -3,8 +3,8 @@
 env/
 venv/
 
-# Generated json files
-*.json
+# Generated test data json files
+testdata-*.json
 
 *.pyc
 *.egg-info/*

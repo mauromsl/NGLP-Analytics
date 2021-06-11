@@ -5,6 +5,7 @@ import click
 import warnings
 import enum
 from faker import Faker
+from faker_web import WebProvider
 from nglp.models import events
 from nglp.lib import data_dictionaries
 
@@ -23,6 +24,24 @@ ALLOWED_PARAM_VALUES = {
     'data_fill': ['minimal', 'full', 'mix'],
 }
 
+OBJECT_TYPES = {
+    "request" : ["file"],
+    "investigation" : ["article", "journal"],
+    "export" : ["article"],
+    "share" : ["article", "journal", "file"],
+    "leave" : ["journal"],
+    "join" : ["journal"]
+}
+
+HTTP_METHODS = {
+    "request" : ["GET"],
+    "investigation" : ["GET"],
+    "export" : ["GET"],
+    # FIXME: these are here to make it work, but in reality these are not relevant to this
+    # event type
+    "leave" : ["GET"],
+    "join" : ["GET"]
+}
 
 class DataGenerator:
     """
@@ -47,6 +66,7 @@ class DataGenerator:
         self.model = EVENTS_SELECTOR.get(self.event_type)() if is_core is False else events.CoreEvent()
         # self.validate_model()
         self.fake = Faker()
+        self.fake.add_provider(WebProvider)
 
     def validate_params(self):
         if self.event_type not in EVENTS_SELECTOR.keys():
@@ -68,7 +88,7 @@ class DataGenerator:
             return
         with_errors = '-with_errors' if self.add_records_with_error else ''
         dt = '{date:%Y-%m-%d_%H:%M:%S}'.format(date=datetime.datetime.now())
-        self.filename = f"{self.event_type}-{self.number_of_records}{with_errors}-{dt}.json"
+        self.filename = f"testdata-{self.event_type}-{self.number_of_records}{with_errors}-{dt}.json"
 
     def get_fake_data(self, data_type, single=True, allowed_values=None):
         length = 1
@@ -80,27 +100,43 @@ class DataGenerator:
             length = random.choices(range(1, max_len+1), weights=weights, k=1)[0]
 
         random_data_by_type = {
-            'event': random.choices(data_dictionaries.EVENT_TYPES, k=length),
-            'object_type': random.choices(data_dictionaries.OBJECT_TYPES, k=length),
+            'event': [self.event_type],
+            'object_type': random.choices(OBJECT_TYPES[self.event_type], k=length),
             'object_id': random.choices([self.fake.bothify(text='????-########'), self.fake.uuid4()], k=length),
             'ip': random.choices([self.fake.ipv4(), self.fake.ipv6()], weights=[0.7, 0.3], k=length),
-            'share.source_id': random.choices(data_dictionaries.SOURCE_ID_TYPES, k=length),
             'source.type': random.choices(data_dictionaries.DATA_SOURCE_TYPES, k=length),
             'container': random.choices([self.fake.hexify(text="^^^^^"), self.fake.hexify(text="^^^^^"), self.fake.hexify(text="^^^^^^^^")], k=length),
-            'search_keywords': random.choices(self.fake.words(nb=8), k=length)
+            'method': random.choices(HTTP_METHODS[self.event_type], k=length)
         }
         fake_data_by_type = {
-            'occurred_at': str(self.fake.date_time_between(start_date="-1y")),
-            'format': self.fake.mime_type(),
+            'occurred_at': datetime.datetime.strftime(self.fake.date_time_between(start_date="-1y"), "%Y-%m-%dT%H:%M:%SZ"),
+            'format': self.fake.content_type_popular(),
             'url': self.fake.uri(),
-            'method': self.fake.http_method(),
             'referrer': self.fake.uri(),
             'user_agent': self.fake.user_agent(),
-            'user_id': self.fake.hexify(text="^^^^^^^^^^^^"),
             'user_org': self.fake.hexify(text="ror:^^^^^^^"),
             'city': self.fake.location_on_land(),
             'source.archive_id': self.fake.hexify(text="^^^^^")
+        }
+        fake_data_overrides_by_event = {
+            'export' : {
+                'format' : [random.choice([
+                    "application/x-research-info-systems",
+                    "application/x-endnote-style"
+                ])]
             }
+        }
+        special_data_by_event = {
+            "search" : {
+                'search_keywords': random.choices(self.fake.words(nb=8), k=length)
+            },
+            "share" : {
+                'share.source_id': random.choices(data_dictionaries.SOURCE_ID_TYPES, k=length)
+            },
+            "workflow_transition" : {
+                'user_id': self.fake.hexify(text="^^^^^^^^^^^^"),
+            }
+        }
 
         # If given a set of allowed values to choose from, compute that first
         fake_data = []
@@ -108,33 +144,40 @@ class DataGenerator:
             fake_data = random.choices(allowed_values, k=length)
         elif data_type in random_data_by_type:
             fake_data = random_data_by_type[data_type]
+        elif data_type in fake_data_overrides_by_event.get(self.event_type, {}):
+            fake_data = fake_data_overrides_by_event[self.event_type][data_type]
         elif data_type in fake_data_by_type:
             fake_data = []
             for i in range(length):
                 fake_data.append(fake_data_by_type[data_type])
+        elif data_type in special_data_by_event.get(self.event_type, {}):
+            fake_data = special_data_by_event[self.event_type][data_type]
+
         return fake_data[0] if (single and fake_data) else fake_data
 
     def full_data_generator(self):
         # Some fields data relies on other fields. This is to store fields that have already ben generated. Otherwise
         # recurse will generate a whole new set of data, so the dependant data might not be correct.
         stored_data = {}
+
         def recurse(struct, path):
             # This method will generate fake data for all the fields in the model
             data = {}
-
-
             for key, val in struct.fields:
-                data[key] = self.get_fake_data(".".join(path + [key]), single=True, allowed_values=val.get(
+                fd = self.get_fake_data(".".join(path + [key]), single=True, allowed_values=val.get(
                     'allowed_values', None))
+                if fd:
+                    data[key] = fd
                 if key == "event":
                     data["category"] = data_dictionaries.CATEGORY_TYPES[data["event"]]
                 elif key == "user_org":
                     stored_data["user_org"] = data["user_org"]
-                elif key == "identifier":
+                elif "source" in path and len(path) == 1 and key == "identifier":
                     data["identifier"] = (stored_data["user_org"] + "/" + data["type"] + "/" +
                                   self.fake.password(length=8, special_chars=False))
                 elif key == "subj_id":
-                    data["subj_id"] = data_dictionaries.SUBJ_ID_TYPES[data["source_id"]]
+                    if "source_id" in data:
+                        data["subj_id"] = data_dictionaries.SUBJ_ID_TYPES[data["source_id"]]
                 elif key == "city":
                     stored_data["geo"] = data["city"]
                     data["city"] = stored_data["geo"][2]
@@ -144,15 +187,21 @@ class DataGenerator:
                     data["lat"] = stored_data["geo"][0]
                 elif key == "lon":
                     data["lon"] = stored_data["geo"][1]
+                # FIXME: note that we are not populating continent, and this doesn't seem to be easy to do
             for key, val in struct.lists:
-                data[key] = self.get_fake_data(".".join(path + [key]), single=False, allowed_values=val.get('allowed_values', None))
+                fd = self.get_fake_data(".".join(path + [key]), single=False, allowed_values=val.get('allowed_values', None))
+                if fd:
+                    data[key] = fd
             for key in struct.substructs.keys():
                 substruct = struct.substruct(key)
-                data[key] = recurse(substruct, path + [key])
+                fd = recurse(substruct, path + [key])
+                if fd:
+                    data[key] = fd
             return data
+
         path = []
-        data = recurse(self.model.__seamless_struct__, path)
-        return data
+        result = recurse(self.model.__seamless_struct__, path)
+        return result
 
     def minimal_data_generator(self):
 
@@ -251,6 +300,7 @@ class DataGenerator:
               required=True,
               type=int,
               help='Number of test records to generate.')
+@click.option("-c", "--core", "is_core", type=bool, is_flag=True, help="generate the core event model")
 @click.option('-r', '--data-fill',
               default='mix',
               show_default=True,
@@ -275,7 +325,7 @@ class DataGenerator:
               show_default=True,
               help='Filename to save the json generated test data. '
                    'If no filename is provided, the default filename has the pattern '
-                   '{event_type}-{number_of_records}-{dt} or {event_type}-{number_of_records}-with-errors-{dt}.json')
+                   'testdata-{event_type}-{number_of_records}-{dt} or {event_type}-{number_of_records}-with-errors-{dt}.json')
 def generate_test_data(event_type, number_of_records, is_core=False, data_fill='mix', add_records_with_error=False,
                        error_if_model_unsupported=True, filename=None):
     dg = DataGenerator(event_type, number_of_records, is_core, data_fill, add_records_with_error,

@@ -1,10 +1,9 @@
-import enum
-
 EVENT_TYPES = [
     'request',
     'investigation',
-    'first_decision',
+    'workflow_transition',
     'export',
+    'share',
     'join',
     'leave'
 ]

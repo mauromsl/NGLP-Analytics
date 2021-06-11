@@ -8,14 +8,24 @@ The core models for the NGLP Analytics. Python 3
 
 ### Generate Data
 
+Each type of incoming event (e.g. as if via the API)
+
 ```bash
 for i in {request,investigation,join,leave,export,workflow_transition}; do python test/generate_test_data.py -e $i -n 1000; done
 ```
 
-### Index Data in ElasticSearch
+A set of events populating all the core model data too
 
 ```bash
-find . -name "*.json" -exec python test/load_test_data.py -i {} \;
+for i in {request,investigation,join,leave,export}; do python test/generate_test_data.py -e $i -n 1000 -c; done
+```
+
+### Index Data in ElasticSearch
+
+In the directory where you generated the test data in the previous section:
+
+```bash
+find . -maxdepth 1 -name "*.json" -exec python test/load_test_data.py -i {} \;
 ```
 
 TODO - full usage instructions.
