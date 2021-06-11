@@ -9,7 +9,7 @@ The core models for the NGLP Analytics. Python 3
 ### Generate Data
 
 ```bash
-for i in {request,investigation,join,leave,export,workflow_transition}; do python nglp/generate_test_data.py -e $i -n 1000; done
+for i in {request,investigation,join,leave,export,workflow_transition}; do python test/generate_test_data.py -e $i -n 1000; done
 ```
 
 ### Index Data in ElasticSearch
