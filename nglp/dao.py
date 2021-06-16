@@ -1,4 +1,7 @@
 from elasticsearch import Elasticsearch
+import requests
+import time
+import json
 
 from nglp.config import settings
 
@@ -64,3 +67,32 @@ class BaseDAO(object):
             CONNECTION.indices.create(index=self.__index_type__, body={
                 "mappings" : mappings
             })
+
+    @classmethod
+    def query(cls, q):
+        """Perform a query on backend.
+        """
+        return cls._send_query(q)
+
+    @classmethod
+    def _send_query(cls, qobj, retry=50, return_raw_resp=False):
+        """Actually send a query object to the backend."""
+        r = None
+        count = 0
+        exception = None
+        while count < retry:
+            count += 1
+            try:
+                r = CONNECTION.search(body=qobj, index=cls.__index_type__)
+                break
+            except Exception as e:
+                exception = e
+            time.sleep(0.5)
+
+        if r is not None:
+            return r
+
+        if exception is not None:
+            raise exception
+
+        raise Exception("Couldn't get the ES query endpoint to respond.  Also, you shouldn't be seeing this.")
