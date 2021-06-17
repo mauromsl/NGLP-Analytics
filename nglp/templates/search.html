@@ -1,10 +1,15 @@
+<!DOCTYPE html>
 <html lang="en">
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>General Event Search Page</title>
+        {% include "_edges_common_css.html" %}
     </head>
     <body>
-        <h1>Search</h1>
-        <div id="event-search"></div>
+        <div class="container">
+            <h1>Search</h1>
+            <div id="event-search"></div>
+        </div>
 
         {% include "_edges_common_js.html" %}
         <script type="text/javascript" src="/static/js/search.edges.js?v={{config.version}}"></script>
@@ -12,8 +17,8 @@
         <script type="text/javascript">
         jQuery (document).ready (function($) {
             nglp.search.init({
-                    searchUrl : '{{ url_for("query", path="public/event") }}'
-                });
+                searchUrl : '{{ url_for("query", path="public/event") }}'
+            });
         });
         </script>
     </body>
