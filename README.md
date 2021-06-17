@@ -1,25 +1,26 @@
 # NGLP Analytics Suite
+The API and models for the NGLP Analytics. Python 3
 
 ## Getting the code
 
 Clone from this repo:
 
-```
+```bash
 git clone git@github.com:NGLPteam/NGLP-Analytics.git
 ```
 
-Update your submodules
+#### Update submodules (the edges search component)
 
-```
-cd NGLP-Analytics
+From project root, run:
+```bash
 git submodule update --init --recursive
 ```
 
-## NGLP Analytics Data
+This will check out the `edges` js library to `nglp/static/edges`
 
-The core models for the NGLP Analytics. Python 3
+#### Python environment
 
-1. Copy the secrets file from `env.template` to `.env` and customise as necessary
+1. Copy the secrets file from `env.template` to `.env` and customise as necessary (todo: hints)
 2. Create and activate virtualenv with e.g. `virtualenv -p python3.8 venv` and `./venv/bin/activate`
 3. Install requirements with `pip install -r requirements.txt && pip install -e .`
 
@@ -47,4 +48,16 @@ find . -maxdepth 1 -name "*.json" -exec python test/load_test_data.py -i {} \;
 
 TODO - full usage instructions.
 
+### Run the analytics API application
 
+From project root, run:
+```bash
+python nglp/main.py
+```
+
+This will bring up the webserver, by default at http://localhost:8000
+
+* The JSON API
+* at /search (http://localhost:8000/search) is a demo instance of `edges` with a search interface over the whole index.
+
+TODO - make instruction writing more gooder.

@@ -22,7 +22,7 @@ async def root():
 
 @app.get("/search", response_class=HTMLResponse)
 async def search(request: Request):
-    return templates.TemplateResponse("search.html", {"request" : request, "config" : settings })
+    return templates.TemplateResponse("search.html", {"request": request, "config": settings})
 
 
 if __name__ == "__main__":
