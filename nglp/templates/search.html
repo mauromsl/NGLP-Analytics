@@ -1,0 +1,20 @@
+<html lang="en">
+    <head>
+        <title>General Event Search Page</title>
+    </head>
+    <body>
+        <h1>Search</h1>
+        <div id="event-search"></div>
+
+        {% include "_edges_common_js.html" %}
+        <script type="text/javascript" src="/static/js/search.edges.js?v={{config.version}}"></script>
+
+        <script type="text/javascript">
+        jQuery (document).ready (function($) {
+            nglp.search.init({
+                    searchUrl : '{{ url_for("query", path="public/event") }}'
+                });
+        });
+        </script>
+    </body>
+</html>

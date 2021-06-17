@@ -1,4 +1,21 @@
-### NGLP Analytics Data
+# NGLP Analytics Suite
+
+## Getting the code
+
+Clone from this repo:
+
+```
+git clone git@github.com:NGLPteam/NGLP-Analytics.git
+```
+
+Update your submodules
+
+```
+cd NGLP-Analytics
+git submodule update --init --recursive
+```
+
+## NGLP Analytics Data
 
 The core models for the NGLP Analytics. Python 3
 
