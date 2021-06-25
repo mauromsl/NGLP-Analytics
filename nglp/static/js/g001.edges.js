@@ -214,7 +214,7 @@ nglp.g001 = {
         });
 
 
-        // Article fulltext Date Histogram
+        // Article fulltext Date Histogram & list of formats
         nglp.g001.active["#fulltext-container"] = edges.newEdge({
             selector: "#fulltext-container",
             template: edges.html.newComponentList(),
@@ -236,6 +236,22 @@ nglp.g001 = {
                 ]
             }),
             components : [
+                edges.newORTermSelector({
+                    id: "fulltext-formats",
+                    field: "format.exact",
+                    display: "Fulltext Formats",
+                    size: 10,
+                    syncCounts: false,
+                    lifecycle: "static",
+                    orderBy: "count",
+                    orderDir: "desc",
+                    renderer : edges.bs3.newORTermSelectorRenderer({
+                        showCount: true,
+                        hideEmpty: true,
+                        open: true,
+                        togglable: false
+                    })
+                }),
                 edges.newMultibar({
                     id: "fulltext",
                     dataFunction: edges.ChartDataFunctions.dateHistogram({
@@ -252,7 +268,29 @@ nglp.g001 = {
                         marginLeft: 80
                     })
                 })
-            ]
+            ],
+            callbacks : {
+                "edges:pre-query" : function(edge) {
+                    if ("#fulltext-map-container" in nglp.g001.active) {
+                        let formats = edge.currentQuery.listMust(es.newTermsFilter({field: "format.exact"}));
+                        let selectedFormats = false;
+                        if (formats.length > 0) {
+                            selectedFormats = formats[0].values;
+                        }
+
+                        let mapEdge = nglp.g001.active["#fulltext-map-container"];
+                        let nq = mapEdge.cloneQuery();
+
+                        nq.removeMust(es.newTermsFilter({field: "format.exact"}))
+                        if (selectedFormats) {
+                            nq.addMust(es.newTermsFilter({field: "format.exact", values: selectedFormats}));
+                        }
+
+                        mapEdge.pushQuery(nq);
+                        mapEdge.cycle();
+                    }
+                }
+            }
         });
 
         // Article fulltext map
@@ -296,7 +334,7 @@ nglp.g001 = {
         });
 
 
-        // Article export Date Histogram
+        // Article export Date Histogram & list of formats
         nglp.g001.active["#export-container"] = edges.newEdge({
             selector: "#export-container",
             template: edges.html.newComponentList(),
@@ -318,6 +356,22 @@ nglp.g001 = {
                 ]
             }),
             components : [
+                edges.newORTermSelector({
+                    id: "export-formats",
+                    field: "format.exact",
+                    display: "Export Formats",
+                    size: 10,
+                    syncCounts: false,
+                    lifecycle: "static",
+                    orderBy: "count",
+                    orderDir: "desc",
+                    renderer : edges.bs3.newORTermSelectorRenderer({
+                        showCount: true,
+                        hideEmpty: true,
+                        open: true,
+                        togglable: false
+                    })
+                }),
                 edges.newMultibar({
                     id: "export",
                     dataFunction: edges.ChartDataFunctions.dateHistogram({
@@ -334,7 +388,29 @@ nglp.g001 = {
                         marginLeft: 80
                     })
                 })
-            ]
+            ],
+            callbacks : {
+                "edges:pre-query" : function(edge) {
+                    if ("#export-map-container" in nglp.g001.active) {
+                        let formats = edge.currentQuery.listMust(es.newTermsFilter({field: "format.exact"}));
+                        let selectedFormats = false;
+                        if (formats.length > 0) {
+                            selectedFormats = formats[0].values;
+                        }
+
+                        let mapEdge = nglp.g001.active["#export-map-container"];
+                        let nq = mapEdge.cloneQuery();
+
+                        nq.removeMust(es.newTermsFilter({field: "format.exact"}))
+                        if (selectedFormats) {
+                            nq.addMust(es.newTermsFilter({field: "format.exact", values: selectedFormats}));
+                        }
+
+                        mapEdge.pushQuery(nq);
+                        mapEdge.cycle();
+                    }
+                }
+            }
         });
 
         // Article export map
