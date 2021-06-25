@@ -25,5 +25,10 @@ async def search(request: Request):
     return templates.TemplateResponse("search.html", {"request" : request, "config" : settings })
 
 
+@app.get("/g001")
+async def g001(request: Request):
+    return templates.TemplateResponse("g001.html", {"request" : request, "config" : settings})
+
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, debug=True)
