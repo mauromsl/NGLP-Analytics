@@ -3,7 +3,6 @@ import json
 import datetime
 import click
 import warnings
-import enum
 from faker import Faker
 from faker_web import WebProvider
 from nglp.models import events
@@ -30,7 +29,8 @@ OBJECT_TYPES = {
     "export" : ["article"],
     "share" : ["article", "journal", "file"],
     "leave" : ["journal"],
-    "join" : ["journal"]
+    "join" : ["journal"],
+    "workflow_transition" : ["article"]
 }
 
 HTTP_METHODS = {
@@ -40,8 +40,17 @@ HTTP_METHODS = {
     # FIXME: these are here to make it work, but in reality these are not relevant to this
     # event type
     "leave" : ["GET"],
-    "join" : ["GET"]
+    "join" : ["GET"],
+    "workflow_transition" : ["POST"]
 }
+
+WORKFLOW = [
+    "submit",
+    "first_decision",
+    "review",
+    "accept",
+    "publish"
+]
 
 class DataGenerator:
     """
@@ -260,7 +269,7 @@ class DataGenerator:
             for i in range(self.number_of_records):
                 yield random.choices([self.full_data_generator(), self.minimal_data_generator()])[0]
 
-    def write_data(self):
+    def write_usage_data(self):
         print(f"Starting data generation for {self.event_type}")
         start = datetime.datetime.now()
         print(f"Start time: {start}")
@@ -277,6 +286,60 @@ class DataGenerator:
                 count += 1
                 print('.', end="", flush=True) if count % pulse == 0 else ''
             output.write(']')
+        end = datetime.datetime.now()
+        print()
+        print("Data generation completed.")
+        print(f"File name: {self.filename}")
+        print(f"Count: {count}")
+        print(f"End time: {end}")
+        diff = end - start
+        hours = diff.days * 24 + diff.seconds // 3600
+        minutes = (diff.seconds % 3600) // 60
+        seconds = diff.seconds % 60
+        print("Time taken: {:0>2d}:{:0>2d}:{:0>2d}".format(hours, minutes, seconds))
+
+
+    def write_workflow_data(self):
+        print(f"Starting data generation for {self.event_type}")
+        start = datetime.datetime.now()
+        print(f"Start time: {start}")
+        count = 0
+        pulse = self.number_of_records // 100 if self.number_of_records > 100 else 1
+
+        with open(self.filename, 'w') as output:
+            output.write('[')
+            first = True
+            for i in range(self.number_of_records):
+                if not first:
+                    output.write(',')
+                first = False
+
+                distance = random.randint(0, len(WORKFLOW))
+                start = self.fake.date_time_between(start_date="-1y")
+                object_id = None
+                container = None
+                for j in range(0, distance):
+                    workflow_status = WORKFLOW[j]
+                    data = self.full_data_generator()
+                    data["event"] = workflow_status
+                    data['occurred_at'] = datetime.datetime.strftime(start, "%Y-%m-%dT%H:%M:%SZ")
+
+                    if object_id is not None:
+                        data["object_id"] = object_id
+                    else:
+                        object_id = data["object_id"]
+                    if container is not None:
+                        data["container"] = container
+                    else:
+                        container = data["container"]
+
+                    start = self.fake.date_time_between(start_date=start)
+                    json.dump(data, output, indent=2)
+
+                count += 1
+                print('.', end="", flush=True) if count % pulse == 0 else ''
+            output.write(']')
+
         end = datetime.datetime.now()
         print()
         print("Data generation completed.")
@@ -330,7 +393,11 @@ def generate_test_data(event_type, number_of_records, is_core=False, data_fill='
                        error_if_model_unsupported=True, filename=None):
     dg = DataGenerator(event_type, number_of_records, is_core, data_fill, add_records_with_error,
                        error_if_model_unsupported, filename)
-    dg.write_data()
+
+    if event_type == "workflow_transition":
+        dg.write_workflow_data()
+    else:
+        dg.write_usage_data()
 
 
 if __name__ == '__main__':

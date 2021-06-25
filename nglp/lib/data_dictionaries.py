@@ -18,9 +18,9 @@ CATEGORY_TYPES = {
     'request':'usage',
     'investigation':'usage',
     'export': 'usage',
-    'first_decision': 'workflow',
     'join': 'audit',
-    'leave': 'audit'
+    'leave': 'audit',
+    "workflow_transition" : "workflow"
 }
 
 SOURCE_ID_TYPES = [
