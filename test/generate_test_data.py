@@ -143,7 +143,7 @@ class DataGenerator:
                 'share.source_id': random.choices(data_dictionaries.SOURCE_ID_TYPES, k=length)
             },
             "workflow_transition" : {
-                'user_id': self.fake.hexify(text="^^^^^^^^^^^^"),
+                'user_id': [self.fake.hexify(text="^^^^^^^^^^^^")],
             }
         }
 
@@ -308,16 +308,15 @@ class DataGenerator:
 
         with open(self.filename, 'w') as output:
             output.write('[')
-            first = True
             for i in range(self.number_of_records):
-                if not first:
+                if i > 0:
                     output.write(',')
-                first = False
 
-                distance = random.randint(0, len(WORKFLOW))
+                distance = random.randint(1, len(WORKFLOW))
                 start = self.fake.date_time_between(start_date="-1y")
                 object_id = None
                 container = None
+                entries = []
                 for j in range(0, distance):
                     workflow_status = WORKFLOW[j]
                     data = self.full_data_generator()
@@ -334,7 +333,10 @@ class DataGenerator:
                         container = data["container"]
 
                     start = self.fake.date_time_between(start_date=start)
-                    json.dump(data, output, indent=2)
+                    entries.append(json.dumps(data, indent=2))
+
+                workflow_set = ",\n".join(entries)
+                output.write(workflow_set)
 
                 count += 1
                 print('.', end="", flush=True) if count % pulse == 0 else ''

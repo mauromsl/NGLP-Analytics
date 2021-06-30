@@ -24,18 +24,18 @@ This will check out the `edges` js library to `nglp/static/edges`
 2. Create and activate virtualenv with e.g. `virtualenv -p python3.8 venv` and `./venv/bin/activate`
 3. Install requirements with `pip install -r requirements.txt && pip install -e .`
 
-### Generate Data
+### Generate Test Data
 
 Each type of incoming event (e.g. as if via the API)
 
 ```bash
-for i in {request,investigation,join,leave,export}; do python test/generate_test_data.py -e $i -n 1000; done
+for i in {request,investigation,join,leave,export,workflow_transition}; do python test/generate_test_data.py -e $i -n 1000; done
 ```
 
 A set of events populating all the core model data too
 
 ```bash
-for i in {request,investigation,join,leave,export}; do python test/generate_test_data.py -e $i -n 1000 -c; done
+for i in {request,investigation,join,leave,export,workflow_transition}; do python test/generate_test_data.py -e $i -n 1000 -c; done
 ```
 
 ### Index Data in ElasticSearch
