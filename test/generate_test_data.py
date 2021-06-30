@@ -327,15 +327,39 @@ class DataGenerator:
                         data["object_id"] = object_id
                     else:
                         object_id = data["object_id"]
+
                     if container is not None:
                         data["container"] = container
                     else:
                         container = data["container"]
 
                     start = self.fake.date_time_between(start_date=start)
-                    entries.append(json.dumps(data, indent=2))
+                    entries.append(data)
 
-                workflow_set = ",\n".join(entries)
+                for j in range(len(entries)):
+                    entry = entries[j]
+
+                    # if there is a following event
+                    if len(entries) > j + 1:
+                        followed_by = entries[j + 1]
+                        if "workflow" not in entry:
+                            entry["workflow"] = {"followed_by" : {}}
+                        entry["workflow"]["followed_by"] = {
+                            "state" : followed_by["event"],
+                            "date": followed_by["occurred_at"]
+                        }
+
+                    # if there is a previous event
+                    if j > 0:
+                        follows = entries[j - 1]
+                        if "workflow" not in entry:
+                            entry["workflow"] = {"follows" : {}}
+                        entry["workflow"]["follows"] = {
+                            "state" : follows["event"],
+                            "transition_time": int((datetime.datetime.strptime(entry["occurred_at"], "%Y-%m-%dT%H:%M:%SZ") - datetime.datetime.strptime(follows["occurred_at"], "%Y-%m-%dT%H:%M:%SZ")).total_seconds())
+                        }
+
+                workflow_set = ",\n".join([json.dumps(e, indent=2) for e in entries])
                 output.write(workflow_set)
 
                 count += 1

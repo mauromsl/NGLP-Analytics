@@ -225,7 +225,7 @@ LEAVE_EVENT = {
 Example core data model event (using all the fields, even if they're not strictly allowed)
  
 {
-    "occurred_at" : 2021-04-29T12:00:00Z,
+    "occurred_at" : "2021-04-29T12:00:00Z",
     "category" : "usage",
     "event" : "request",
     "object_type" : "file",
@@ -255,6 +255,16 @@ Example core data model event (using all the fields, even if they're not strictl
         "type": "DSpace",
         "archive_id" : "12345"
     }
+    "workflow" : {
+        "follows" : {
+            "state" : "workflow state previous to this",
+            "transition_time" : 12345
+        },
+        "followed_by" : {
+            "state" : "workflow state that follows this",
+            "date" : "2021-05-29T12:00:00Z",
+        }
+    }
 }
 
 """
@@ -282,7 +292,7 @@ CORE_EVENT = {
         "search_keywords": {"contains": "field", "coerce": "unicode_lower"} # Ask CIC if they have a plan for
         # capitalisation in search queries
     },
-    "objects" : ["share", "location", "source"],
+    "objects" : ["share", "location", "source", "workflow"],
     "structs": {
         "share": {
             "fields": {
@@ -307,6 +317,23 @@ CORE_EVENT = {
                 "type",
                 "archive_id"
             ]
+        },
+        "workflow" : {
+            "objects" : ["follows", "followed_by"],
+            "structs" : {
+                "follows" : {
+                    "fields" : {
+                        "state" : {"coerce" : "unicode"},
+                        "transition_time" : {"coerce" : "integer"}
+                    }
+                },
+                "followed_by" : {
+                    "fields" : {
+                        "state" : {"coerce" : "unicode"},
+                        "date" : {"coerce" : "datetime"}
+                    }
+                }
+            }
         }
     },
     "required": [
