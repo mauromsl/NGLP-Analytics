@@ -108,7 +108,8 @@ WORKFLOW_TRANSITION_EVENT_STRUCT = {
     "fields" : {
         "event" : {"coerce" : "unicode_lower"},
         "object_type": {"coerce" : "unicode_lower", "allowed_values" : ["article"]},
-        "user_id" : {"coerce" : "unicode"}
+        "user_id" : {"coerce" : "unicode"},
+        "container" : {"coerce" : "unicode"}
     },
     "lists" : {
         "object_id" : {"contains" : "field", "coerce": "unicode"}
