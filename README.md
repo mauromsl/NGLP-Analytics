@@ -59,5 +59,6 @@ This will bring up the webserver, by default at http://localhost:8000
 
 * The JSON API
 * at /search (http://localhost:8000/search) is a demo instance of `edges` with a search interface over the whole index.
+* /g001 and /g014 are reports configured with d3 charts in `edges`.
 
 TODO - make instruction writing more gooder.
