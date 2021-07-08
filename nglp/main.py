@@ -36,5 +36,4 @@ async def g014(request: Request):
 
 
 if __name__ == "__main__":
-    print(settings)
-    uvicorn.run("main:app", host=settings.host, port=int(settings.port), reload=True, debug=True)
+    uvicorn.run("main:app", host=settings.host, port=int(settings.port), reload=True, debug=True, proxy_headers=True)
