@@ -3,6 +3,8 @@ from typing import List
 
 
 class Settings(BaseSettings):
+    host: str = "0.0.0.0"
+    port: str = "8000"      # This is a string to match when passed in via environment variable
     es_hosts: List[str] = ["https://localhost:9200"]
     es_verify_certs: bool = True
     version: str = "1.0.0"
