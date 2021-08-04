@@ -6,6 +6,9 @@ venv/
 # Generated test data json files
 testdata-*.json
 
+# local log store
+store/logs/*.log
+
 *.pyc
 *.egg-info/*
 src*

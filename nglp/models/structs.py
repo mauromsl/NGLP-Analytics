@@ -31,6 +31,7 @@ Example Request event
 
 REQUEST_EVENT_STRUCT = {
     "fields" : {
+        "occurred_at" : {"coerce" : "datetime"},
         "event" : {"coerce" : "unicode_lower", "allowed_values" : ["request"]},
         "object_type" : {"coerce" : "unicode_lower", "allowed_values" : ["file"]},
         "format" : {"coerce" : "unicode_lower"},
@@ -71,6 +72,7 @@ Example Investigation event
 
 INVESTIGATION_EVENT_STRUCT = {
     "fields" : {
+        "occurred_at" : {"coerce" : "datetime"},
         "event" : {"coerce" : "unicode_lower", "allowed_values" : ["investigation"]},
         "object_type": {"coerce" : "unicode_lower"},
         "url" : {"coerce" : "unicode"},
@@ -106,6 +108,7 @@ Example Workflow Transition Event in JSON
 
 WORKFLOW_TRANSITION_EVENT_STRUCT = {
     "fields" : {
+        "occurred_at" : {"coerce" : "datetime"},
         "event" : {"coerce" : "unicode_lower"},
         "object_type": {"coerce" : "unicode_lower", "allowed_values" : ["article"]},
         "user_id" : {"coerce" : "unicode"},
@@ -141,6 +144,7 @@ Example Export Event in JSON
 
 EXPORT_EVENT = {
     "fields" : {
+        "occurred_at" : {"coerce" : "datetime"},
         "event" : {"coerce" : "unicode_lower", "allowed_values" : ["export"]},
         "object_type": {"coerce" : "unicode_lower", "allowed_values" : ["article"]},
         "format" : {"coerce" : "unicode"},
@@ -176,6 +180,7 @@ Example Join Event in JSON
 
 JOIN_EVENT = {
     "fields" : {
+        "occurred_at" : {"coerce" : "datetime"},
         "event" : {"coerce" : "unicode_lower", "allowed_values" : ["join"]},
         "object_type": {"coerce" : "unicode_lower", "allowed_values" : ["journal"]},
         "user_id" : {"coerce" : "unicode"}
@@ -206,6 +211,7 @@ Example Leave Event in JSON
 
 LEAVE_EVENT = {
     "fields" : {
+        "occurred_at" : {"coerce" : "datetime"},
         "event" : {"coerce" : "unicode_lower", "allowed_values" : ["leave"]},
         "object_type": {"coerce" : "unicode_lower", "allowed_values" : ["journal"]},
         "user_id" : {"coerce" : "unicode"}

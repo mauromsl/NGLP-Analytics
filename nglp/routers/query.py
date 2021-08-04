@@ -1,29 +1,15 @@
 from fastapi import APIRouter, HTTPException, Request, Response
-from functools import wraps
 import json
 import urllib.request
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse
 from nglp.lib.query import QueryService
 
 router = APIRouter(
     prefix="/query"
 )
 
-# def jsonp(f):
-#     """Wraps JSONified output for JSONP"""
-#     @wraps(f)
-#     def decorated_function(*args, **kwargs):
-#         callback = request.args.get('callback', False)
-#         if callback:
-#             content = str(callback) + '(' + str(f(*args, **kwargs).data.decode("utf-8")) + ')'
-#             return current_app.response_class(content, mimetype='application/javascript')
-#         else:
-#             return f(*args, **kwargs)
-#     return decorated_function
-
-
-@router.get("/{path:path}")
-@router.post("/{path:path")
+@router.get("/{path:path}", include_in_schema=False)
+@router.post("/{path:path}", include_in_schema=False)
 async def query(path: str, request: Request, response: Response):
     pathparts = path.strip('/').split('/')
     if len(pathparts) < 2:
