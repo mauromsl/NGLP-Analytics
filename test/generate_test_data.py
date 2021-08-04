@@ -197,82 +197,62 @@ class DataGenerator:
         else:
             return field
 
-    def full_data_generator(self):
+    def recurse(self, struct, path, data_fill, stored_data=None):
+        # This method will generate fake data for all the fields in the model
+        data = {}
+        if stored_data == None:
+            stored_data = {}
 
+        for key, val in struct.fields:
+            if data_fill == "minimal":
+                if key not in struct.required:
+                    continue
+            field = self.recurse_field(key, val, path, data, stored_data)
+            if field is not None:
+                data[key] = field
+                stored_data[key] = field
+            if key == "city":
+                data[key] = stored_data["city"][2]
+            # FIXME: note that we are not populating continent, and this doesn't seem to be easy to do
+        for key, val in struct.lists:
+            if data_fill == "minimal":
+                if key not in struct.required:
+                    continue
+            fd = self.get_fake_data(".".join(path + [key]), single=False,
+                                    allowed_values=val.get('allowed_values', None))
+            if fd:
+                data[key] = fd
+        for key in struct.substructs.keys():
+            if self.data_fill == "minimal":
+                if key not in struct.required:
+                    continue
+            substruct = struct.substruct(key)
+            fd = self.recurse(substruct, path + [key], data_fill, stored_data=stored_data)
+            if fd:
+                data[key] = fd
+        return data
 
-        # Some fields data relies on other fields. This is to store fields that have already ben generated. Otherwise
-        # recurse will generate a whole new set of data, so the dependant data might not be correct.
-        stored_data = {}
-
-        def recurse(struct, path):
-            # This method will generate fake data for all the fields in the model
-            data = {}
-            for key, val in struct.fields:
-                field = self.recurse_field(key, val, path, data, stored_data)
-                if field is not None:
-                    data[key] = field
-                    stored_data[key] = field
-                if key == "city":
-                    data[key] = stored_data["city"][2]
-                # FIXME: note that we are not populating continent, and this doesn't seem to be easy to do
-            for key, val in struct.lists:
-                fd = self.get_fake_data(".".join(path + [key]), single=False, allowed_values=val.get('allowed_values', None))
-                if fd:
-                    data[key] = fd
-            for key in struct.substructs.keys():
-                substruct = struct.substruct(key)
-                fd = recurse(substruct, path + [key])
-                if fd:
-                    data[key] = fd
-            return data
-
+    def data_generator(self, data_fill):
         path = []
-        result = recurse(self.model.__seamless_struct__, path)
+        result = self.recurse(self.model.__seamless_struct__, path, data_fill)
         return result
 
     def minimal_data_generator(self):
-        stored_data = {}
-
-        def recurse(struct, path):
-            # This method will generate fake data for all the fields in the model
-            data = {}
-
-            for key, val in struct.fields:
-                if key not in struct.required:
-                    continue
-                field = self.recurse_field(key, val, path, data, stored_data)
-                if field is not None:
-                    data[key] = field
-                    stored_data[key] = field
-                if key == "city":
-                    data[key] = stored_data["city"][2]
-            for key, val in struct.lists:
-                if key not in struct.required:
-                    continue
-                data[key] = self.get_fake_data(".".join(path + [key]), single=False,
-                                               allowed_values=val.get('allowed_values', None))
-            for key in struct.substructs.keys():
-                if key not in struct.required:
-                    continue
-                substruct = struct.substruct(key)
-                data[key] = recurse(substruct, path + [key])
-            return data
-
         path = []
-        data = recurse(self.model.__seamless_struct__, path)
+        data = self.recurse(self.model.__seamless_struct__, path)
         return data
 
     def generate_data(self):
         if self.data_fill == 'full':
             for i in range(self.number_of_records):
-                yield self.full_data_generator()
+                yield self.data_generator("full")
         elif self.data_fill == 'minimal':
             for i in range(self.number_of_records):
-                yield self.minimal_data_generator()
+                yield self.data_generator("minimal")
         else:
             # data_fill is mix
             for i in range(self.number_of_records):
-                yield random.choices([self.full_data_generator(), self.minimal_data_generator()])[0]
+                yield random.choices([self.data_generator("full"), self.data_generator("minimal")])[0]
 
     def write_usage_data(self):
         print(f"Starting data generation for {self.event_type}")
