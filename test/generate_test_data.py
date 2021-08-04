@@ -123,6 +123,7 @@ class DataGenerator:
             'url': self.fake.uri(),
             'referrer': self.fake.uri(),
             'user_agent': self.fake.user_agent(),
+            'user_id': self.fake.hexify(text="^^^^^^^^^^^^"),
             'user_org': self.fake.hexify(text="ror:^^^^^^^"),
             'city': self.fake.location_on_land(),
             'source.archive_id': self.fake.hexify(text="^^^^^")
@@ -164,7 +165,41 @@ class DataGenerator:
 
         return fake_data[0] if (single and fake_data) else fake_data
 
+    def recurse_field(self, key, val, path, data, stored_data):
+        field = None
+
+        fd = self.get_fake_data(".".join(path + [key]), single=True, allowed_values=val.get(
+            'allowed_values', None))
+        if fd:
+            field = fd
+
+        if key == "category":
+            field = data_dictionaries.CATEGORY_TYPES[stored_data["event"]]
+        elif key == "identifier":
+            if data.get("user_org"):
+                field = (stored_data["user_org"] + "/" + data["type"] + "/" +
+                         self.fake.password(length=8, special_chars=False))
+            else:
+                field = (self.fake.hexify(text="^^^^^^") + "/" + data["type"] + "/" +
+                         self.fake.password(length=8, special_chars=False))
+        elif key == "subj_id":
+            if data.get("source_id") is not None:
+                field = data_dictionaries.SUBJ_ID_TYPES[data["source_id"]]
+        elif key == "country":
+            field = stored_data["city"][3]
+        elif key == "lat":
+            field = stored_data["city"][0]
+        elif key == "lon":
+            field = stored_data["city"][1]
+
+        if field is None:
+            pass
+        else:
+            return field
+
     def full_data_generator(self):
+
+
         # Some fields data relies on other fields. This is to store fields that have already ben generated. Otherwise
         # recurse will generate a whole new set of data, so the dependant data might not be correct.
         stored_data = {}
@@ -173,29 +208,12 @@ class DataGenerator:
             # This method will generate fake data for all the fields in the model
             data = {}
             for key, val in struct.fields:
-                fd = self.get_fake_data(".".join(path + [key]), single=True, allowed_values=val.get(
-                    'allowed_values', None))
-                if fd:
-                    data[key] = fd
-                if key == "event":
-                    data["category"] = data_dictionaries.CATEGORY_TYPES[data["event"]]
-                elif key == "user_org":
-                    stored_data["user_org"] = data["user_org"]
-                elif "source" in path and len(path) == 1 and key == "identifier":
-                    data["identifier"] = (stored_data["user_org"] + "/" + data["type"] + "/" +
-                                  self.fake.password(length=8, special_chars=False))
-                elif key == "subj_id":
-                    if "source_id" in data:
-                        data["subj_id"] = data_dictionaries.SUBJ_ID_TYPES[data["source_id"]]
-                elif key == "city":
-                    stored_data["geo"] = data["city"]
-                    data["city"] = stored_data["geo"][2]
-                elif key == "country":
-                    data["country"] = stored_data["geo"][3]
-                elif key == "lat":
-                    data["lat"] = stored_data["geo"][0]
-                elif key == "lon":
-                    data["lon"] = stored_data["geo"][1]
+                field = self.recurse_field(key, val, path, data, stored_data)
+                if field is not None:
+                    data[key] = field
+                    stored_data[key] = field
+                if key == "city":
+                    data[key] = stored_data["city"][2]
                 # FIXME: note that we are not populating continent, and this doesn't seem to be easy to do
             for key, val in struct.lists:
                 fd = self.get_fake_data(".".join(path + [key]), single=False, allowed_values=val.get('allowed_values', None))
@@ -213,7 +231,6 @@ class DataGenerator:
         return result
 
     def minimal_data_generator(self):
-
         stored_data = {}
 
         def recurse(struct, path):
@@ -223,35 +240,23 @@ class DataGenerator:
             for key, val in struct.fields:
                 if key not in struct.required:
                     continue
-                data[key] = self.get_fake_data(".".join(path + [key]), single=True, allowed_values=val.get(
-                    'allowed_values', None))
-                if key == "event":
-                    data["category"] = data_dictionaries.CATEGORY_TYPES[data["event"]]
-                elif key == "user_org":
-                    stored_data["user_org"] = data["user_org"]
-                elif key == "identifier":
-                    data["identifier"] = (stored_data["user_org"] + "/" + data["type"] + "/" +
-                                          self.fake.password(length=8, special_chars=False))
-                elif key == "subj_id":
-                    data["subj_id"] = data_dictionaries.SUBJ_ID_TYPES[data["source_id"]]
-                elif key == "city":
-                    stored_data["geo"] = data["city"]
-                    data["city"] = stored_data["geo"][2]
-                elif key == "country":
-                    data["country"] = stored_data["geo"][3]
-                elif key == "lat":
-                    data["lat"] = stored_data["geo"][0]
-                elif key == "lon":
-                    data["lon"] = stored_data["geo"][1]
+                field = self.recurse_field(key, val, path, data, stored_data)
+                if field is not None:
+                    data[key] = field
+                    stored_data[key] = field
+                if key == "city":
+                    data[key] = stored_data["city"][2]
             for key, val in struct.lists:
                 if key not in struct.required:
                     continue
                 data[key] = self.get_fake_data(".".join(path + [key]), single=False,
                                                allowed_values=val.get('allowed_values', None))
             for key in struct.substructs.keys():
+                if key not in struct.required:
+                    continue
                 substruct = struct.substruct(key)
                 data[key] = recurse(substruct, path + [key])
-                return data
+            return data
 
         path = []
         data = recurse(self.model.__seamless_struct__, path)
@@ -377,6 +382,8 @@ class DataGenerator:
         minutes = (diff.seconds % 3600) // 60
         seconds = diff.seconds % 60
         print("Time taken: {:0>2d}:{:0>2d}:{:0>2d}".format(hours, minutes, seconds))
+
+
 
 
 @click.command()
