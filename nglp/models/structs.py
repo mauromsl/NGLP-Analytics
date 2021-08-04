@@ -30,15 +30,16 @@ Example Request event
 """
 
 REQUEST_EVENT_STRUCT = {
-    "fields": {
-        "event": {"coerce": "unicode_lower", "allowed_values": ["request"]},
-        "object_type": {"coerce": "unicode_lower", "allowed_values": ["file"]},
-        "format": {"coerce": "unicode_lower"},
-        "url": {"coerce": "unicode"},
-        "method": {"coerce": "unicode_lower", "allowed_values": ["get"]},
-        "referrer": {"coerce": "unicode"},
-        "user_agent": {"coerce": "unicode"},
-        "ip": {"coerce": "ip"}
+    "fields" : {
+        "occurred_at" : {"coerce" : "datetime"},
+        "event" : {"coerce" : "unicode_lower", "allowed_values" : ["request"]},
+        "object_type" : {"coerce" : "unicode_lower", "allowed_values" : ["file"]},
+        "format" : {"coerce" : "unicode_lower"},
+        "url" : {"coerce" : "unicode"},
+        "method" : {"coerce" : "unicode_lower", "allowed_values" : ["get"]},
+        "referrer" : {"coerce" : "unicode"},
+        "user_agent" : {"coerce" : "unicode"},
+        "ip" : {"coerce": "ip"}
     },
     "lists": {
         "object_id": {"contains": "field", "coerce": "unicode"}
@@ -70,14 +71,15 @@ Example Investigation event
 """
 
 INVESTIGATION_EVENT_STRUCT = {
-    "fields": {
-        "event": {"coerce": "unicode_lower", "allowed_values": ["investigation"]},
-        "object_type": {"coerce": "unicode_lower"},
-        "url": {"coerce": "unicode"},
-        "method": {"coerce": "unicode_lower", "allowed_values": ["get"]},
-        "referrer": {"coerce": "unicode"},
-        "user_agent": {"coerce": "unicode"},
-        "ip": {"coerce": "ip"}
+    "fields" : {
+        "occurred_at" : {"coerce" : "datetime"},
+        "event" : {"coerce" : "unicode_lower", "allowed_values" : ["investigation"]},
+        "object_type": {"coerce" : "unicode_lower"},
+        "url" : {"coerce" : "unicode"},
+        "method" : {"coerce" : "unicode_lower", "allowed_values" : ["get"]},
+        "referrer": {"coerce" : "unicode"},
+        "user_agent" : {"coerce" : "unicode"},
+        "ip" : {"coerce" : "ip"}
     },
     "lists": {
         "object_id": {"contains": "field", "coerce": "unicode"}
@@ -105,11 +107,12 @@ Example Workflow Transition Event in JSON
 """
 
 WORKFLOW_TRANSITION_EVENT_STRUCT = {
-    "fields": {
-        "event": {"coerce": "unicode_lower"},
-        "object_type": {"coerce": "unicode_lower", "allowed_values": ["article"]},
-        "user_id": {"coerce": "unicode"},
-        "container": {"coerce": "unicode"}
+    "fields" : {
+        "occurred_at" : {"coerce" : "datetime"},
+        "event" : {"coerce" : "unicode_lower"},
+        "object_type": {"coerce" : "unicode_lower", "allowed_values" : ["article"]},
+        "user_id" : {"coerce" : "unicode"},
+        "container" : {"coerce" : "unicode"}
     },
     "lists": {
         "object_id": {"contains": "field", "coerce": "unicode"}
@@ -140,15 +143,16 @@ Example Export Event in JSON
 """
 
 EXPORT_EVENT = {
-    "fields": {
-        "event": {"coerce": "unicode_lower", "allowed_values": ["export"]},
-        "object_type": {"coerce": "unicode_lower", "allowed_values": ["article"]},
-        "format": {"coerce": "unicode"},
-        "url": {"coerce": "unicode"},
-        "method": {"coerce": "unicode_lower", "allowed_values": ["get"]},
-        "referrer": {"coerce": "unicode"},
-        "user_agent": {"coerce": "unicode"},
-        "ip": {"coerce": "ip"}
+    "fields" : {
+        "occurred_at" : {"coerce" : "datetime"},
+        "event" : {"coerce" : "unicode_lower", "allowed_values" : ["export"]},
+        "object_type": {"coerce" : "unicode_lower", "allowed_values" : ["article"]},
+        "format" : {"coerce" : "unicode"},
+        "url" : {"coerce" : "unicode"},
+        "method" : {"coerce" : "unicode_lower", "allowed_values" : ["get"]},
+        "referrer": {"coerce" : "unicode"},
+        "user_agent" : {"coerce" : "unicode"},
+        "ip" : {"coerce" : "ip"}
     },
     "lists": {
         "object_id": {"contains": "field", "coerce": "unicode"}
@@ -175,10 +179,11 @@ Example Join Event in JSON
 """
 
 JOIN_EVENT = {
-    "fields": {
-        "event": {"coerce": "unicode_lower", "allowed_values": ["join"]},
-        "object_type": {"coerce": "unicode_lower", "allowed_values": ["journal"]},
-        "user_id": {"coerce": "unicode"}
+    "fields" : {
+        "occurred_at" : {"coerce" : "datetime"},
+        "event" : {"coerce" : "unicode_lower", "allowed_values" : ["join"]},
+        "object_type": {"coerce" : "unicode_lower", "allowed_values" : ["journal"]},
+        "user_id" : {"coerce" : "unicode"}
     },
     "lists": {
         "object_id": {"contains": "field", "coerce": "unicode"}
@@ -205,10 +210,11 @@ Example Leave Event in JSON
 """
 
 LEAVE_EVENT = {
-    "fields": {
-        "event": {"coerce": "unicode_lower", "allowed_values": ["leave"]},
-        "object_type": {"coerce": "unicode_lower", "allowed_values": ["journal"]},
-        "user_id": {"coerce": "unicode"}
+    "fields" : {
+        "occurred_at" : {"coerce" : "datetime"},
+        "event" : {"coerce" : "unicode_lower", "allowed_values" : ["leave"]},
+        "object_type": {"coerce" : "unicode_lower", "allowed_values" : ["journal"]},
+        "user_id" : {"coerce" : "unicode"}
     },
     "lists": {
         "object_id": {"contains": "field", "coerce": "unicode"}

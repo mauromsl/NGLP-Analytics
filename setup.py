@@ -9,7 +9,7 @@ setup(
         'faker-web==0.3.1',
         'click~=7.1.2',
         'elasticsearch>=7.0.0,<8.0.0',
-        'fastapi==0.65.2',
+        'fastapi==0.68.0',
         'pydantic==1.8.2',
         'python-dotenv==0.17.1',
         'requests==2.25.1',
