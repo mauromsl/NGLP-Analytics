@@ -100,14 +100,47 @@ class LeaveEvent(EventModel):
         super(LeaveEvent, self).__init__(raw=raw)
 
 
-class CoreEvent(SeamlessMixin, BaseDAO):
+########################################
+## Models for the full event structure
+
+class CoreEventInterfaceMixin:
+    @property
+    def raw(self):
+        return self.__seamless__.data
+
+    @property
+    def event(self):
+        return self.__seamless__.get_single("event")
+
+    @property
+    def category(self):
+        return self.__seamless__.get_single("category")
+
+    @category.setter
+    def category(self, val):
+        self.__seamless__.set_single("cateogry", val)
+
+
+class PipelineEvent(SeamlessMixin, CoreEventInterfaceMixin):
+    __SEAMLESS_STRUCT__ = [
+        structs.CORE_EVENT_STRUCTURE
+    ]
+
+    __SEAMLESS_COERCE__ = structs.COERCE
+
+    def __init__(self, raw=None):
+        super(PipelineEvent, self).__init__(raw=raw)
+
+
+class CoreEvent(SeamlessMixin, CoreEventInterfaceMixin, BaseDAO):
     """A core event model for the main analytics index, which can act as a container for
     any of the other events, plus additional context information required for analytics."""
 
     __index_type__ = "event"
 
     __SEAMLESS_STRUCT__ = [
-        structs.CORE_EVENT
+        structs.CORE_EVENT_STRUCTURE,
+        structs.CORE_EVENT_REQUIRED
     ]
 
     __SEAMLESS_COERCE__ = structs.COERCE

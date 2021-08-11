@@ -8,6 +8,7 @@ testdata-*.json
 
 # local log store
 store/logs/*.log
+store/pipeline/*.log
 
 *.pyc
 *.egg-info/*

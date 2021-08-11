@@ -120,6 +120,12 @@ def to_bool(val):
 
 def to_datetime(val):
     try:
+        datetime.strptime(val, "%Y-%m-%dT%H:%M:%S.%fZ")
+        return val
+    except:
+        pass
+
+    try:
         datetime.strptime(val, "%Y-%m-%dT%H:%M:%SZ")
         return val
     except:

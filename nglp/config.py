@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     es_verify_certs: bool = True
     version: str = "1.0.0"
     event_log_dir: str = paths.rel2abs(__file__, "..", "store", "logs")
+    pipeline_output_dir: str = paths.rel2abs(__file__, "..", "store", "pipeline")
     event_log_max_bytes: int = 1024
     workflow_transitions: List[str] = [
         "submit",
