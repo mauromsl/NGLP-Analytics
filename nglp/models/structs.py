@@ -276,14 +276,36 @@ Example core data model event (using all the fields, even if they're not strictl
 
 """
 
-CORE_EVENT = {
+CORE_EVENT_REQUIRED = {
+    "objects": ["source"],
+    "structs": {
+        "source": {
+            "required": [
+                "identifier",
+                "type",
+                "archive_id"
+            ]
+        }
+    },
+    "required": [
+        "occurred_at",
+        "category",
+        "event",
+        "object_type",
+        "object_id",
+        "source"
+    ]
+}
+
+
+CORE_EVENT_STRUCTURE = {
     "fields": {
         "occurred_at": {"coerce": "datetime"},
         "event": {"coerce": "unicode_lower"},
         "category": {"coerce": "unicode_lower"},
         "object_type": {"coerce": "unicode_lower"},
         "format": {"coerce": "unicode_lower"},
-        "url": {"coerce": "url"},
+        "url" : {"coerce" : "unicode"},
         "method": {"coerce": "unicode_lower"},
         "referrer": {"coerce": "unicode"},
         "user_agent": {"coerce": "unicode"},
@@ -318,12 +340,7 @@ CORE_EVENT = {
                 "type": {"coerce": "unicode_lower"},
                 "identifier": {"coerce": "unicode"},
                 "archive_id": {"coerce": "unicode"}
-            },
-            "required": [
-                "identifier",
-                "type",
-                "archive_id"
-            ]
+            }
         },
         "workflow": {
             "objects": ["follows", "followed_by"],
@@ -342,13 +359,6 @@ CORE_EVENT = {
                 }
             }
         }
-    },
-    "required": [
-        "occurred_at",
-        "category",
-        "event",
-        "object_type",
-        "object_id",
-        "source"
-    ]
+    }
 }
+
