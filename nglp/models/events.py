@@ -1,5 +1,7 @@
 import json
 
+from typing import List
+
 from nglp.lib.seamless import SeamlessMixin
 from nglp.models import structs
 from nglp.dao import BaseDAO, MAPPING_OPTS
@@ -121,6 +123,10 @@ class CoreEventInterfaceMixin:
         self.__seamless__.set_with_struct("category", val)
 
     @property
+    def object_ids(self):
+        return self.__seamless__.get_list("object_id")
+
+    @property
     def ip(self):
         return self.__seamless__.get_single("ip")
 
@@ -149,6 +155,21 @@ class CoreEventInterfaceMixin:
     def lat_lon(self, tup):
         self.__seamless__.set_with_struct("location.lat", tup[0])
         self.__seamless__.set_with_struct("location.lon", tup[1])
+
+    @property
+    def occurred_at(self):
+        return self.__seamless__.get_single("occurred_at")
+
+    def clear_workflow_annotations(self):
+        self.__seamless__.delete("workflow")
+
+    def workflow_followed_by(self, state, date):
+        self.__seamless__.set_with_struct("workflow.followed_by.state", state)
+        self.__seamless__.set_with_struct("workflow.followed_by.date", date)
+
+    def workflow_follows(self, state, delta):
+        self.__seamless__.set_with_struct("workflow.follows.state", state)
+        self.__seamless__.set_with_struct("workflow.follows.transition_time", delta)
 
 
 class PipelineEvent(SeamlessMixin, CoreEventInterfaceMixin):
@@ -181,6 +202,12 @@ class CoreEvent(SeamlessMixin, CoreEventInterfaceMixin, BaseDAO):
     def mappings(self):
         return es_data_mapping.create_mapping(self.__seamless_struct__.raw, MAPPING_OPTS)
 
+    @classmethod
+    def find(cls, object_ids: List[str]=None, source_ids: List[str]=None, categories: List[str]=None, size: int=10):
+        q = CoreEventQuery(object_ids, source_ids, categories, size)
+        res = cls.query(q.query())
+        return [cls(o) for o in res.get("hits", {}).get("hits", [])]
+
 
 class EventModelFactory():
     model_map = {
@@ -198,3 +225,32 @@ class EventModelFactory():
         if event_type in settings.workflow_transitions:
             return WorkflowTransitionEvent
         return None
+
+
+class CoreEventQuery:
+    def __init__(self, object_ids: List[str]=None, source_ids: List[str]=None, categories: List[str]=None, size: int=10):
+        self._object_ids = object_ids
+        self._source_ids = source_ids
+        self._categories = categories
+        self._size = size
+
+    def query(self):
+        musts = []
+        if self._object_ids is not None:
+            musts.append({"terms" : {"object_id.exact" : self._object_ids}})
+        if self._source_ids is not None:
+            musts.append({"terms" : {"source.identifier.exact" : self._source_ids}})
+        if self._categories is not None:
+            musts.append({"terms" : {"category.exact" : self._categories}})
+
+        if len(musts) > 0:
+            return {
+                "query" : {
+                    "bool" : {
+                        "filter" : musts
+                    }
+                },
+                "size" : self._size
+            }
+
+        return {"query" : {"match_all" : {}}, "size" : self._size}

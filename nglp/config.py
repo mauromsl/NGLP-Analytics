@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     event_log_max_bytes: int = 1024
 
     ##########################################
+    ## Source systems
+    sources: List[dict] = []
+
+    ##########################################
     ## Workflow events configuration
     workflow_transitions: List[str] = [
         "submit",
@@ -40,7 +44,7 @@ class Settings(BaseSettings):
 
     ###########################################
     ## Query route configuration
-    query_route = {
+    query_route: dict = {
         "public" : {
             "event" : {
                 "auth" : False,
