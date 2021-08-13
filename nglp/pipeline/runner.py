@@ -5,15 +5,18 @@ be the job of a scaleable import pipeline
 import json
 import os
 
+from nglp.pipeline.pipeline import UnacceptableEvent
 from nglp.pipeline.categorise import Categorise
-from nglp.models.events import CoreEvent, PipelineEvent
+from nglp.pipeline.geolocate import Geolocate
+from nglp.models.events import PipelineEvent
 from nglp.config import settings
 from datetime import datetime
 
 
 class Runner:
     pipe = [
-        Categorise()
+        Categorise(),
+        Geolocate()
     ]
 
     def process_event(self, event: PipelineEvent) -> PipelineEvent:
@@ -25,7 +28,10 @@ class Runner:
         for line in stream_in:
             obj = json.loads(line)
             event = PipelineEvent(obj)
-            self.process_event(event)
+            try:
+                self.process_event(event)
+            except UnacceptableEvent:
+                continue
             out = json.dumps(event.raw)
             stream_out.write(out + "\n")
 

@@ -1,4 +1,4 @@
-from nglp.pipeline.pipeline import PipelineProcessor
+from nglp.pipeline.pipeline import PipelineProcessor, UnacceptableEvent
 from nglp.models.events import PipelineEvent
 from nglp.config import settings
 from nglp.lib.data_dictionaries import CATEGORY_TYPES
@@ -9,6 +9,8 @@ class Categorise(PipelineProcessor):
         cat = self._get_category(event)
         if cat is not None:
             event.category = cat
+        else:
+            raise UnacceptableEvent()
         return event
 
     def _get_category(self, event: PipelineEvent) -> str:

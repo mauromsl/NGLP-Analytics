@@ -15,7 +15,8 @@ setup(
         'requests==2.25.1',
         'jinja2==3.0.1',
         'aiofiles==0.7.0',
-        'uvicorn==0.14.0'
+        'uvicorn==0.14.0',
+        'geoip2'
     ],
     url='http://cottagelabs.com/',
     author='Cottage Labs',

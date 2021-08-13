@@ -118,7 +118,37 @@ class CoreEventInterfaceMixin:
 
     @category.setter
     def category(self, val):
-        self.__seamless__.set_single("cateogry", val)
+        self.__seamless__.set_with_struct("category", val)
+
+    @property
+    def ip(self):
+        return self.__seamless__.get_single("ip")
+
+    @property
+    def city(self):
+        return self.__seamless__.get_single("city")
+
+    @city.setter
+    def city(self, val):
+        self.__seamless__.set_with_struct("city", val)
+
+    @property
+    def country(self):
+        return self.__seamless__.get_single("country")
+
+    @country.setter
+    def country(self, val):
+        self.__seamless__.set_with_struct("country", val)
+
+    @property
+    def lat_lon(self):
+        return (self.__seamless__.get_single("location.lat"),
+                self.__seamless__.get_single("location.lon"))
+
+    @lat_lon.setter
+    def lat_lon(self, tup):
+        self.__seamless__.set_with_struct("location.lat", tup[0])
+        self.__seamless__.set_with_struct("location.lon", tup[1])
 
 
 class PipelineEvent(SeamlessMixin, CoreEventInterfaceMixin):
