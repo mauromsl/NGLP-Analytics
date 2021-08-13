@@ -9,7 +9,7 @@ Clone from this repo:
 git clone git@github.com:NGLPteam/NGLP-Analytics.git
 ```
 
-#### Update submodules (the edges search component)
+### Update submodules (the edges search component)
 
 From project root, run:
 ```bash
@@ -18,11 +18,29 @@ git submodule update --init --recursive
 
 This will check out the `edges` js library to `nglp/static/edges`
 
-#### Python environment
+### Python environment
 
 1. Copy the secrets file from `env.template` to `.env` and customise as necessary (todo: hints)
 2. Create and activate virtualenv with e.g. `virtualenv -p python3.8 venv` and `./venv/bin/activate`
 3. Install dependencies with `pip install -e .`
+
+### Setup the Geolocation database
+
+We are using the MaxMind geolocation data for this project.  You may use the free or paid-for options.
+
+To use the free version, go to https://dev.maxmind.com/geoip/geolite2-free-geolocation-data
+
+You will need to sign up for GeoLite2, and when you have logged into your account, you will need to 
+download the "GeoLite2 City" binary edition.
+
+Unzip the download and find the `.mmdb` file.  Put this file somewhere the application will be able to use
+it.
+
+In `.env` set:
+
+```
+geo_database=/path/to/geolite2.mmdb
+```
 
 ### Generate Test Data
 
