@@ -163,13 +163,27 @@ class CoreEventInterfaceMixin:
     def clear_workflow_annotations(self):
         self.__seamless__.delete("workflow")
 
-    def workflow_followed_by(self, state, date):
+    def set_workflow_followed_by(self, state, date):
         self.__seamless__.set_with_struct("workflow.followed_by.state", state)
         self.__seamless__.set_with_struct("workflow.followed_by.date", date)
 
-    def workflow_follows(self, state, delta):
+    def set_workflow_follows(self, state, delta):
         self.__seamless__.set_with_struct("workflow.follows.state", state)
         self.__seamless__.set_with_struct("workflow.follows.transition_time", delta)
+
+    @property
+    def workflow_followed_by(self):
+        return (
+            self.__seamless__.get_single("workflow.followed_by.state"),
+            self.__seamless__.get_single("workflow.followed_by.date")
+        )
+
+    @property
+    def workflow_follows(self):
+        return (
+            self.__seamless__.get_single("workflow.follows.state"),
+            self.__seamless__.get_single("workflow.follows.transition_time")
+        )
 
 
 class PipelineEvent(SeamlessMixin, CoreEventInterfaceMixin):

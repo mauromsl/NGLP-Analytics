@@ -30,7 +30,12 @@ class Settings(BaseSettings):
 
     ##########################################
     ## Source systems
-    sources: List[dict] = []
+    sources: List[dict] = [ # for reasons unclear, I have been unable to override this in .env
+        {
+            "type" : "WDP",
+            "identifier": "http://example.com/wdp"
+        }
+    ]
 
     ##########################################
     ## Workflow events configuration

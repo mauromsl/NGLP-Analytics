@@ -32,8 +32,8 @@ class Workflow(Precompute):
             e.clear_workflow_annotations()
 
     def _annotate_events(self, first, second):
-        first.workflow_followed_by(second.event, second.occurred_at)
-        second.workflow_follows(first.event, self._delta(first, second))
+        first.set_workflow_followed_by(second.event, second.occurred_at)
+        second.set_workflow_follows(first.event, self._delta(first, second))
 
     def _delta(self, first, second):
         start = datetime.strptime(first.occurred_at, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -53,7 +53,7 @@ class Workflow(Precompute):
             for i, e in enumerate(events[start_pos + 1:]):
                 if e.event == next_type:
                     next = e
-                    next_pos = i
+                    next_pos = i + start_pos + 1
         return start, next, next_pos
 
     def _get_next_event_type(self, current_type, offset):
