@@ -7,19 +7,21 @@ import datetime
 from nglp.models import events
 from test.generate_test_data import DataGenerator, generate_test_data
 
+# instructions for usage within pump_data() function which starts line 94
+
 EVENTS_SELECTOR = {
-    'request': events.RequestEvent,
-    'investigation': events.InvestigationEvent,
-    'join': events.JoinEvent,
-    'leave': events.LeaveEvent,
-    'export': events.ExportEvent,
-    'workflow_transition': events.WorkflowTransitionEvent,
-    'core': events.CoreEvent
+    "request": events.RequestEvent,
+    "investigation": events.InvestigationEvent,
+    "join": events.JoinEvent,
+    "leave": events.LeaveEvent,
+    "export": events.ExportEvent,
+    "workflow_transition": events.WorkflowTransitionEvent,
+    "core": events.CoreEvent,
 }
 
 ALLOWED_PARAM_VALUES = {
-    'event_type': EVENTS_SELECTOR.keys(),
-    'data_fill': ['minimal', 'full', 'mix'],
+    "event_type": EVENTS_SELECTOR.keys(),
+    "data_fill": ["minimal", "full", "mix"],
 }
 
 
@@ -99,10 +101,32 @@ def pump_data(
     add_records_with_error=False,
     error_if_model_unsupported=True,
 ):
+    """
+    The pump_data() function is called from the command line.
+    the file and generate_data options are required. file should be the name of the file to be pumped, and generate_data
+    toggles whether the pump will generate the file (with the name specified).
+    event_type, number_of_records, is_core, data_fill, add_records_with_error, and _error_if_model_unsupported should
+    only be used when generate_data is True.
+    Example call for non-generated data:
+        python test/test_data_pump.py -f "api_test.json" -g False
+    Pumps data from a preexisting file called "api_test.json"
+    Example call for generated data:
+        python test/test_data_pump.py -f "api_test.json" -g True -e "request" -n 200
+    First will generate test 200 request events, in a file called "api_test.json", then pumps the data to the event api
+
+    The api is local, but only needs to be changed on line 146 if this is used on a deployed version.
+    """
     # unpack JSON doc
     if generate_data == True:
-        dg = DataGenerator(event_type, number_of_records, is_core, data_fill, add_records_with_error,
-                           error_if_model_unsupported, filename=file)
+        dg = DataGenerator(
+            event_type,
+            number_of_records,
+            is_core,
+            data_fill,
+            add_records_with_error,
+            error_if_model_unsupported,
+            filename=file,
+        )
 
         if event_type == "workflow_transition":
             dg.write_workflow_data()
@@ -123,7 +147,7 @@ def pump_data(
         )
         time.sleep(random.choices(range(1, 10), k=1)[0])
         count += 1
-        print('.', end="", flush=True) if count % pulse == 0 else ''
+        print(".", end="", flush=True) if count % pulse == 0 else ""
     end = datetime.datetime.now()
     print()
     print("Data pumping completed.")
