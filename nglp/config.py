@@ -13,8 +13,10 @@ class Settings(BaseSettings):
     geo_database: str = None
 
     ##########################################
-    ## Application versioning
+    ## Application
     version: str = "1.0.0"
+    host: str = "0.0.0.0"
+    port: str = "8000"  # This is a string to match when passed in via environment variable
 
     ##########################################
     ## ES Connection
