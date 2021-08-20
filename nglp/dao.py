@@ -1,5 +1,5 @@
 from elasticsearch import Elasticsearch
-import requests
+import uuid
 import time
 import json
 
@@ -69,13 +69,17 @@ class BaseDAO(object):
             })
 
     @classmethod
-    def query(cls, q):
-        """Perform a query on backend.
-        """
-        return cls._send_query(q)
+    def makeid(cls):
+        return str(uuid.uuid4().hex)
 
     @classmethod
-    def _send_query(cls, qobj, retry=50, return_raw_resp=False):
+    def query(cls, q, retry=50):
+        """Perform a query on backend.
+        """
+        return cls._send_query(q, retry=retry)
+
+    @classmethod
+    def _send_query(cls, qobj, retry=50):
         """Actually send a query object to the backend."""
         r = None
         count = 0
@@ -96,3 +100,13 @@ class BaseDAO(object):
             raise exception
 
         raise Exception("Couldn't get the ES query endpoint to respond.  Also, you shouldn't be seeing this.")
+
+    @classmethod
+    def bulk(cls, records, idkey="id"):
+        data = ""
+        for r in records:
+            if r.get(idkey) is None:
+                r[idkey] = cls.makeid()
+            data += json.dumps({"index" : {"_id": r[idkey]}}) + "\n"
+            data = json.dumps(r) + "\n"
+        return CONNECTION.bulk(body=data, index=cls.__index_type__)

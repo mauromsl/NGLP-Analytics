@@ -300,6 +300,7 @@ CORE_EVENT_REQUIRED = {
 
 CORE_EVENT_STRUCTURE = {
     "fields": {
+        "id" : {"coerce" : "unicode"},
         "occurred_at": {"coerce": "datetime"},
         "event": {"coerce": "unicode_lower"},
         "category": {"coerce": "unicode_lower"},
