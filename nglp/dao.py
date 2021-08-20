@@ -110,3 +110,7 @@ class BaseDAO(object):
             data += json.dumps({"index" : {"_id": r[idkey]}}) + "\n"
             data = json.dumps(r) + "\n"
         return CONNECTION.bulk(body=data, index=cls.__index_type__)
+
+    @classmethod
+    def delete_by_query(cls, q):
+        return CONNECTION.delete_by_query(index=cls.__index_type__, body=q)
