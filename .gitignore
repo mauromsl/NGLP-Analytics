@@ -3,6 +3,10 @@
 env/
 venv/
 
+# GeoLite database
+GeoLite2-*
+*.mndb
+
 # Generated test data json files
 testdata-*.json
 
