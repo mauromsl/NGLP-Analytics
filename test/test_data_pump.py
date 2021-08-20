@@ -143,7 +143,7 @@ def pump_data(
     pulse = number_of_records // 100 if number_of_records > 100 else 1
     for entry in unpacked_file:
         requests.post(
-            url="http://localhost:8000/api/", data=json.dumps(entry), verify=False
+            url="http://localhost:8000/api/", data=json.dumps(entry)
         )
         time.sleep(random.choices(range(1, 10), k=1)[0])
         count += 1

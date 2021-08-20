@@ -20,20 +20,35 @@ class Normalise(PipelineProcessor):
         if not event.object_id:
             return  event
 
-        if regex.DOI.search(event.object_id) is not None:
-            # then the object_id matches a DOI
-            # normalise the doi
-            # set event.object_id as normalised DOI
-            # return event
-        elif regex.HANDLE.search(event.object_id) is not None:
-            # then the object_id matches a handle
-        elif regex.ISSN.search(event.object_id) is not None:
-            # then the object_id matches an ISSN
-        elif regex.HTTP_URL.search(event.object_id) is not None:
-            # the object_id matches an HTTP URL
+        for id in event.object_id:
+            if regex.DOI.search(id) is not None:
+                # then the object_id matches a DOI
+                # normalise the doi
+                # set event.object_id as normalised DOI
+                # return event
+                normalised_id = id.
 
+
+            elif regex.HANDLE.search(id) is not None:
+                # then the object_id matches a handle
+                pass
+
+            elif regex.ISSN.search(id) is not None:
+                # then the object_id matches an ISSN
+                pass
+
+            elif regex.HTTP_URL.search(id) is not None:
+                # the object_id matches an HTTP URL
+                pass
         # determine if object_id is doi, url, issn or handle by comparing to regex
 
         # for each, depending on type, return an edited version
+    def normalise_doi(self, doi):
+        # object_id matches a doi
+        # object id should be normalised and returned.
+        norm = regex.group_match(regex.DOI_COMPILED, doi, "object_id")
+        if norm is None:
+            raise ValueError(f"Could not extract a normalised DOI from {doi}")
+        return norm
 
         # if that is not possible, return an exception
