@@ -1,5 +1,5 @@
 from copy import deepcopy
-
+from datetime import datetime, timedelta
 
 class EventFixtureFactory(object):
 
@@ -12,8 +12,12 @@ class EventFixtureFactory(object):
         return deepcopy(INVESTIGATION_EVENT)
 
     @classmethod
-    def workflow_transition_event(cls):
-        return deepcopy(WORKFLOW_TRANSITION_EVENT)
+    def workflow_transition_event(cls, state="first_decision", occurred_at=None):
+        event = deepcopy(WORKFLOW_TRANSITION_EVENT)
+        event["event"] = state
+        if occurred_at is not None:
+            event["occurred_at"] = occurred_at
+        return event
 
     @classmethod
     def export_event(cls):
@@ -36,8 +40,26 @@ class EventFixtureFactory(object):
         return deepcopy(INVESTIGATION_CORE_EVENT)
 
     @classmethod
-    def workflow_transition_core_event(cls):
-        return deepcopy(WORKFLOW_TRANSITION_CORE_EVENT)
+    def workflow_transition_core_event(cls, state="first_decision", occurred_at=None):
+        event = deepcopy(WORKFLOW_TRANSITION_CORE_EVENT)
+        event["event"] = state
+        if occurred_at is not None:
+            event["occurred_at"] = occurred_at
+        return event
+
+    @classmethod
+    def workflow_transition_core_set(cls, states, first_occurred_at, last_occurred_at, workflow_annotations=False):
+        start = datetime.strptime(first_occurred_at, "%Y-%m-%dT%H:%M:%S.%fZ")
+        end = datetime.strptime(last_occurred_at, "%Y-%m-%dT%H:%M:%S.%fZ")
+        delta = (end - start).total_seconds()
+        interval = delta / len(states)
+        return [
+            cls.workflow_transition_core_event(
+                state,
+                datetime.strftime(start + timedelta(seconds=(interval * i)), "%Y-%m-%dT%H:%M:%S.%fZ")
+            )
+            for i, state in enumerate(states)
+        ]
 
     @classmethod
     def export_core_event(cls):
@@ -50,6 +72,8 @@ class EventFixtureFactory(object):
     @classmethod
     def leave_core_event(cls):
         return deepcopy(LEAVE_CORE_EVENT)
+
+
 REQUEST_EVENT = {
     "event" : "request",
     "object_type" : "File",

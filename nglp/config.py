@@ -29,6 +29,15 @@ class Settings(BaseSettings):
     event_log_max_bytes: int = 1024
 
     ##########################################
+    ## Source systems
+    sources: List[dict] = [ # for reasons unclear, I have been unable to override this in .env
+        {
+            "type" : "WDP",
+            "identifier": "http://example.com/wdp"
+        }
+    ]
+
+    ##########################################
     ## Workflow events configuration
     workflow_transitions: List[str] = [
         "submit",
@@ -40,7 +49,7 @@ class Settings(BaseSettings):
 
     ###########################################
     ## Query route configuration
-    query_route = {
+    query_route: dict = {
         "public" : {
             "event" : {
                 "auth" : False,
