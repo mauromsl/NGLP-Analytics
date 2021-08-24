@@ -1,5 +1,6 @@
 import logging.config
 import os
+import faust
 
 from fastapi import APIRouter, HTTPException, Request
 
@@ -32,7 +33,11 @@ logging.config.dictConfig({
         }
     }
 })
+
 LOG = logging.getLogger("event_api")
+
+app = faust.App('analytics', broker=settings.kafka_broker, value_serializer='json')
+topic = app.topic('events')
 
 router = APIRouter(
     prefix="/api"
@@ -46,8 +51,11 @@ async def event(request: Request):
         raise HTTPException(status_code=400, detail="Unrecognised event type")
     try:
         m = EventModel(payload)
-    except SeamlessException as e:
+    except (SeamlessException,Exception) as e:
+        LOG.exception()
         raise HTTPException(status_code=400, detail=e.message)
     m.set_occurred_at()
-    LOG.info(m.loggable())
+    # LOG.info(m.loggable())
+
+    await topic.send(value=m.loggable())
     return {"status" : "success"}
