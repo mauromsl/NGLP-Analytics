@@ -63,7 +63,7 @@ class Settings(BaseSettings):
 
     ###########################################
     ## Kafka Broker configuration
-    kafka_broker = "kafka://localhost:9092"
+    kafka_broker = "kafka://kafka-server:19092"
 
     class Config:
         env_file = paths.rel2abs(__file__, "..", ".env")
