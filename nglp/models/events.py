@@ -30,10 +30,20 @@ class EventModel(SeamlessMixin):
 
         self.__seamless__.set_single("occurred_at", occurred_at)
 
+    @property
+    def source(self):
+        return self.__seamless__.get_single("source")
+
+    @source.setter
+    def source(self, source_record):
+        self.__seamless__.set_with_struct("source", source_record)
+
+
 class RequestEvent(EventModel):
     """Event which represents a "Request" event, which is a file download"""
     __SEAMLESS_STRUCT__ = [
-        structs.REQUEST_EVENT_STRUCT
+        structs.REQUEST_EVENT_STRUCT,
+        structs.SOURCE
     ]
 
     __SEAMLESS_COERCE__ = structs.COERCE
@@ -45,7 +55,8 @@ class RequestEvent(EventModel):
 class InvestigationEvent(EventModel):
     """Event which represents an "Investigation" event, which is a page view"""
     __SEAMLESS_STRUCT__ =  [
-        structs.INVESTIGATION_EVENT_STRUCT
+        structs.INVESTIGATION_EVENT_STRUCT,
+        structs.SOURCE
     ]
 
     __SEAMLESS_COERCE__ = structs.COERCE
@@ -57,7 +68,8 @@ class InvestigationEvent(EventModel):
 class WorkflowTransitionEvent(EventModel):
     """Event which represents one of the range of workflow transition events"""
     __SEAMLESS_STRUCT__ =  [
-        structs.WORKFLOW_TRANSITION_EVENT_STRUCT
+        structs.WORKFLOW_TRANSITION_EVENT_STRUCT,
+        structs.SOURCE
     ]
 
     __SEAMLESS_COERCE__ = structs.COERCE
@@ -69,7 +81,8 @@ class WorkflowTransitionEvent(EventModel):
 class ExportEvent(EventModel):
     """Event which represents a metadata export from an item (e.g. for a reference manager)"""
     __SEAMLESS_STRUCT__ =  [
-        structs.EXPORT_EVENT
+        structs.EXPORT_EVENT,
+        structs.SOURCE
     ]
 
     __SEAMLESS_COERCE__ = structs.COERCE
@@ -81,7 +94,8 @@ class ExportEvent(EventModel):
 class JoinEvent(EventModel):
     """Event which represents a staff member joining the editorial team for a journal"""
     __SEAMLESS_STRUCT__ =  [
-        structs.JOIN_EVENT
+        structs.JOIN_EVENT,
+        structs.SOURCE
     ]
 
     __SEAMLESS_COERCE__ = structs.COERCE
@@ -93,7 +107,8 @@ class JoinEvent(EventModel):
 class LeaveEvent(EventModel):
     """Event which represents a staff member leaving the editorial team for a journal"""
     __SEAMLESS_STRUCT__ =  [
-        structs.LEAVE_EVENT
+        structs.LEAVE_EVENT,
+        structs.SOURCE
     ]
 
     __SEAMLESS_COERCE__ = structs.COERCE
@@ -220,7 +235,7 @@ class CoreEvent(SeamlessMixin, CoreEventInterfaceMixin, BaseDAO):
     def find(cls, object_ids: List[str]=None, source_ids: List[str]=None, categories: List[str]=None, size: int=10):
         q = CoreEventQuery(object_ids, source_ids, categories, size)
         res = cls.query(q.query())
-        return [cls(o) for o in res.get("hits", {}).get("hits", [])]
+        return [cls(o.get("_source")) for o in res.get("hits", {}).get("hits", [])]
 
 
 class EventModelFactory():

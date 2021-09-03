@@ -98,6 +98,13 @@ ALLOWED_PARAM_VALUES = {
     help="URL of the API to send data to"
 )
 @click.option(
+    "-o",
+    "--source",
+    required=True,
+    type=str,
+    help="identifier for the service which is the source of this data"
+)
+@click.option(
     "-s",
     "--shortest",
     type=float,
@@ -114,6 +121,7 @@ ALLOWED_PARAM_VALUES = {
 def pump_data(
     event_type,
     number_of_records,
+    source,
     file=None,
     generate_data=True,
     is_core=False,
@@ -175,7 +183,7 @@ def pump_data(
     pulse = number_of_records // 100 if number_of_records > 100 else 1
     for entry in unpacked_file:
         resp = requests.post(
-            url=api, data=json.dumps(entry), verify=False
+            url=api + "?source=" + source, data=json.dumps(entry), verify=False
         )
         if resp.status_code != 201:
             print(resp.text)

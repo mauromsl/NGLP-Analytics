@@ -112,5 +112,5 @@ class BaseDAO(object):
             if r.get(idkey) is None:
                 r[idkey] = cls.makeid()
             data += json.dumps({"index" : {"_id": r[idkey]}}) + "\n"
-            data = json.dumps(r) + "\n"
+            data += json.dumps(r) + "\n"
         return CONNECTION.bulk(body=data, index=cls.index_name())

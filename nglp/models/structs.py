@@ -13,6 +13,19 @@ COERCE = {
     "ip": coerce.to_ip
 }
 
+SOURCE = {
+    "objects" : ["source"],
+    "structs" : {
+        "source" : {
+            "fields": {
+                "type": {"coerce": "unicode_lower"},
+                "identifier": {"coerce": "unicode"}
+            }
+        }
+    }
+}
+
+
 """
 Example Request event
 
@@ -281,8 +294,8 @@ CORE_EVENT_REQUIRED = {
         "source": {
             "required": [
                 "identifier",
-                "type",
-                "archive_id"
+                "type"#,
+                #"archive_id"   # Removing this for the time being, as this part of the pipeline has not yet been developed
             ]
         }
     },
