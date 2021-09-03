@@ -316,7 +316,7 @@ class DataGenerator:
                     if container is not None:
                         data["container"] = container
                     else:
-                        container = data["container"]
+                        container = data.get("container")
 
                     start = self.fake.date_time_between(start_date=start)
                     entries.append(data)
