@@ -284,7 +284,7 @@ class DataGenerator:
         print("Time taken: {:0>2d}:{:0>2d}:{:0>2d}".format(hours, minutes, seconds))
 
 
-    def write_workflow_data(self):
+    def write_workflow_data(self, join_events=True):
         print(f"Starting data generation for {self.event_type}")
         start = datetime.datetime.now()
         print(f"Start time: {start}")
@@ -304,7 +304,7 @@ class DataGenerator:
                 entries = []
                 for j in range(0, distance):
                     workflow_status = WORKFLOW[j]
-                    data = self.full_data_generator()
+                    data = self.data_generator("full")
                     data["event"] = workflow_status
                     data['occurred_at'] = datetime.datetime.strftime(start, "%Y-%m-%dT%H:%M:%SZ")
 
@@ -321,28 +321,29 @@ class DataGenerator:
                     start = self.fake.date_time_between(start_date=start)
                     entries.append(data)
 
-                for j in range(len(entries)):
-                    entry = entries[j]
+                if join_events:
+                    for j in range(len(entries)):
+                        entry = entries[j]
 
-                    # if there is a following event
-                    if len(entries) > j + 1:
-                        followed_by = entries[j + 1]
-                        if "workflow" not in entry:
-                            entry["workflow"] = {"followed_by" : {}}
-                        entry["workflow"]["followed_by"] = {
-                            "state" : followed_by["event"],
-                            "date": followed_by["occurred_at"]
-                        }
+                        # if there is a following event
+                        if len(entries) > j + 1:
+                            followed_by = entries[j + 1]
+                            if "workflow" not in entry:
+                                entry["workflow"] = {"followed_by" : {}}
+                            entry["workflow"]["followed_by"] = {
+                                "state" : followed_by["event"],
+                                "date": followed_by["occurred_at"]
+                            }
 
-                    # if there is a previous event
-                    if j > 0:
-                        follows = entries[j - 1]
-                        if "workflow" not in entry:
-                            entry["workflow"] = {"follows" : {}}
-                        entry["workflow"]["follows"] = {
-                            "state" : follows["event"],
-                            "transition_time": int((datetime.datetime.strptime(entry["occurred_at"], "%Y-%m-%dT%H:%M:%SZ") - datetime.datetime.strptime(follows["occurred_at"], "%Y-%m-%dT%H:%M:%SZ")).total_seconds())
-                        }
+                        # if there is a previous event
+                        if j > 0:
+                            follows = entries[j - 1]
+                            if "workflow" not in entry:
+                                entry["workflow"] = {"follows" : {}}
+                            entry["workflow"]["follows"] = {
+                                "state" : follows["event"],
+                                "transition_time": int((datetime.datetime.strptime(entry["occurred_at"], "%Y-%m-%dT%H:%M:%SZ") - datetime.datetime.strptime(follows["occurred_at"], "%Y-%m-%dT%H:%M:%SZ")).total_seconds())
+                            }
 
                 workflow_set = ",\n".join([json.dumps(e, indent=2) for e in entries])
                 output.write(workflow_set)
