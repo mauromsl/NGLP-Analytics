@@ -37,11 +37,14 @@ async def g014(request: Request):
     return templates.TemplateResponse("g014.html", {"request" : request, "config" : settings})
 
 
-@app.get("/favicon.ico")
+@app.get("/favicon.ico", include_in_schema=False)
 async def icon():
     return FileResponse('nglp/static/img/favicon.ico')
 
 
 if __name__ == "__main__":
+    from nglp.initialise import initialise
+    initialise()
+
     uvicorn.run("main:app", host=settings.host, port=int(settings.port), reload=True, debug=True, proxy_headers=True,
                 forwarded_allow_ips='*')

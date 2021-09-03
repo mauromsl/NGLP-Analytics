@@ -58,13 +58,17 @@ class BaseDAO(object):
     """The name of the index to be created - subclasses should override"""
     __index_type__ = "index_type"
 
+    @classmethod
+    def index_name(cls):
+        return settings.es_index_namespace + cls.__index_type__
+
     def mappings(self):
         raise NotImplementedError()
 
     def initialise_index(self):
         mappings = self.mappings()
-        if not CONNECTION.indices.exists(index=self.__index_type__):
-            CONNECTION.indices.create(index=self.__index_type__, body={
+        if not CONNECTION.indices.exists(index=self.index_name()):
+            CONNECTION.indices.create(index=self.index_name(), body={
                 "mappings" : mappings
             })
 
@@ -87,7 +91,7 @@ class BaseDAO(object):
         while count < retry:
             count += 1
             try:
-                r = CONNECTION.search(body=qobj, index=cls.__index_type__)
+                r = CONNECTION.search(body=qobj, index=cls.index_name())
                 break
             except Exception as e:
                 exception = e
@@ -109,4 +113,4 @@ class BaseDAO(object):
                 r[idkey] = cls.makeid()
             data += json.dumps({"index" : {"_id": r[idkey]}}) + "\n"
             data = json.dumps(r) + "\n"
-        return CONNECTION.bulk(body=data, index=cls.__index_type__)
+        return CONNECTION.bulk(body=data, index=cls.index_name())

@@ -22,7 +22,7 @@ def load_test_data(input):
         data = json.loads(f.read())
         batch = []
         for d in data:
-            batch.append(json.dumps({"create" : {"_index" : CoreEvent.__index_type__}}))
+            batch.append(json.dumps({"create" : {"_index" : CoreEvent.index_name()}}))
             batch.append(json.dumps(d))
             if len(batch) > BATCH_SIZE:
                 CONNECTION.bulk("\n".join(batch))
