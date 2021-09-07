@@ -10,11 +10,11 @@ HANDLE = r"^((https?:\/\/)?((dx\.)?hdl\.handle\.net\/)|info:hdl\/)?(?P<id>(?!10\
 HANDLE_COMPILED = re.compile(HANDLE, re.IGNORECASE)
 
 #~~ISSN:Regex~~
-ISSN = r'^\d{4}-\d{3}(\d|X|x){1}$'
+ISSN = r'(?P<id>\d{4}-\d{3}[\d|X|x]{1}$)'
 ISSN_COMPILED = re.compile(ISSN)
 
 #~~URL:Regex~~
-HTTP_URL = r'^https?://([^/:]+\.[a-z]{2,63}|([0-9]{1,3}\.){3}[0-9]{1,3})(:[0-9]+)?(\/.*)?$'
+HTTP_URL = r'^https?:\/\/(?P<id>([^\/:]+\.[a-z]{2,63}|(?:[0-9]{1,3}\.){3}[0-9]{1,3})(:[0-9]+)?(\/.*)?)$'
 HTTP_URL_COMPILED = re.compile(HTTP_URL, re.IGNORECASE)
 
 

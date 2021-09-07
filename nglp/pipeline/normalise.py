@@ -16,8 +16,10 @@ class Normalise(PipelineProcessor):
         """
 
         if not event:
+            # will return None
             return event
         if not event.object_id:
+            # Would return none
             return  event
 
         for id in event.object_id:
@@ -26,29 +28,52 @@ class Normalise(PipelineProcessor):
                 # normalise the doi
                 # set event.object_id as normalised DOI
                 # return event
-                normalised_id = id.
+                normalised_id = normalise(type="doi", id=id)
+                event.object_id = normalised_id
 
 
             elif regex.HANDLE.search(id) is not None:
                 # then the object_id matches a handle
-                pass
+                normalised_id = normalise(type="handle", id=id)
+                event.object_id = normalised_id
 
             elif regex.ISSN.search(id) is not None:
                 # then the object_id matches an ISSN
-                pass
-
+                normalised_id = normalise(type="issn", id=id)
+                event.object_id = normalised_id
             elif regex.HTTP_URL.search(id) is not None:
                 # the object_id matches an HTTP URL
-                pass
-        # determine if object_id is doi, url, issn or handle by comparing to regex
+                normalised_id = normalise(type="url", id=id)
+                event.object_id = normalised_id
+        return event
 
         # for each, depending on type, return an edited version
-    def normalise_doi(self, doi):
+    def normalise(self, type, id):
         # object_id matches a doi
         # object id should be normalised and returned.
-        norm = regex.group_match(regex.DOI_COMPILED, doi, "object_id")
-        if norm is None:
-            raise ValueError(f"Could not extract a normalised DOI from {doi}")
-        return norm
-
-        # if that is not possible, return an exception
+        norm_id = None
+        if type == "doi":
+            norm = regex.group_match(regex.DOI_COMPILED, id, "id")
+            if norm is None:
+                raise ValueError(f"Could not extract a normalised DOI from {id}")
+            else:
+                norm_id = norm
+        elif type == "handle":
+            norm = regex.group_match(regex.DOI_COMPILED, id, "id")
+            if norm is None:
+                raise ValueError(f"Could not extract a normalised Handle from {id}")
+            else:
+                norm_id = norm
+        elif type == "issn":
+            norm = regex.group_match(regex.ISSN_COMPILED, id, "id")
+            if norm is None:
+                raise ValueError(f"Could not extract a normalised ISSN from {id}")
+            else:
+                norm_id = norm
+        elif type == "url":
+            norm = regex.group_match(regex.HTTP_URL_COMPILED, id, "id")
+            if norm is None:
+                raise ValueError(f"Could not extract a normalised URL from {id}")
+            else:
+                norm_id = norm
+        return norm_id
