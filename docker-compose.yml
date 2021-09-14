@@ -28,6 +28,16 @@ services:
     depends_on:
       - zookeeper-server
 
+  kafka-topic:
+    image: 'bitnami/kafka:latest'
+    container_name: kafka-topic
+    networks:
+      - elasticsearch
+    command: sh -c "sleep 3 && kafka-topics.sh --list --zookeeper zookeeper:2181 | grep -q -w events && echo topic events already exist || kafka-topics.sh --bootstrap-server kafka-server:19092 --create --topic events || sleep 15"
+
+    depends_on:
+      - kafka-server
+
   nglp:
     build:
       context: .
@@ -38,7 +48,7 @@ services:
     ports:
       - '8000:8000'
     depends_on:
-      - kafka-server
+      - kafka-topic
 
   nglp-events-consumer:
     build:
