@@ -1,8 +1,15 @@
 from nglp.pipeline.pipeline import PipelineProcessor, UnacceptableEvent
 from nglp.models.events import PipelineEvent
 from nglp.config import settings
-import regex
+from nglp.pipeline import regex
 
+
+ID_MAPPING = {
+    "DOI": regex.DOI_COMPILED,
+    "Handle": regex.HANDLE_COMPILED,
+    "ISSN": regex.ISSN_COMPILED,
+    "URL": regex.HTTP_URL_COMPILED,
+}
 
 class Normalise(PipelineProcessor):
     def run(self, event:PipelineEvent) -> PipelineEvent:
@@ -15,65 +22,50 @@ class Normalise(PipelineProcessor):
         return event
         """
 
-        if not event:
-            # will return None
-            return event
-        if not event.object_id:
-            # Would return none
+        if not event.object_ids:
+            # Would return no normalised anything
             return  event
 
-        for id in event.object_id:
-            if regex.DOI.search(id) is not None:
+        id_list = []
+
+        for objid in event.raw["object_id"]:
+            if regex.DOI_COMPILED.search(objid) is not None:
                 # then the object_id matches a DOI
                 # normalise the doi
                 # set event.object_id as normalised DOI
                 # return event
-                normalised_id = normalise(type="doi", id=id)
-                event.object_id = normalised_id
+                normalised_id = self.normalise(type="DOI", objid=objid)
+                id_list.append(normalised_id)
 
-
-            elif regex.HANDLE.search(id) is not None:
+            elif regex.HANDLE_COMPILED.search(objid) is not None:
                 # then the object_id matches a handle
-                normalised_id = normalise(type="handle", id=id)
-                event.object_id = normalised_id
+                normalised_id = self.normalise(type="Handle", objid=objid)
+                id_list.append(normalised_id)
 
-            elif regex.ISSN.search(id) is not None:
+            elif regex.ISSN_COMPILED.search(objid) is not None:
                 # then the object_id matches an ISSN
-                normalised_id = normalise(type="issn", id=id)
-                event.object_id = normalised_id
-            elif regex.HTTP_URL.search(id) is not None:
+                normalised_id = self.normalise(type="ISSN", objid=objid)
+                id_list.append(normalised_id)
+
+            elif regex.HTTP_URL_COMPILED.search(objid) is not None:
                 # the object_id matches an HTTP URL
-                normalised_id = normalise(type="url", id=id)
-                event.object_id = normalised_id
+                normalised_id = self.normalise(type="URL", objid=objid)
+                id_list.append(normalised_id)
+
+            else:
+                raise ValueError(f"Could not extract a normalised ID from {objid}")
+
+        event.object_ids = id_list
         return event
 
         # for each, depending on type, return an edited version
-    def normalise(self, type, id):
-        # object_id matches a doi
-        # object id should be normalised and returned.
-        norm_id = None
-        if type == "doi":
-            norm = regex.group_match(regex.DOI_COMPILED, id, "id")
-            if norm is None:
-                raise ValueError(f"Could not extract a normalised DOI from {id}")
-            else:
-                norm_id = norm
-        elif type == "handle":
-            norm = regex.group_match(regex.DOI_COMPILED, id, "id")
-            if norm is None:
-                raise ValueError(f"Could not extract a normalised Handle from {id}")
-            else:
-                norm_id = norm
-        elif type == "issn":
-            norm = regex.group_match(regex.ISSN_COMPILED, id, "id")
-            if norm is None:
-                raise ValueError(f"Could not extract a normalised ISSN from {id}")
-            else:
-                norm_id = norm
-        elif type == "url":
-            norm = regex.group_match(regex.HTTP_URL_COMPILED, id, "id")
-            if norm is None:
-                raise ValueError(f"Could not extract a normalised URL from {id}")
-            else:
-                norm_id = norm
+    def normalise(self, type, objid):
+        # object_id matches a regex string
+        # object_id should be normalised and returned.
+        norm = regex.group_match(ID_MAPPING[type], objid, "id")
+        if norm == None:
+            raise ValueError(f"Could not extract a normalised {type} from {objid}")
+        else:
+            norm_id = norm
+
         return norm_id
