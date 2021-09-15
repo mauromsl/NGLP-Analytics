@@ -46,7 +46,7 @@ services:
     networks:
       - elasticsearch
     ports:
-      - '8000:8000'
+      - '8800:8000'
     depends_on:
       - kafka-topic
 
