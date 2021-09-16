@@ -34,22 +34,22 @@ class Normalise(PipelineProcessor):
                 # normalise the doi
                 # set event.object_id as normalised DOI
                 # return event
-                normalised_id = self.normalise(type="DOI", objid=objid)
+                normalised_id = self.normalise(_type="DOI", objid=objid)
                 id_list.append(normalised_id)
 
             elif regex.HANDLE_COMPILED.search(objid) is not None:
                 # then the object_id matches a handle
-                normalised_id = self.normalise(type="Handle", objid=objid)
+                normalised_id = self.normalise(_type="Handle", objid=objid)
                 id_list.append(normalised_id)
 
             elif regex.ISSN_COMPILED.search(objid) is not None:
                 # then the object_id matches an ISSN
-                normalised_id = self.normalise(type="ISSN", objid=objid)
+                normalised_id = self.normalise(_type="ISSN", objid=objid)
                 id_list.append(normalised_id)
 
             elif regex.HTTP_URL_COMPILED.search(objid) is not None:
                 # the object_id matches an HTTP URL
-                normalised_id = self.normalise(type="URL", objid=objid)
+                normalised_id = self.normalise(_type="URL", objid=objid)
                 id_list.append(normalised_id)
 
             else:
@@ -59,12 +59,12 @@ class Normalise(PipelineProcessor):
         return event
 
         # for each, depending on type, return an edited version
-    def normalise(self, type, objid):
+    def normalise(self, _type, objid):
         # object_id matches a regex string
         # object_id should be normalised and returned.
-        norm = regex.group_match(ID_MAPPING[type], objid, "id")
+        norm = regex.group_match(ID_MAPPING[_type], objid, "id")
         if norm == None:
-            raise ValueError(f"Could not extract a normalised {type} from {objid}")
+            raise ValueError(f"Could not extract a normalised {_type} from {objid}")
         else:
             norm_id = norm
 

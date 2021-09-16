@@ -309,15 +309,15 @@ class DataGenerator:
                     output.write(',')
 
                 distance = random.randint(1, len(WORKFLOW))
-                start = self.fake.date_time_between(start_date="-1y")
+                workflow_start = self.fake.date_time_between(start_date="-1y")
                 object_id = None
                 container = None
                 entries = []
                 for j in range(0, distance):
                     workflow_status = WORKFLOW[j]
-                    data = self.full_data_generator()
+                    data = next(self.generate_data())
                     data["event"] = workflow_status
-                    data['occurred_at'] = datetime.datetime.strftime(start, "%Y-%m-%dT%H:%M:%SZ")
+                    data['occurred_at'] = datetime.datetime.strftime(workflow_start, "%Y-%m-%dT%H:%M:%SZ")
 
                     if object_id is not None:
                         data["object_id"] = object_id
@@ -329,7 +329,7 @@ class DataGenerator:
                     else:
                         container = data["container"]
 
-                    start = self.fake.date_time_between(start_date=start)
+                    workflow_start = self.fake.date_time_between(start_date=workflow_start)
                     entries.append(data)
 
                 for j in range(len(entries)):

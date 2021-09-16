@@ -1,11 +1,12 @@
 import re
 
 #~~DOI:Regex~~
-DOI = r"^((https?:\/\/)?((dx\.)?doi\.org\/|hdl\.handle\.net\/)|doi:|info:doi\/|info:hdl\/)?(?P<id>10\.\w+\/\w+)$"
+DOI = r"^((https?:\/\/)?((dx\.)?doi\.org\/|hdl\.handle\.net\/)|doi:|info:doi\/|info:hdl\/)?(?P<id>10\.\w+((" \
+      r"\/|\.)\S+)+)$"
 DOI_COMPILED = re.compile(DOI, re.IGNORECASE)
 
 #~~HANDLE:Regex~~
-HANDLE = r"^((https?:\/\/)?((dx\.)?hdl\.handle\.net\/)|info:hdl\/)?(?P<id>(?!10\.)\d{1,6}\.\w+\/\w+)$"
+HANDLE = r"^((https?:\/\/)?((dx\.)?hdl\.handle\.net\/)|info:hdl\/)?(?P<id>(?!10\.)\d{1,6}\.\w+(\/\w+)+)$"
 HANDLE_COMPILED = re.compile(HANDLE, re.IGNORECASE)
 
 #~~ISSN:Regex~~
