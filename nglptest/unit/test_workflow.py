@@ -1,6 +1,6 @@
 from unittest import TestCase
 from unittest.mock import patch
-from test.fixtures.events import EventFixtureFactory
+from nglptest.fixtures.events import EventFixtureFactory
 from nglp.models import events
 from nglp.precompute.workflow import Workflow
 from datetime import datetime

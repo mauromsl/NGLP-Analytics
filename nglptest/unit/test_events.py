@@ -1,5 +1,5 @@
 from unittest import TestCase
-from test.fixtures.events import EventFixtureFactory
+from nglptest.fixtures.events import EventFixtureFactory
 from nglp.models import events
 from copy import deepcopy
 from nglp.lib.seamless import SeamlessException

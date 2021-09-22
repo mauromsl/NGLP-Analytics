@@ -76,7 +76,7 @@ class OpenAPISupport(object):
             swag_properties[obj] = {}
             swag_properties[obj]['title'] = newpath
             swag_properties[obj]['type'] = 'object'
-            swag_properties[obj]['properties'] = self.struct_to_jsonschema(struct=instructions, path=newpath)  # recursive call, process sub-struct(s)
+            swag_properties[obj]['properties'] = self.struct_to_jsonschema(struct=instructions, path=newpath)["properties"]  # recursive call, process sub-struct(s)
             required = deepcopy(instructions.get('required', []))
             if len(required) > 0:
                 swag_properties[obj]['required'] = required
@@ -93,7 +93,7 @@ class OpenAPISupport(object):
             elif instructions['contains'] == 'object':
                 swag_properties[l]['items']['type'] = 'object'
                 swag_properties[l]['items']['title'] = newpath
-                swag_properties[l]['items']['properties'] = self.struct_to_jsonschema(struct=struct.get('structs', {}).get(l, {}), path=newpath)  # recursive call, process sub-struct(s)
+                swag_properties[l]['items']['properties'] = self.struct_to_jsonschema(struct=struct.get('structs', {}).get(l, {}), path=newpath)["properties"]  # recursive call, process sub-struct(s)
 
                 required = deepcopy(struct.get('structs', {}).get(l, {}).get('required', []))
                 if len(required) > 0:
