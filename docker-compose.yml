@@ -2,17 +2,11 @@ version: '2.4'
 services:
   zookeeper:
     image: 'bitnami/zookeeper:latest'
-    expose:
-      - '2181'
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
 
   kafka:
     image: 'bitnami/kafka:latest'
-    expose:
-      - '9092'
-      - '9103'
-      - '19092'
     environment:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT
@@ -47,5 +41,4 @@ services:
     volumes:
       - "./logs:/app/store/pipeline:rw"
     depends_on:
-      kafka:
-        condition: service_healthy
+      - analytics
