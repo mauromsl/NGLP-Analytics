@@ -63,8 +63,8 @@ class Settings(BaseSettings):
     }
 
     ###########################################
-    ## Kafka Broker configuration
-    kafka_broker = "kafka://kafka-server:19092"
+    ## Kafka Broker configuration #todo: pass this as enviroment variable since it currently has container specific info
+    kafka_broker = "kafka://kafka:19092"
 
     class Config:
         env_file = paths.rel2abs(__file__, "..", ".env")
