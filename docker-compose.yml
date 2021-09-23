@@ -3,22 +3,18 @@ services:
   zookeeper-server:
     image: 'bitnami/zookeeper:latest'
     container_name: zookeeper
-    networks:
-      - elasticsearch
-    ports:
-      - '2181:2181'
+    expose:
+      - '2181'
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
 
   kafka-server:
     image: 'bitnami/kafka:latest'
     container_name: kafka-server
-    networks:
-      - elasticsearch
     ports:
       - '9092:9092'
     environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-server:2181
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT
       - KAFKA_CFG_LISTENERS=CLIENT://:9103,EXTERNAL://:9092,INTERNAL://:19092,
       - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka-server:9103,EXTERNAL://localhost:9092,,INTERNAL://kafka-server:19092
@@ -29,18 +25,16 @@ services:
     depends_on:
       - zookeeper-server
     healthcheck:
-      test: ["CMD", "kafka-topics.sh", "--list", "--zookeeper", "zookeeper:2181"]
+      test: ["CMD", "kafka-topics.sh", "--list", "--zookeeper", "zookeeper-server:2181"]
       interval: 30s
       timeout: 10s
-      retries: 4
+      retries: 10
 
   nglp:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: nglp-analytics
-    networks:
-      - elasticsearch
     ports:
       - '8800:8000'
     depends_on:
@@ -52,14 +46,7 @@ services:
       context: .
       dockerfile: Dockerfile-events-consumer
     container_name: nglp-events-consumer
-    networks:
-      - elasticsearch
     volumes:
-      - "/opt/nglp:/app/store/pipeline:rw"
+      - "./logs:/app/store/pipeline:rw"
     depends_on:
-      kafka-server:
-         condition: service_healthy
-
-networks:
-  elasticsearch:
-    driver: bridge
+      - nglp
