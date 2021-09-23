@@ -1,5 +1,5 @@
 """
-This finle is mostly for testing.  Actually running the functions for real should
+This file is mostly for testing.  Actually running the functions for real should
 be the job of a scaleable import pipeline
 """
 import json
@@ -38,6 +38,8 @@ class Runner:
     # def process_stream(self, stream_in, stream_out, oid_stream):
     #     oids = set()
     #     for line in stream_in:
+    #         if line == "":
+    #             continue
     #         obj = json.loads(line)
     #         event = PipelineEvent(obj)
     #

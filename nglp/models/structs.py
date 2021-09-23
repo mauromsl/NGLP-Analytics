@@ -13,6 +13,19 @@ COERCE = {
     "ip": coerce.to_ip
 }
 
+SOURCE = {
+    "objects" : ["source"],
+    "structs" : {
+        "source" : {
+            "fields": {
+                "type": {"coerce": "unicode_lower"},
+                "identifier": {"coerce": "unicode"}
+            }
+        }
+    }
+}
+
+
 """
 Example Request event
 
@@ -111,8 +124,7 @@ WORKFLOW_TRANSITION_EVENT_STRUCT = {
         "occurred_at" : {"coerce" : "datetime"},
         "event" : {"coerce" : "unicode_lower"},
         "object_type": {"coerce" : "unicode_lower", "allowed_values" : ["article"]},
-        "user_id" : {"coerce" : "unicode"},
-        "container" : {"coerce" : "unicode"}
+        "user_id" : {"coerce" : "unicode"}
     },
     "lists": {
         "object_id": {"contains": "field", "coerce": "unicode"}
@@ -282,8 +294,8 @@ CORE_EVENT_REQUIRED = {
         "source": {
             "required": [
                 "identifier",
-                "type",
-                "archive_id"
+                "type"#,
+                #"archive_id"   # Removing this for the time being, as this part of the pipeline has not yet been developed
             ]
         }
     },

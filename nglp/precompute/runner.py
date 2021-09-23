@@ -16,7 +16,7 @@ class Runner:
 
     def process_file(self, oid_file):
         with open(oid_file, "r") as f:
-            ids = [i for i in f]
+            ids = [i.strip() for i in f]
         self.run(ids)
 
 
@@ -26,4 +26,4 @@ if __name__ == "__main__":
     oid_file = oid_files[0]
 
     r = Runner()
-    r.process_file(oid_file)
+    r.process_file(os.path.join(settings.pipeline_output_dir, oid_file))

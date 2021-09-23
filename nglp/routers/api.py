@@ -43,19 +43,30 @@ router = APIRouter(
     prefix="/api"
 )
 
+
 @router.post("/", status_code=201, openapi_extra=OpenAPISupport().request_body_section(RequestEvent().__seamless_struct__))
-async def event(request: Request):
+async def event(request: Request, source: str):
+    source_record = None
+    for s in settings.sources:
+        if source == s.get("identifier"):
+            source_record = s
+            break
+    if source_record is None:
+        raise HTTPException(status_code=403, detail="The source you provided is not registered with this service")
+
     payload = await request.json()
     EventModel = EventModelFactory.get(payload.get("event"))
     if EventModel is None:
         raise HTTPException(status_code=400, detail="Unrecognised event type")
     try:
         m = EventModel(payload)
-    except (SeamlessException,Exception) as e:
-        LOG.exception()
+    except (SeamlessException, Exception) as e:
+        LOG.exception(e)
         raise HTTPException(status_code=400, detail=e.message)
-    m.set_occurred_at()
-    # LOG.info(m.loggable())
 
+    m.set_occurred_at()
+    m.source = source_record
+
+    # LOG.info(m.loggable())
     await topic.send(value=m.loggable())
-    return {"status" : "success"}
+    return {"status": "success"}
