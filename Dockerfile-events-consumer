@@ -11,5 +11,6 @@ EXPOSE $PORT
 COPY . /app
 WORKDIR /app
 RUN pip install -e .
+
+# Run the consumer
 ENTRYPOINT exec faust -A nglp.pipeline.runner worker -l info
-# ENTRYPOINT exec python nglp/main.py

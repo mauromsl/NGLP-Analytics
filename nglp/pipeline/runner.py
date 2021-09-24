@@ -38,6 +38,8 @@ class Runner:
     # def process_stream(self, stream_in, stream_out, oid_stream):
     #     oids = set()
     #     for line in stream_in:
+    #         if line == "":
+    #             continue
     #         obj = json.loads(line)
     #         event = PipelineEvent(obj)
     #

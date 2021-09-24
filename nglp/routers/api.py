@@ -60,15 +60,13 @@ async def event(request: Request, source: str):
         raise HTTPException(status_code=400, detail="Unrecognised event type")
     try:
         m = EventModel(payload)
-    except (SeamlessException,Exception) as e:
-        LOG.exception()
+    except (SeamlessException, Exception) as e:
+        LOG.exception(e)
         raise HTTPException(status_code=400, detail=e.message)
 
     m.set_occurred_at()
-    # LOG.info(m.loggable())
-
-    await topic.send(value=m.loggable())
     m.source = source_record
 
-    LOG.info(m.loggable())
-    return {"status" : "success"}
+    # LOG.info(m.loggable())
+    await topic.send(value=m.loggable())
+    return {"status": "success"}

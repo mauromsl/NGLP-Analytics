@@ -35,7 +35,7 @@ htmlcov/*
 dev.cfg
 app.cfg
 
-# Logs created while debugging
+# Logs created while debugging or running the consumer container
 *.log
 
 # ipython and jupyter related files
