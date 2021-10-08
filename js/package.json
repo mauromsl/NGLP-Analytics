@@ -1,0 +1,51 @@
+{
+  "name": "nglp-analytics",
+  "version": "1.0.0-SNAPSHOT",
+  "description": "NGLP Analytics Visualisation Dashboards",
+  "scripts": {
+    "clean": "rm -rf ./.parcel-cache && rm -rf ./dist",
+    "jquery-external": "cd vendor/edges2 && npm run jquery-external && cd ../..",
+    "jquery-bundled": "cd vendor/edges2 && npm run jquery-bundled && cd ../..",
+    "es1x": "cd vendor/edges2 && npm run es1x && cd ../..",
+    "es-external": "cd vendor/edges2 && npm run es-external dependencies/es.js && cd ../..",
+    "serve-g001": "npm run jquery-bundled && npm run es1x && parcel serve views/g001.html -p 8000",
+    "target-g001": "parcel build --target g001",
+    "build-g001": "npm run jquery-bundled && npm run es1x && npm run clean && npm run target-g001"
+  },
+  "targets": {
+    "g001": {
+      "source": "src/g001.js",
+      "engines": {
+        "browsers": "> 0.5%, last 2 versions, not dead"
+      },
+      "isLibrary": false,
+      "optimize": false,
+      "outputFormat": "global"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NGLPteam/NGLP-Analytics.git"
+  },
+  "keywords": [
+    "data",
+    "visualisation"
+  ],
+  "author": "Cottage Labs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NGLPteam/NGLP-Analytics/issues"
+  },
+  "homepage": "https://github.com/NGLPteam/NGLP-Analytics#readme",
+  "devDependencies": {
+    "@babel/core": "^7.15.5",
+    "@babel/plugin-transform-runtime": "^7.15.0",
+    "parcel": "latest",
+    "sass": "^1.42.1"
+  },
+  "dependencies": {
+    "@parcel/transformer-sass": "^2.0.0-rc.0",
+    "@babel/runtime-corejs2": "^7.15.4",
+    "jquery": "^3.6.0"
+  }
+}

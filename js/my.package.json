@@ -1,0 +1,43 @@
+{
+  "name": "nglp-analytics",
+  "version": "1.0.0-SNAPSHOT",
+  "description": "NGLP Analytics Visualisation Dashboards",
+  "scripts": {},
+  "targets": {
+    "g001": {
+      "source": "src/g001.js",
+      "engines": {
+        "browsers": "> 0.5%, last 2 versions, not dead"
+      },
+      "isLibrary": false,
+      "optimize": false,
+      "outputFormat": "global"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NGLPteam/NGLP-Analytics.git"
+  },
+  "keywords": [
+    "data",
+    "visualisation"
+  ],
+  "author": "Cottage Labs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NGLPteam/NGLP-Analytics/issues"
+  },
+  "homepage": "https://github.com/NGLPteam/NGLP-Analytics",
+  "devDependencies": {
+    "@babel/core": "^7.15.5",
+    "@babel/plugin-transform-runtime": "^7.15.0",
+    "@parcel/transformer-sass": "^2.0.0-rc.0",
+    "parcel": "latest",
+    "sass": "^1.39.2"
+  },
+  "dependencies": {
+    "@babel/runtime-corejs2": "^7.15.4",
+    "@swc/helpers": "^0.2.13",
+    "jquery": "^3.6.0"
+  }
+}
