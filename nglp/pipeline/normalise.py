@@ -28,12 +28,9 @@ class Normalise(PipelineProcessor):
 
         id_list = []
 
-        for objid in event.raw["object_id"]:
+        for objid in event.object_ids:
             if regex.DOI_COMPILED.search(objid) is not None:
                 # then the object_id matches a DOI
-                # normalise the doi
-                # set event.object_id as normalised DOI
-                # return event
                 normalised_id = self.normalise(_type="DOI", objid=objid)
                 id_list.append(normalised_id)
 
@@ -53,7 +50,7 @@ class Normalise(PipelineProcessor):
                 id_list.append(normalised_id)
 
             else:
-                raise ValueError(f"Could not extract a normalised ID from {objid}")
+                id_list.append(objid)
 
         event.object_ids = id_list
         return event
@@ -64,7 +61,7 @@ class Normalise(PipelineProcessor):
         # object_id should be normalised and returned.
         norm = regex.group_match(ID_MAPPING[_type], objid, "id")
         if norm == None:
-            raise ValueError(f"Could not extract a normalised {_type} from {objid}")
+            return objid
         else:
             norm_id = norm
 
