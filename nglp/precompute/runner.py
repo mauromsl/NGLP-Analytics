@@ -3,8 +3,6 @@ import json
 import faust
 import threading, queue
 
-from nglp.config import settings
-
 from nglp.precompute.workflow import Workflow
 from nglp.config import settings
 

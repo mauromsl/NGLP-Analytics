@@ -44,11 +44,11 @@ router = APIRouter(
 )
 
 
-@router.post("/{source}", status_code=201, openapi_extra=OpenAPISupport().request_body_section(RequestEvent().__seamless_struct__))
+@router.post("/", status_code=201, openapi_extra=OpenAPISupport().request_body_section(RequestEvent().__seamless_struct__))
 async def event(request: Request, source: str):
     source_record = None
     for s in settings.sources:
-        if source == s.get("type"):
+        if source == s.get("identifier"):
             source_record = s
             break
     if source_record is None:
@@ -66,7 +66,6 @@ async def event(request: Request, source: str):
 
     m.set_occurred_at()
     m.source = source_record
-
-    # LOG.info(m.loggable())
+    #send event log to kafka topic
     await topic.send(value=m.loggable())
     return {"status": "success"}
