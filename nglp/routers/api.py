@@ -44,11 +44,11 @@ router = APIRouter(
 )
 
 
-@router.post("/", status_code=201, openapi_extra=OpenAPISupport().request_body_section(RequestEvent().__seamless_struct__))
+@router.post("/{source}", status_code=201, openapi_extra=OpenAPISupport().request_body_section(RequestEvent().__seamless_struct__))
 async def event(request: Request, source: str):
     source_record = None
     for s in settings.sources:
-        if source == s.get("identifier"):
+        if source == s.get("type"):
             source_record = s
             break
     if source_record is None:

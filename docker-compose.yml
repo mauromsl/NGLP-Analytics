@@ -42,3 +42,12 @@ services:
       - "./logs:/app/store/pipeline:rw"
     depends_on:
       - analytics
+
+  nglp-oids-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile-oids-consumer
+    volumes:
+      - "./logs:/app/store/pipeline:rw"
+    depends_on:
+      - nglp-events-consumer
