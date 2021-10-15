@@ -1,3 +1,7 @@
+@charset "utf-8";
+
+@import "../vendor/edges2/sass/renderers/googlemap/google-map-view";
+
 #overview, #investigations, #fulltext, #export {
     height: 400px;
 }

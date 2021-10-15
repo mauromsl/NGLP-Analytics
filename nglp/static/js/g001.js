@@ -3341,6 +3341,518 @@ var $f29180d7a0e96438$export$1b75c0a6cacf635c = /*#__PURE__*/ function(Renderer)
 
 
 
+
+
+
+
+function $2de4fa00a47777f3$export$9b1f0f098143fb9(locations) {
+    return {
+        lat: locations[0].lat,
+        lon: locations[0].lon
+    };
+}
+
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */ /* Geohash encoding/decoding and associated functions   (c) Chris Veness 2014-2019 / MIT Licence  */ /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */ const $be7a76b3305d5aac$var$base32 = '0123456789bcdefghjkmnpqrstuvwxyz'; // (geohash-specific) Base32 map
+/**
+ * Geohash: Gustavo Niemeyer’s geocoding system.
+ */ class $be7a76b3305d5aac$var$Geohash {
+    /**
+     * Encodes latitude/longitude to geohash, either to specified precision or to automatically
+     * evaluated precision.
+     *
+     * @param   {number} lat - Latitude in degrees.
+     * @param   {number} lon - Longitude in degrees.
+     * @param   {number} [precision] - Number of characters in resulting geohash.
+     * @returns {string} Geohash of supplied latitude/longitude.
+     * @throws  Invalid geohash.
+     *
+     * @example
+     *     const geohash = Geohash.encode(52.205, 0.119, 7); // => 'u120fxw'
+     */ static encode(lat, lon, precision) {
+        // infer precision?
+        if (typeof precision == 'undefined') {
+            // refine geohash until it matches precision of supplied lat/lon
+            for(let p = 1; p <= 12; p++){
+                const hash = $be7a76b3305d5aac$var$Geohash.encode(lat, lon, p);
+                const posn = $be7a76b3305d5aac$var$Geohash.decode(hash);
+                if (posn.lat == lat && posn.lon == lon) return hash;
+            }
+            precision = 12; // set to maximum
+        }
+        lat = Number(lat);
+        lon = Number(lon);
+        precision = Number(precision);
+        if (isNaN(lat) || isNaN(lon) || isNaN(precision)) throw new Error('Invalid geohash');
+        let idx = 0; // index into base32 map
+        let bit = 0; // each char holds 5 bits
+        let evenBit = true;
+        let geohash = '';
+        let latMin = -90, latMax = 90;
+        let lonMin = -180, lonMax = 180;
+        while(geohash.length < precision){
+            if (evenBit) {
+                // bisect E-W longitude
+                const lonMid = (lonMin + lonMax) / 2;
+                if (lon >= lonMid) {
+                    idx = idx * 2 + 1;
+                    lonMin = lonMid;
+                } else {
+                    idx = idx * 2;
+                    lonMax = lonMid;
+                }
+            } else {
+                // bisect N-S latitude
+                const latMid = (latMin + latMax) / 2;
+                if (lat >= latMid) {
+                    idx = idx * 2 + 1;
+                    latMin = latMid;
+                } else {
+                    idx = idx * 2;
+                    latMax = latMid;
+                }
+            }
+            evenBit = !evenBit;
+            if ((++bit) == 5) {
+                // 5 bits gives us a character: append it and start over
+                geohash += $be7a76b3305d5aac$var$base32.charAt(idx);
+                bit = 0;
+                idx = 0;
+            }
+        }
+        return geohash;
+    }
+    /**
+     * Decode geohash to latitude/longitude (location is approximate centre of geohash cell,
+     *     to reasonable precision).
+     *
+     * @param   {string} geohash - Geohash string to be converted to latitude/longitude.
+     * @returns {{lat:number, lon:number}} (Center of) geohashed location.
+     * @throws  Invalid geohash.
+     *
+     * @example
+     *     const latlon = Geohash.decode('u120fxw'); // => { lat: 52.205, lon: 0.1188 }
+     */ static decode(geohash) {
+        const bounds = $be7a76b3305d5aac$var$Geohash.bounds(geohash); // <-- the hard work
+        // now just determine the centre of the cell...
+        const latMin = bounds.sw.lat, lonMin = bounds.sw.lon;
+        const latMax = bounds.ne.lat, lonMax = bounds.ne.lon;
+        // cell centre
+        let lat = (latMin + latMax) / 2;
+        let lon = (lonMin + lonMax) / 2;
+        // round to close to centre without excessive precision: ⌊2-log10(Δ°)⌋ decimal places
+        lat = lat.toFixed(Math.floor(2 - Math.log(latMax - latMin) / Math.LN10));
+        lon = lon.toFixed(Math.floor(2 - Math.log(lonMax - lonMin) / Math.LN10));
+        return {
+            lat: Number(lat),
+            lon: Number(lon)
+        };
+    }
+    /**
+     * Returns SW/NE latitude/longitude bounds of specified geohash.
+     *
+     * @param   {string} geohash - Cell that bounds are required of.
+     * @returns {{sw: {lat: number, lon: number}, ne: {lat: number, lon: number}}}
+     * @throws  Invalid geohash.
+     */ static bounds(geohash) {
+        if (geohash.length == 0) throw new Error('Invalid geohash');
+        geohash = geohash.toLowerCase();
+        let evenBit = true;
+        let latMin = -90, latMax = 90;
+        let lonMin = -180, lonMax = 180;
+        for(let i = 0; i < geohash.length; i++){
+            const chr = geohash.charAt(i);
+            const idx = $be7a76b3305d5aac$var$base32.indexOf(chr);
+            if (idx == -1) throw new Error('Invalid geohash');
+            for(let n = 4; n >= 0; n--){
+                const bitN = idx >> n & 1;
+                if (evenBit) {
+                    // longitude
+                    const lonMid = (lonMin + lonMax) / 2;
+                    if (bitN == 1) lonMin = lonMid;
+                    else lonMax = lonMid;
+                } else {
+                    // latitude
+                    const latMid = (latMin + latMax) / 2;
+                    if (bitN == 1) latMin = latMid;
+                    else latMax = latMid;
+                }
+                evenBit = !evenBit;
+            }
+        }
+        const bounds = {
+            sw: {
+                lat: latMin,
+                lon: lonMin
+            },
+            ne: {
+                lat: latMax,
+                lon: lonMax
+            }
+        };
+        return bounds;
+    }
+    /**
+     * Determines adjacent cell in given direction.
+     *
+     * @param   geohash - Cell to which adjacent cell is required.
+     * @param   direction - Direction from geohash (N/S/E/W).
+     * @returns {string} Geocode of adjacent cell.
+     * @throws  Invalid geohash.
+     */ static adjacent(geohash, direction) {
+        // based on github.com/davetroy/geohash-js
+        geohash = geohash.toLowerCase();
+        direction = direction.toLowerCase();
+        if (geohash.length == 0) throw new Error('Invalid geohash');
+        if ('nsew'.indexOf(direction) == -1) throw new Error('Invalid direction');
+        const neighbour = {
+            n: [
+                'p0r21436x8zb9dcf5h7kjnmqesgutwvy',
+                'bc01fg45238967deuvhjyznpkmstqrwx'
+            ],
+            s: [
+                '14365h7k9dcfesgujnmqp0r2twvyx8zb',
+                '238967debc01fg45kmstqrwxuvhjyznp'
+            ],
+            e: [
+                'bc01fg45238967deuvhjyznpkmstqrwx',
+                'p0r21436x8zb9dcf5h7kjnmqesgutwvy'
+            ],
+            w: [
+                '238967debc01fg45kmstqrwxuvhjyznp',
+                '14365h7k9dcfesgujnmqp0r2twvyx8zb'
+            ]
+        };
+        const border = {
+            n: [
+                'prxz',
+                'bcfguvyz'
+            ],
+            s: [
+                '028b',
+                '0145hjnp'
+            ],
+            e: [
+                'bcfguvyz',
+                'prxz'
+            ],
+            w: [
+                '0145hjnp',
+                '028b'
+            ]
+        };
+        const lastCh = geohash.slice(-1); // last character of hash
+        let parent = geohash.slice(0, -1); // hash without last character
+        const type = geohash.length % 2;
+        // check for edge-cases which don't share common prefix
+        if (border[direction][type].indexOf(lastCh) != -1 && parent != '') parent = $be7a76b3305d5aac$var$Geohash.adjacent(parent, direction);
+        // append letter for direction to parent
+        return parent + $be7a76b3305d5aac$var$base32.charAt(neighbour[direction][type].indexOf(lastCh));
+    }
+    /**
+     * Returns all 8 adjacent cells to specified geohash.
+     *
+     * @param   {string} geohash - Geohash neighbours are required of.
+     * @returns {{n,ne,e,se,s,sw,w,nw: string}}
+     * @throws  Invalid geohash.
+     */ static neighbours(geohash) {
+        return {
+            'n': $be7a76b3305d5aac$var$Geohash.adjacent(geohash, 'n'),
+            'ne': $be7a76b3305d5aac$var$Geohash.adjacent($be7a76b3305d5aac$var$Geohash.adjacent(geohash, 'n'), 'e'),
+            'e': $be7a76b3305d5aac$var$Geohash.adjacent(geohash, 'e'),
+            'se': $be7a76b3305d5aac$var$Geohash.adjacent($be7a76b3305d5aac$var$Geohash.adjacent(geohash, 's'), 'e'),
+            's': $be7a76b3305d5aac$var$Geohash.adjacent(geohash, 's'),
+            'sw': $be7a76b3305d5aac$var$Geohash.adjacent($be7a76b3305d5aac$var$Geohash.adjacent(geohash, 's'), 'w'),
+            'w': $be7a76b3305d5aac$var$Geohash.adjacent(geohash, 'w'),
+            'nw': $be7a76b3305d5aac$var$Geohash.adjacent($be7a76b3305d5aac$var$Geohash.adjacent(geohash, 'n'), 'w')
+        };
+    }
+}
+var /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */ $be7a76b3305d5aac$export$9099ad97b570f7c = $be7a76b3305d5aac$var$Geohash;
+
+
+var $7ac4d4ec044faea2$export$c57445924c23547b = /*#__PURE__*/ function(Component) {
+    "use strict";
+    $bca7673885229bfd$export$9099ad97b570f7c($7ac4d4ec044faea2$export$c57445924c23547b, Component);
+    function $7ac4d4ec044faea2$export$c57445924c23547b(params) {
+        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $7ac4d4ec044faea2$export$c57445924c23547b);
+        var _this;
+        _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($7ac4d4ec044faea2$export$c57445924c23547b).call(this, params));
+        //////////////////////////////////
+        // parameters that can be passed in
+        // field in the data which is the geo_point type
+        _this.geoHashAggregation = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "geoHashAggregation", "geohash");
+        _this.calculateCentre = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "calculateCentre", function() {
+            return $2de4fa00a47777f3$export$9b1f0f098143fb9;
+        });
+        _this.geoBoundingBoxFilterField = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "geoBoundingBoxFilterField", "location");
+        _this.zoomToPrecisionMap = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "zoomToPrecisionMap", {
+            0: 1,
+            3: 2,
+            5: 3,
+            7: 4,
+            10: 5,
+            13: 6,
+            15: 7
+        });
+        //////////////////////////////////
+        // internal state
+        // list of locations and the related object at those locations
+        // of the form
+        // {lat: <lat>, lon: <lon>, obj: {object}}
+        _this.locations = [];
+        // lat/lon object which defines the centre point of the map
+        // this default is somewhere in Mali, and is a decent default for the globe
+        _this.centre = {
+            lat: 17,
+            lon: 0
+        };
+        _this.currentPrecision = 0;
+        _this.currentTopLeft = false;
+        _this.currentBottomRight = false;
+        return _this;
+    }
+    $67866ae5f3a26802$export$9099ad97b570f7c($7ac4d4ec044faea2$export$c57445924c23547b, [
+        {
+            key: "synchronise",
+            value: function synchronise() {
+                this.locations = [];
+                this.centre = {
+                    lat: 17,
+                    lon: 0
+                };
+                // read the locations out of the geohash aggregation
+                if (this.edge.result) {
+                    var agg = this.edge.result.aggregation(this.geoHashAggregation);
+                    for(var i = 0; i < agg.buckets.length; i++){
+                        var bucket = agg.buckets[i];
+                        var latlon = $be7a76b3305d5aac$export$9099ad97b570f7c.decode(bucket.key);
+                        latlon["count"] = bucket.doc_count;
+                        this.locations.push(latlon);
+                    }
+                }
+                // set the centre point
+                if (this.locations.length > 0) this.centre = this.calculateCentre(this.locations);
+            }
+        },
+        {
+            key: "boundsChanged",
+            value: function boundsChanged(params) {
+                var top_left = params.top_left;
+                var bottom_right = params.bottom_right;
+                var zoom = params.zoom;
+                var precision = this._getPrecisionForZoom(zoom);
+                // if the precision isn't going to change, and the view is just a closer view than
+                // the existing one, don't run the cycle
+                if (precision === this.currentPrecision && this._currentBoxContains({
+                    top_left: top_left,
+                    bottom_right: bottom_right
+                })) return;
+                var nq = this.edge.cloneQuery();
+                nq.removeMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.GeoBoundingBoxFilter({
+                    field: this.geoBoundingBoxFilterField
+                }));
+                nq.addMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.GeoBoundingBoxFilter({
+                    field: this.geoBoundingBoxFilterField,
+                    top_left: top_left,
+                    bottom_right: bottom_right
+                }));
+                var agg = nq.getAggregation({
+                    name: this.geoHashAggregation
+                });
+                agg.precision = precision;
+                this.currentPrecision = precision;
+                this.currentBottomRight = bottom_right;
+                this.currentTopLeft = top_left;
+                this.edge.pushQuery(nq);
+                this.edge.cycle();
+            }
+        },
+        {
+            key: "_getPrecisionForZoom",
+            value: function _getPrecisionForZoom(zoom) {
+                for(var i = zoom; i >= 0; i--){
+                    if (i in this.zoomToPrecisionMap) return this.zoomToPrecisionMap[i];
+                }
+                return 1;
+            }
+        },
+        {
+            key: "_currentBoxContains",
+            value: function _currentBoxContains(params) {
+                var top_left = params.top_left;
+                var bottom_right = params.bottom_right;
+                // if we don't know the current box, then assume false, as we can't tell
+                if (!this.currentTopLeft || !this.currentBottomRight) return false;
+                function getCorners(top_left1, bottom_right1) {
+                    var a = {
+                        lon: top_left1.lon,
+                        lat: top_left1.lat
+                    };
+                    var b = {
+                        lon: top_left1.lon,
+                        lat: bottom_right1.lat
+                    };
+                    var c = {
+                        lon: bottom_right1.lon,
+                        lat: bottom_right1.lat
+                    };
+                    var d = {
+                        lon: bottom_right1.lon,
+                        lat: top_left1.lat
+                    };
+                    return [
+                        a,
+                        b,
+                        c,
+                        d
+                    ];
+                }
+                var current = getCorners(this.currentTopLeft, this.currentBottomRight);
+                var updated = getCorners(top_left, bottom_right);
+                var tl = current[0].lon > updated[0].lon && current[0].lat < updated[0].lat;
+                var tr = current[1].lon > updated[1].lon && current[1].lat > updated[1].lat;
+                var br = current[2].lon < updated[2].lon && current[2].lat > updated[2].lat;
+                var bl = current[3].lon < updated[3].lon && current[3].lat > updated[3].lat;
+                return tl && tr && br && bl;
+            }
+        }
+    ]);
+    return $7ac4d4ec044faea2$export$c57445924c23547b;
+}($6cf4dc301226cb87$export$ea71c44d9cb0d048);
+
+
+
+
+
+var $5cab7f24a6cc18af$export$b2f13e228c542ebb = window.google;
+
+
+var $eec1dd49d0c67d6b$export$a0bd1dffd4b583c = /*#__PURE__*/ function(Renderer) {
+    "use strict";
+    $bca7673885229bfd$export$9099ad97b570f7c($eec1dd49d0c67d6b$export$a0bd1dffd4b583c, Renderer);
+    function $eec1dd49d0c67d6b$export$a0bd1dffd4b583c(params) {
+        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $eec1dd49d0c67d6b$export$a0bd1dffd4b583c);
+        var _this;
+        _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($eec1dd49d0c67d6b$export$a0bd1dffd4b583c).call(this, params));
+        /////////////////////////////////////////////
+        // parameters that can be passed in
+        // what should the renderer do if there are no geopoints
+        // can be one of:
+        // render - render the map anyway, with no geopoints on it
+        // hide - hide the map and display the mapHiddenText
+        _this.onNoGeoPoints = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "onNoGeoPoints", "render");
+        // text to render if the map has no geo points and the behaviour is "hide"
+        _this.mapHiddenText = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "mapHiddenText", "No map data available");
+        // initial zoom level
+        _this.initialZoom = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "initialZoom", 2);
+        // initial map type
+        _this.mapType = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "mapType", "hybrid");
+        _this.clusterByCount = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "clusterByCount", false);
+        _this.reQueryOnBoundsChange = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "reQueryOnBoundsChange", false);
+        _this.clusterIcons = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "clusterIcons", {
+            0: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m1.png"
+        });
+        /////////////////////////////////////////////
+        // internal state
+        _this.namespace = "edges-google-map-view";
+        _this.map = false;
+        _this.markers = [];
+        _this.currentZoom = false;
+        _this.currentBounds = false;
+        return _this;
+    }
+    $67866ae5f3a26802$export$9099ad97b570f7c($eec1dd49d0c67d6b$export$a0bd1dffd4b583c, [
+        {
+            key: "draw",
+            value: function draw() {
+                // now check if there are any geo points, and if there's anything we should do about it
+                if (this.component.locations.length === 0) {
+                    if (this.onNoGeoPoints === "hide") {
+                        this.component.context.html(this.mapHiddenText);
+                        return;
+                    }
+                }
+                var centre = new $5cab7f24a6cc18af$export$b2f13e228c542ebb.maps.LatLng(this.component.centre.lat, this.component.centre.lon);
+                if (!this.map) {
+                    var canvasClass = $d48cc3604bf30e24$export$e516ebba864be69d(this.namespace, "canvas", this);
+                    var canvasSelector = $d48cc3604bf30e24$export$b1157bd4df096bce(this.namespace, "canvas", this);
+                    this.component.context.html('<div class="' + canvasClass + '"></div>');
+                    var element = this.component.jq(canvasSelector)[0];
+                    var mapTypeId = this.mapType;
+                    if (this.mapType === "hybrid") mapTypeId = $5cab7f24a6cc18af$export$b2f13e228c542ebb.maps.MapTypeId.HYBRID;
+                    var mapOptions = {
+                        zoom: this.initialZoom,
+                        center: centre,
+                        mapTypeId: mapTypeId
+                    };
+                    this.map = new $5cab7f24a6cc18af$export$b2f13e228c542ebb.maps.Map(element, mapOptions);
+                    // make sure we set the centre right
+                    this.map.setCenter(centre);
+                }
+                if (this.reQueryOnBoundsChange) {
+                    var onBoundsChanged = $d48cc3604bf30e24$export$367047a567f2342b(this, "boundsChanged");
+                    this.map.addListener("bounds_changed", onBoundsChanged);
+                }
+                // clear any existing markers
+                for(i = 0; i < this.markers.length; i++)this.markers[i].setMap(null);
+                this.markers = [];
+                for(var i = 0; i < this.component.locations.length; i++){
+                    var loc = this.component.locations[i];
+                    var myLatlng = new $5cab7f24a6cc18af$export$b2f13e228c542ebb.maps.LatLng(loc.lat, loc.lon);
+                    var properties = {
+                        position: myLatlng,
+                        map: this.map
+                    };
+                    var icon = this._getClusterIcon(loc.count);
+                    if (icon) properties["icon"] = icon;
+                    if (this.clusterByCount) properties["label"] = {
+                        text: loc.count.toString()
+                    };
+                    var marker = new $5cab7f24a6cc18af$export$b2f13e228c542ebb.maps.Marker(properties);
+                    this.markers.push(marker);
+                }
+            }
+        },
+        {
+            key: "boundsChanged",
+            value: function boundsChanged() {
+                var bounds = this.map.getBounds();
+                var zoom = this.map.getZoom();
+                var ne = bounds.getNorthEast();
+                var sw = bounds.getSouthWest();
+                var top_left = {
+                    lat: ne.lat(),
+                    lon: sw.lng()
+                };
+                var bottom_right = {
+                    lat: sw.lat(),
+                    lon: ne.lng()
+                };
+                this.component.boundsChanged({
+                    top_left: top_left,
+                    bottom_right: bottom_right,
+                    zoom: zoom
+                });
+            }
+        },
+        {
+            key: "_getClusterIcon",
+            value: function _getClusterIcon(count) {
+                var icon = false;
+                var highest = -1;
+                for(var limit in this.clusterIcons)if (limit <= count && limit > highest) {
+                    icon = this.clusterIcons[limit];
+                    highest = limit;
+                }
+                return icon;
+            }
+        }
+    ]);
+    return $eec1dd49d0c67d6b$export$a0bd1dffd4b583c;
+}($6cf4dc301226cb87$export$a695173e2ecfa9b);
+
+
 $parcel$global.nglp = {
 };
 nglp.g001 = {
@@ -3357,6 +3869,7 @@ nglp.g001.init = function(params) {
     });
     $99b6183ba65dae12$export$4048ae5fe51d81b7(selector).html("\n        <h2>Overview</h2>\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <div id=\"overview-container\"></div>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"overview-map-container\"></div>\n            </div>\n        </div>\n        <h2>Interactions with Article Landing Pages</h2>\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <div id=\"investigations-container\"></div>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"investigations-map-container\"></div>\n            </div>\n        </div>\n        <h2>Fulltext Views</h2>\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <div id=\"fulltext-container\"></div>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"fulltext-map-container\"></div>\n            </div>\n        </div>\n        <h2>Article Exports</h2>\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <div id=\"export-container\"></div>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"export-map-container\"></div>\n            </div>\n        </div>\n    ");
     nglp.g001.overviewEdge(search_url);
+    nglp.g001.overviewMap(search_url);
 };
 nglp.g001.overviewEdge = function(search_url) {
     nglp.g001.active["#overview-container"] = new $6cf4dc301226cb87$export$22ad9a5707a07e9c({
@@ -3415,6 +3928,65 @@ nglp.g001.overviewEdge = function(search_url) {
                     xAxisLabel: "Occurred At",
                     yAxisLabel: "Article Interactions",
                     marginLeft: 80
+                })
+            })
+        ]
+    });
+};
+// Article interactions overview map
+nglp.g001.overviewMap = function(search_url) {
+    nglp.g001.active["#overview-map-container"] = new $6cf4dc301226cb87$export$22ad9a5707a07e9c({
+        selector: "#overview-map-container",
+        template: new $7806010593255453$export$ebdadc91708616a9(),
+        searchUrl: search_url,
+        manageUrl: false,
+        openingQuery: new $8d94b5f2509b6cf5$export$8b446892c82de644.Query({
+            must: [
+                new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsFilter({
+                    field: "event.exact",
+                    values: [
+                        "request",
+                        "investigation",
+                        "export"
+                    ]
+                }),
+                new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsFilter({
+                    field: "object_type.exact",
+                    values: [
+                        "article",
+                        "file"
+                    ]
+                }),
+                new $8d94b5f2509b6cf5$export$8b446892c82de644.RangeFilter({
+                    field: "occurred_at",
+                    gte: "2020-05-01",
+                    lte: "2021-07-01"
+                }) // FIXME: these will need to be wired up to a date selector
+            ],
+            size: 0,
+            aggs: [
+                new $8d94b5f2509b6cf5$export$8b446892c82de644.GeohashGridAggregation({
+                    name: "geo",
+                    field: "location",
+                    precision: 1
+                })
+            ]
+        }),
+        components: [
+            new $7ac4d4ec044faea2$export$c57445924c23547b({
+                id: "overview-map",
+                geoHashAggregation: "geo",
+                // renderer: edges.google.newMapViewRenderer({
+                renderer: new $eec1dd49d0c67d6b$export$a0bd1dffd4b583c({
+                    clusterByCount: true,
+                    reQueryOnBoundsChange: true,
+                    clusterIcons: {
+                        0: "/static/img/m1.png",
+                        2: "/static/img/m2.png",
+                        20: "/static/img/m3.png",
+                        50: "/static/img/m4.png",
+                        100: "/static/img/m5.png"
+                    }
                 })
             })
         ]
