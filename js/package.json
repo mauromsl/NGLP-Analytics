@@ -6,11 +6,19 @@
     "clean": "rm -rf ./.parcel-cache && rm -rf ./dist",
     "jquery-external": "cd vendor/edges2 && npm run jquery-external && cd ../..",
     "jquery-bundled": "cd vendor/edges2 && npm run jquery-bundled && cd ../..",
-    "es1x": "cd vendor/edges2 && npm run es1x && cd ../..",
+    "es7x": "cd vendor/edges2 && npm run es7x && cd ../..",
     "es-external": "cd vendor/edges2 && npm run es-external dependencies/es.js && cd ../..",
-    "serve-g001": "npm run jquery-bundled && npm run es1x && parcel serve views/g001.html -p 8000",
+    "serve-g001": "npm run jquery-bundled && npm run es7x && parcel serve views/g001.html -p 8000",
     "target-g001": "parcel build --target g001",
-    "build-g001": "npm run jquery-bundled && npm run es1x && npm run clean && npm run target-g001"
+    "build-g001": "npm run jquery-external && npm run es7x && npm run clean && npm run target-g001"
+  },
+  "alias" : {
+    "d3" : {
+      "global" : "d3"
+    },
+    "nv" : {
+      "global" : "nv"
+    }
   },
   "targets": {
     "g001": {
@@ -20,7 +28,8 @@
       },
       "isLibrary": false,
       "optimize": false,
-      "outputFormat": "global"
+      "outputFormat": "global",
+      "distDir": "../nglp/static/js"
     }
   },
   "repository": {

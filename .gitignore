@@ -16,7 +16,6 @@ store/pipeline/*.log
 
 *.pyc
 *.egg-info/*
-src*
 .Python
 build/*
 dist/*
