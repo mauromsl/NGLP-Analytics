@@ -3,6 +3,8 @@ from nglp.models.events import PipelineEvent
 from nglp.config import settings
 from nglp.pipeline import regex
 
+from logging import Logger
+
 
 ID_MAPPING = {
     "DOI": regex.DOI_COMPILED,

@@ -36,9 +36,20 @@ class Workflow(Precompute):
         second.set_workflow_follows(first.event, self._delta(first, second))
 
     def _delta(self, first, second):
-        start = datetime.strptime(first.occurred_at, "%Y-%m-%dT%H:%M:%S.%fZ")
-        end = datetime.strptime(second.occurred_at, "%Y-%m-%dT%H:%M:%S.%fZ")
+        start = self._to_datetime(first.occurred_at)
+        end = self._to_datetime(second.occurred_at)
         return (end - start).total_seconds()
+
+    def _to_datetime(self, date_expr: str):
+        try:
+            return datetime.strptime(date_expr, "%Y-%m-%dT%H:%M:%S.%fZ")
+        except:
+            pass
+
+        try:
+            return datetime.strptime(date_expr, "%Y-%m-%dT%H:%M:%SZ")
+        except:
+            raise ValueError("Could not convert string {val} to UTC Datetime".format(val=date_expr))
 
     def _scan(self, events, start_pos):
         start = events[start_pos]

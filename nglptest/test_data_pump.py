@@ -5,7 +5,6 @@ import random
 import click
 import datetime
 from nglp.models import events
-from test.generate_test_data import DataGenerator, generate_test_data
 
 # instructions for usage within pump_data() function which starts line 94
 
@@ -29,9 +28,9 @@ ALLOWED_PARAM_VALUES = {
 @click.option(
     "-f",
     "--file",
-    required=True,
+    required=False,
     help="Filename to save the json generated test data, and from which to pump data."
-    "If no filename is provided, the default filename has the pattern "
+    "If no filename is provided, the default filename for generation has the pattern "
     "testdata-{event_type}-{number_of_records}-{dt} or {event_type}-{number_of_records}-with-errors-{dt}.json",
 )
 @click.option(
@@ -91,15 +90,47 @@ ALLOWED_PARAM_VALUES = {
     show_default=True,
     help="Throw errors if an event model is not supported by the data generator.",
 )
+@click.option(
+    "-a",
+    "--api",
+    type=str,
+    default="http://localhost:8000/api",
+    help="URL of the API to send data to"
+)
+@click.option(
+    "-o",
+    "--source",
+    required=True,
+    type=str,
+    help="identifier for the service which is the source of this data"
+)
+@click.option(
+    "-s",
+    "--shortest",
+    type=float,
+    default=1,
+    help="Shortest amount of time to wait between API requests"
+)
+@click.option(
+    "-l",
+    "--longest",
+    type=float,
+    default=10,
+    help="Longest amount of time to wait between API requests"
+)
 def pump_data(
-    file,
     event_type,
     number_of_records,
+    source,
+    file=None,
     generate_data=True,
     is_core=False,
     data_fill="mix",
     add_records_with_error=False,
     error_if_model_unsupported=True,
+    api="http://localhost:8000/api",
+    shortest=1,
+    longest=10
 ):
     """
     The pump_data() function is called from the command line.
@@ -116,6 +147,13 @@ def pump_data(
 
     The api is local, but only needs to be changed on line 146 if this is used on a deployed version.
     """
+
+    # I'm not sure why this delayed import is required, but if you put it at the top of the
+    # file with the other imports, you get an ImportError on execution.  I can't see anything
+    # like a circular dependency
+    # from test.generate_test_data import DataGenerator
+    from nglptest.generate_test_data import DataGenerator
+
     # unpack JSON doc
     if generate_data == True:
         dg = DataGenerator(
@@ -129,9 +167,11 @@ def pump_data(
         )
 
         if event_type == "workflow_transition":
-            dg.write_workflow_data()
+            dg.write_workflow_data(join_events=False)
         else:
             dg.write_usage_data()
+
+        file = dg.filename
 
     with open(file, "r") as f:
         unpacked_file = json.loads(f.read())
@@ -142,10 +182,17 @@ def pump_data(
     count = 0
     pulse = number_of_records // 100 if number_of_records > 100 else 1
     for entry in unpacked_file:
+<<<<<<< HEAD:test/test_data_pump.py
         requests.post(
             url="http://localhost:8000/api/", data=json.dumps(entry)
+=======
+        resp = requests.post(
+            url=api + "?source=" + source, data=json.dumps(entry), verify=False
+>>>>>>> develop:nglptest/test_data_pump.py
         )
-        time.sleep(random.choices(range(1, 10), k=1)[0])
+        if resp.status_code != 201:
+            print(resp.text)
+        time.sleep(random.uniform(shortest, longest))
         count += 1
         print(".", end="", flush=True) if count % pulse == 0 else ""
     end = datetime.datetime.now()

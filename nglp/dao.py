@@ -1,7 +1,8 @@
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, NotFoundError, TransportError
 import uuid
 import time
 import json
+from datetime import datetime
 
 from nglp.config import settings
 
@@ -58,13 +59,56 @@ class BaseDAO(object):
     """The name of the index to be created - subclasses should override"""
     __index_type__ = "index_type"
 
+    def __init__(self, raw=None):
+        pass
+
+    @classmethod
+    def index_name(cls):
+        return settings.es_index_namespace + cls.__index_type__
+
     def mappings(self):
+        raise NotImplementedError()
+
+    @property
+    def data(self):
+        raise NotImplementedError()
+
+    def set_id(self, id=None):
+        """Set the id if one is passed, or set a default id if one doesn't already exist"""
+        if id is None:
+            if self.id is None:
+                self.id = self.makeid()
+        else:
+            self.id = self.makeid()
+
+    @property
+    def id(self):
+        raise NotImplementedError()
+
+    @id.setter
+    def id(self, val):
+        raise NotImplementedError()
+
+    @property
+    def last_updated(self):
+        raise NotImplementedError()
+
+    @last_updated.setter
+    def last_updated(self, val):
+        raise NotImplementedError()
+
+    @property
+    def created_date(self):
+        raise NotImplementedError()
+
+    @created_date.setter
+    def created_date(self, val):
         raise NotImplementedError()
 
     def initialise_index(self):
         mappings = self.mappings()
-        if not CONNECTION.indices.exists(index=self.__index_type__):
-            CONNECTION.indices.create(index=self.__index_type__, body={
+        if not CONNECTION.indices.exists(index=self.index_name()):
+            CONNECTION.indices.create(index=self.index_name(), body={
                 "mappings" : mappings
             })
 
@@ -87,7 +131,7 @@ class BaseDAO(object):
         while count < retry:
             count += 1
             try:
-                r = CONNECTION.search(body=qobj, index=cls.__index_type__)
+                r = CONNECTION.search(body=qobj, index=cls.index_name())
                 break
             except Exception as e:
                 exception = e
@@ -108,5 +152,31 @@ class BaseDAO(object):
             if r.get(idkey) is None:
                 r[idkey] = cls.makeid()
             data += json.dumps({"index" : {"_id": r[idkey]}}) + "\n"
-            data = json.dumps(r) + "\n"
-        return CONNECTION.bulk(body=data, index=cls.__index_type__)
+            data += json.dumps(r) + "\n"
+        return CONNECTION.bulk(body=data, index=cls.index_name())
+
+    def save(self):
+        self.set_id()
+        now = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        self.last_updated = now
+        if not self.created_date:
+            self.created_date = now
+
+        d = json.dumps(self.data)
+        return CONNECTION.index(self.index_name(), body=d, id=self.id)
+
+    @classmethod
+    def pull(cls, id):
+        try:
+            # out = requests.get(cls.target() + id_)
+            out = CONNECTION.get(cls.index_name(), id)
+        except NotFoundError:
+            return None
+        except TransportError as e:
+            raise Exception("ES returned an error: {x}".format(x=json.dumps(e.info)))
+        except Exception as e:
+            return None
+        if out is None:
+            return None
+
+        return cls(out.get("_source"))

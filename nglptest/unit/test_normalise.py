@@ -1,51 +1,52 @@
 from unittest import TestCase
-from test.fixtures.normalise import NormaliseFixtureFactory
+from nglptest.fixtures.normalise import NormaliseFixtureFactory
 from nglp.pipeline.normalise import Normalise
 from copy import deepcopy
 from nglp.models import events
 
 class TestNormalise(TestCase):
 
-    # What do I want to test?
-    # I want to pass an event (more than one type?) through the normalise ID pipeline.
-
-    # How am I going to do that?
-    # I need to import some test data.
-    # I need to write a function that will run that data though the normalise function
-    # I need to compare that to the results I'm expecting.
+    # To change tests:
+    # What has changed?
+    # How does that affect the current tests?
+    # How do I need to change the tests to work again?
 
     def test_01_broken_doi_id(self):
+        # broken_doi_id can't be normalised, so it should be returned unchanged.
         request = NormaliseFixtureFactory.broken_doi_id()
+        request2 = deepcopy(request)
 
-        obj = events.PipelineEvent(raw=request)
+        object = events.PipelineEvent(raw=request)
 
-        with self.assertRaises(ValueError):
-            Normalise().run(event=obj)
+        self.assertEqual(Normalise().run(event=object).object_ids, request2["object_id"])
 
 
     def test_02_broken_issn_id(self):
+        # broken_issn_id can't be normalised, so it should be returned unchanged.
         request = NormaliseFixtureFactory.broken_issn_id()
+        request2 = deepcopy(request)
 
-        obj = events.PipelineEvent(raw=request)
+        object = events.PipelineEvent(raw=request)
 
-        with self.assertRaises(ValueError):
-            Normalise().run(event=obj)
+        self.assertEqual(Normalise().run(event=object).object_ids, request2["object_id"])
 
     def test_09_broken_handle_id(self):
+        # broken_handle_id can't be normalised, so it should be returned unchanged.
         request = NormaliseFixtureFactory.broken_handle_id()
+        request2 = deepcopy(request)
 
-        obj = events.PipelineEvent(raw=request)
+        object = events.PipelineEvent(raw=request)
 
-        with self.assertRaises(ValueError):
-            Normalise().run(event=obj)
+        self.assertEqual(Normalise().run(event=object).object_ids, request2["object_id"])
 
     def test_10_broken_http_url_id(self):
+        # broken_http_url_id can't be normalised, so it should be returned unchanged.
         request = NormaliseFixtureFactory.broken_http_url_id()
+        request2 = deepcopy(request)
 
-        obj = events.PipelineEvent(raw=request)
+        object = events.PipelineEvent(raw=request)
 
-        with self.assertRaises(ValueError):
-            Normalise().run(event=obj)
+        self.assertEqual(Normalise().run(event=object).object_ids, request2["object_id"])
 
     def test_03_single_doi_id(self):
         request = NormaliseFixtureFactory.single_doi_id()

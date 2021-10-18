@@ -42,6 +42,21 @@ In `.env` set:
 geo_database=/path/to/geolite2.mmdb
 ```
 
+### Elasticsearch
+
+We are using the OpenDistro release of Elasticsearch, though you should also be able to use the 7.10
+release of the original Elasticsearch.
+
+Install and run Open Distro for Elasticsearch as per their website: https://opendistro.github.io/for-elasticsearch-docs/
+
+You will require a recent version of Java (>=11), which you can set and run with
+
+```bash
+JAVA_HOME=/path/to/java/11
+export JAVA_HOME
+[elasticsearch]/bin/elasticsearch
+```
+
 ### Generate Test Data
 
 Each type of incoming event (e.g. as if via the API)
