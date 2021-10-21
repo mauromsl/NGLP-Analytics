@@ -9,9 +9,6 @@ typeof globalThis !== 'undefined'
   : typeof global !== 'undefined'
   ? global
   : {};
-var $99b6183ba65dae12$export$4048ae5fe51d81b7 = window.$;
-
-
 function $10cfaf3f2f812eb4$export$9099ad97b570f7c(instance, Constructor) {
     if (!(instance instanceof Constructor)) throw new TypeError("Cannot call a class as a function");
 }
@@ -135,6 +132,10 @@ function $76c445b1cd8e0a95$export$9099ad97b570f7c() {
 function $d1ea3085410a42e5$export$9099ad97b570f7c(arr, i) {
     return $5dd06483043aa0c9$export$9099ad97b570f7c(arr) || $f953e420d03d510c$export$9099ad97b570f7c(arr, i) || $76c445b1cd8e0a95$export$9099ad97b570f7c();
 }
+
+
+
+var $99b6183ba65dae12$export$4048ae5fe51d81b7 = window.$;
 
 
 
@@ -3867,10 +3868,146 @@ nglp.g001.init = function(params) {
     var countFormat = $d48cc3604bf30e24$export$48334dba1de70fbe({
         thousandsSeparator: ","
     });
-    $99b6183ba65dae12$export$4048ae5fe51d81b7(selector).html("\n        <h2>Overview</h2>\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <div id=\"overview-container\"></div>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"overview-map-container\"></div>\n            </div>\n        </div>\n        <h2>Interactions with Article Landing Pages</h2>\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <div id=\"investigations-container\"></div>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"investigations-map-container\"></div>\n            </div>\n        </div>\n        <h2>Fulltext Views</h2>\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <div id=\"fulltext-container\"></div>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"fulltext-map-container\"></div>\n            </div>\n        </div>\n        <h2>Article Exports</h2>\n        <div class=\"row\">\n            <div class=\"col-md-6\">\n                <div id=\"export-container\"></div>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"export-map-container\"></div>\n            </div>\n        </div>\n    ");
-    nglp.g001.overviewEdge(search_url);
-    nglp.g001.overviewMap(search_url);
+    nglp.g001.active[selector] = new $6cf4dc301226cb87$export$22ad9a5707a07e9c({
+        selector: selector,
+        template: new nglp.g001.G001Template(),
+        searchUrl: search_url,
+        manageUrl: false,
+        openingQuery: new $8d94b5f2509b6cf5$export$8b446892c82de644.Query({
+            must: [
+                new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsFilter({
+                    field: "event.exact",
+                    values: [
+                        "request",
+                        "investigation",
+                        "export"
+                    ]
+                }),
+                new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsFilter({
+                    field: "object_type.exact",
+                    values: [
+                        "article",
+                        "file"
+                    ]
+                }),
+                new $8d94b5f2509b6cf5$export$8b446892c82de644.RangeFilter({
+                    field: "occurred_at",
+                    gte: "2020-05-01",
+                    lte: "2021-07-01"
+                }) // FIXME: these will need to be wired up to a date selector
+            ],
+            size: 0,
+            aggs: [
+                new $8d94b5f2509b6cf5$export$8b446892c82de644.DateHistogramAggregation({
+                    name: "occurred_at",
+                    field: "occurred_at",
+                    interval: "1M"
+                }),
+                new $8d94b5f2509b6cf5$export$8b446892c82de644.GeohashGridAggregation({
+                    name: "geo",
+                    field: "location",
+                    precision: 1
+                })
+            ]
+        }),
+        components: [
+            new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
+                id: "g001-interactions-chart",
+                dataFunction: $ae46249d8a2a7b6d$export$8c0eec9b15d1897d({
+                    agg: "occurred_at",
+                    seriesName: "Occurred At"
+                }),
+                renderer: new $f29180d7a0e96438$export$1b75c0a6cacf635c({
+                    xTickFormat: function xTickFormat(d) {
+                        return d3.time.format('%b %y')(new Date(d));
+                    },
+                    barColor: [
+                        "#1e9dd8"
+                    ],
+                    yTickFormat: ",.0f",
+                    showLegend: false,
+                    xAxisLabel: "Occurred At",
+                    yAxisLabel: "Article Interactions",
+                    marginLeft: 80
+                })
+            }),
+            new $7ac4d4ec044faea2$export$c57445924c23547b({
+                id: "g001-interactions-map",
+                geoHashAggregation: "geo",
+                renderer: new $eec1dd49d0c67d6b$export$a0bd1dffd4b583c({
+                    clusterByCount: true,
+                    reQueryOnBoundsChange: true,
+                    clusterIcons: {
+                        0: "/static/img/m1.png",
+                        2: "/static/img/m2.png",
+                        20: "/static/img/m3.png",
+                        50: "/static/img/m4.png",
+                        100: "/static/img/m5.png"
+                    }
+                })
+            })
+        ]
+    });
+// $(selector).html(`
+//     <h2>Overview</h2>
+//     <div class="row">
+//         <div class="col-md-6">
+//             <div id="overview-container"></div>
+//         </div>
+//         <div class="col-md-6">
+//             <div id="overview-map-container"></div>
+//         </div>
+//     </div>
+//     <h2>Interactions with Article Landing Pages</h2>
+//     <div class="row">
+//         <div class="col-md-6">
+//             <div id="investigations-container"></div>
+//         </div>
+//         <div class="col-md-6">
+//             <div id="investigations-map-container"></div>
+//         </div>
+//     </div>
+//     <h2>Fulltext Views</h2>
+//     <div class="row">
+//         <div class="col-md-6">
+//             <div id="fulltext-container"></div>
+//         </div>
+//         <div class="col-md-6">
+//             <div id="fulltext-map-container"></div>
+//         </div>
+//     </div>
+//     <h2>Article Exports</h2>
+//     <div class="row">
+//         <div class="col-md-6">
+//             <div id="export-container"></div>
+//         </div>
+//         <div class="col-md-6">
+//             <div id="export-map-container"></div>
+//         </div>
+//     </div>
+// `);
+//
+// nglp.g001.overviewEdge(search_url);
+// nglp.g001.overviewMap(search_url);
 };
+nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
+    "use strict";
+    $bca7673885229bfd$export$9099ad97b570f7c(_class, Template);
+    function _class() {
+        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, _class);
+        return $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c(_class).apply(this, arguments));
+    }
+    $67866ae5f3a26802$export$9099ad97b570f7c(_class, [
+        {
+            key: "draw",
+            value: function draw(edge) {
+                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G001: Article  Downloads for  Unit Administrators</h1>\n                <h2>Article downloads by format, including landing page and metadata exports in aggregate, with information about users who downloaded them</h2> \n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g001-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row\">\n            <div class=\"col-md-3\">\n                <div id=\"g001-interactions\"></div>\n                <div id=\"g001-format\"></div>\n            </div>\n            <div class=\"col-md-9\">\n                <div id=\"g001-interactions-chart\"></div>\n                <div id=\"g001-interactions-map\"></div>\n                <div class=\"row\">\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-investigations\"></div>\n                    </div>\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-downloads\"></div>\n                    </div>\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-exports\"></div>\n                    </div>\n                </div>\n            </div>\n        </div>";
+                edge.context.html(frame);
+            }
+        }
+    ]);
+    return _class;
+})($6cf4dc301226cb87$export$93af88fe68eea917);
 nglp.g001.overviewEdge = function(search_url) {
     nglp.g001.active["#overview-container"] = new $6cf4dc301226cb87$export$22ad9a5707a07e9c({
         selector: "#overview-container",

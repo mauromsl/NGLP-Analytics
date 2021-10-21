@@ -1,7 +1,35 @@
 @charset "utf-8";
 
-@import "../vendor/edges2/sass/renderers/googlemap/google-map-view";
 
-#overview, #investigations, #fulltext, #export {
-    height: 400px;
+@import "base/palette",
+
+    "../vendor/edges2/sass/renderers/googlemap/google-map-view";
+
+#g001 {
+    .header {
+        background: $header;
+        color: $header-text;
+    }
+
+    .controls {
+        background: $control;
+        color: $header-text;
+    }
+
+    .nav {
+        list-style-type: none;
+
+        li {
+            float: left;
+            margin-right: 0.5em;
+
+            a {
+                color: $header-text;
+            }
+        }
+    }
+
+    #g001-interactions-chart {
+        height: 400px;
+    }
 }

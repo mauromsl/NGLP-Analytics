@@ -1,7 +1,7 @@
 import {$} from "../vendor/edges2/dependencies/jquery"
 import {es} from "../vendor/edges2/dependencies/es"
 
-import {Edge} from "../vendor/edges2/src/core"
+import {Edge, Template} from "../vendor/edges2/src/core"
 import {ComponentList} from "../vendor/edges2/src/templates/html/ComponentList";
 import {Chart, dateHistogram} from "../vendor/edges2/src/components/Chart";
 import {MultibarRenderer} from "../vendor/edges2/src/renderers/nvd3/MultibarRenderer";
@@ -24,54 +24,9 @@ nglp.g001.init = function (params) {
         thousandsSeparator: ","
     });
 
-    $(selector).html(`
-        <h2>Overview</h2>
-        <div class="row">
-            <div class="col-md-6">
-                <div id="overview-container"></div>
-            </div>
-            <div class="col-md-6">
-                <div id="overview-map-container"></div>
-            </div>
-        </div>
-        <h2>Interactions with Article Landing Pages</h2>
-        <div class="row">
-            <div class="col-md-6">
-                <div id="investigations-container"></div>
-            </div>
-            <div class="col-md-6">
-                <div id="investigations-map-container"></div>
-            </div>
-        </div>
-        <h2>Fulltext Views</h2>
-        <div class="row">
-            <div class="col-md-6">
-                <div id="fulltext-container"></div>
-            </div>
-            <div class="col-md-6">
-                <div id="fulltext-map-container"></div>
-            </div>
-        </div>
-        <h2>Article Exports</h2>
-        <div class="row">
-            <div class="col-md-6">
-                <div id="export-container"></div>
-            </div>
-            <div class="col-md-6">
-                <div id="export-map-container"></div>
-            </div>
-        </div>
-    `);
-
-    nglp.g001.overviewEdge(search_url);
-    nglp.g001.overviewMap(search_url);
-}
-
-
-nglp.g001.overviewEdge = function(search_url) {
-    nglp.g001.active["#overview-container"] = new Edge({
-        selector: "#overview-container",
-        template: new ComponentList(),
+    nglp.g001.active[selector] = new Edge({
+        selector: selector,
+        template: new nglp.g001.G001Template(),
         searchUrl: search_url,
         manageUrl : false,
         openingQuery: new es.Query({
@@ -86,12 +41,17 @@ nglp.g001.overviewEdge = function(search_url) {
                     name: "occurred_at",
                     field: "occurred_at",
                     interval: "1M"
+                }),
+                new es.GeohashGridAggregation({
+                    name: "geo",
+                    field: "location",
+                    precision: 1
                 })
             ]
         }),
         components : [
             new Chart({
-                id: "overview",
+                id: "g001-interactions-chart",
                 dataFunction: dateHistogram({
                     agg: "occurred_at",
                     seriesName: "Occurred At"
@@ -105,38 +65,10 @@ nglp.g001.overviewEdge = function(search_url) {
                     yAxisLabel: "Article Interactions",
                     marginLeft: 80
                 })
-            })
-        ]
-    })
-}
-
-// Article interactions overview map
-nglp.g001.overviewMap = function(search_url) {
-    nglp.g001.active["#overview-map-container"] = new Edge({
-        selector: "#overview-map-container",
-        template: new ComponentList(),
-        searchUrl: search_url,
-        manageUrl: false,
-        openingQuery: new es.Query({
-            must: [
-                new es.TermsFilter({field: "event.exact", values: ["request", "investigation", "export"]}),
-                new es.TermsFilter({field: "object_type.exact", values: ["article", "file"]}),
-                new es.RangeFilter({field: "occurred_at", gte: "2020-05-01", lte: "2021-07-01"})    // FIXME: these will need to be wired up to a date selector
-            ],
-            size: 0,
-            aggs: [
-                new es.GeohashGridAggregation({
-                    name: "geo",
-                    field: "location",
-                    precision: 1
-                })
-            ]
-        }),
-        components: [
+            }),
             new GeohashedZoomableMap({
-                id: "overview-map",
+                id: "g001-interactions-map",
                 geoHashAggregation: "geo",
-                // renderer: edges.google.newMapViewRenderer({
                 renderer: new GoogleMapView({
                     clusterByCount: true,
                     reQueryOnBoundsChange: true,
@@ -150,7 +82,52 @@ nglp.g001.overviewMap = function(search_url) {
                 })
             })
         ]
-    });
+    })
+}
+
+nglp.g001.G001Template = class extends Template {
+    draw(edge) {
+        let frame = `<div class="row header">
+            <div class="col-xs-12">
+                <h1>G001: Article  Downloads for  Unit Administrators</h1>
+                <h2>Article downloads by format, including landing page and metadata exports in aggregate, with information about users who downloaded them</h2> 
+            </div>
+        </div>
+        <div class="row controls">
+            <div class="col-md-6">
+                <ul class="nav">
+                    <li><a href="#">Go back to Dashboard</a></li>
+                    <li><a href="#">Print this view to PDF</a></li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <div id="g001-date-range"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div id="g001-interactions"></div>
+                <div id="g001-format"></div>
+            </div>
+            <div class="col-md-9">
+                <div id="g001-interactions-chart"></div>
+                <div id="g001-interactions-map"></div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div id="g001-top-investigations"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div id="g001-top-downloads"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div id="g001-top-exports"></div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        edge.context.html(frame);
+    }
 }
 
 export default nglp;
