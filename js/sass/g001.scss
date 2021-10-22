@@ -49,6 +49,11 @@
 
     .formats-header {
         margin-top: 100px;
+        color: $title-text;
+
+        h3 {
+            font-weight: bold;
+        }
     }
 
     #g001-interactions {
@@ -101,5 +106,11 @@
                 }
             }
         }
+    }
+
+    .edges-nvd3-horizontal-multibar_title {
+        font-weight: bold;
+        color: $title-text;
+        text-transform: uppercase;
     }
 }

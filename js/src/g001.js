@@ -4,7 +4,7 @@ import {es} from "../vendor/edges2/dependencies/es"
 import {Edge, Template} from "../vendor/edges2/src/core"
 import {Chart, termSplitDateHistogram, nestedTerms} from "../vendor/edges2/src/components/Chart";
 import {MultibarRenderer} from "../vendor/edges2/src/renderers/nvd3/MultibarRenderer";
-import {htmlID, numFormat, idSelector, on} from "../vendor/edges2/src/utils";
+import {htmlID, numFormat, idSelector, on, getParam} from "../vendor/edges2/src/utils";
 import {GeohashedZoomableMap} from "../vendor/edges2/src/components/GeohashedZoomableMap";
 import {GoogleMapView} from "../vendor/edges2/src/renderers/googlemap/GoogleMapView";
 import {ORTermSelector} from "../vendor/edges2/src/components/ORTermSelector";
@@ -163,28 +163,50 @@ nglp.g001.init = function (params) {
                     countFormat: countFormat
                 })
             }),
-            new Chart({
-                id: "g001-top-investigations",
-                dataFunction: nestedTerms({
-                    aggs: [
-                        {events: {keys : ["investigation"], aggs: ["formats"]}}
-                    ]
-                }),
-                renderer: new HorizontalMultibarRenderer({
-                    title: "Investigations",
-                    legend: false
-                })
-            }),
+            // this doesn't work - there isn't format information associated with investigations
+            // new Chart({
+            //     id: "g001-top-investigations",
+            //     dataFunction: nestedTerms({
+            //         aggs: [
+            //             {events: {keys : ["investigation"], aggs: ["formats"]}}
+            //         ]
+            //     }),
+            //     renderer: new HorizontalMultibarRenderer({
+            //         title: "Investigations",
+            //         legend: false
+            //     })
+            // }),
             new Chart({
                 id: "g001-top-downloads",
                 dataFunction: nestedTerms({
                     aggs: [
                         {events: {keys : ["request"], aggs: ["formats"]}}
-                    ]
+                    ],
+                    seriesName: "request"
                 }),
                 renderer: new HorizontalMultibarRenderer({
                     title: "Downloads",
-                    legend: false
+                    legend: false,
+                    valueFormat: countFormat,
+                    color: function(d, i) {
+                        return palette[d.key]
+                    },
+                    showXAxis: true,
+                    showYAxis: false,
+                    marginLeft: 0,
+                    marginRight: 0,
+                    marginTop: 0,
+                    marginBottom: 0,
+                    groupSpacing: 0.7,
+                    onUpdate: () => {
+                        let ticks = $("#g001-top-downloads .tick text");
+                        for (let i = 0; i < ticks.length; i++) {
+                            let tick = $(ticks[i]);
+                            tick.attr("x", 0);
+                            tick.attr("y", 20);
+                            tick.css("text-anchor", "start");
+                        }
+                    }
                 })
             }),
             new Chart({
@@ -192,7 +214,8 @@ nglp.g001.init = function (params) {
                 dataFunction: nestedTerms({
                     aggs: [
                         {events: {keys : ["export"], aggs: ["formats"]}}
-                    ]
+                    ],
+                    seriesName: "export"
                 }),
                 renderer: new HorizontalMultibarRenderer({
                     title: "Exports",
@@ -272,9 +295,9 @@ nglp.g001.G001Template = class extends Template {
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-4">
-                        <div id="g001-top-investigations"></div>
-                    </div>
+<!--                    <div class="col-md-4">-->
+<!--                        <div id="g001-top-investigations"></div>-->
+<!--                    </div>-->
                     <div class="col-md-4">
                         <div id="g001-top-downloads"></div>
                     </div>

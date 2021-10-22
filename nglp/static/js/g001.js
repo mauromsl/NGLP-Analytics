@@ -3245,6 +3245,7 @@ function $ae46249d8a2a7b6d$export$d99c821b0fb86668(params) {
 }
 function $ae46249d8a2a7b6d$export$4c2a251a86bb620b(params) {
     var aggs = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "aggs", []);
+    var seriesName = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "seriesName", "series");
     return function(component) {
         // for each aggregation, get the results and add them to the data series
         var data_series = [];
@@ -3273,7 +3274,7 @@ function $ae46249d8a2a7b6d$export$4c2a251a86bb620b(params) {
         var bs = recurse(aggs, context);
         var series = {
         };
-        series["key"] = "Series Test";
+        series["key"] = seriesName;
         series["values"] = [];
         for(var j = 0; j < bs.length; j++){
             var doccount = bs[j].doc_count;
@@ -4598,6 +4599,7 @@ var $8ff5b3d2c2ab6201$export$6d5fb309d07d7299 = /*#__PURE__*/ function(Renderer)
         _this.stacked = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "stacked", false);
         _this.legend = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "legend", true);
         _this.color = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "color", false);
+        _this.barColor = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "barColor", false);
         _this.noDataMessage = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "noDataMessage", false);
         _this.transitionDuration = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "transitionDuration", 500);
         _this.marginTop = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "marginTop", 30);
@@ -4607,6 +4609,8 @@ var $8ff5b3d2c2ab6201$export$6d5fb309d07d7299 = /*#__PURE__*/ function(Renderer)
         _this.yTickFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "yTickFormat", ",.0f");
         _this.xTickFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "xTickFormat", false);
         _this.valueFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "valueFormat", false);
+        _this.showXAxis = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "showXAxis", true);
+        _this.showYAxis, $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "showYAxes", true);
         _this.xAxisLabel = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "xAxisLabel", false);
         _this.yAxisLabel = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "yAxisLabel", false);
         _this.xAxisLabelWrap = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "xAxisLabelWrap", false);
@@ -4619,6 +4623,7 @@ var $8ff5b3d2c2ab6201$export$6d5fb309d07d7299 = /*#__PURE__*/ function(Renderer)
         _this.hideIfNoData = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "hideIfNoData", false);
         _this.onHide = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "onHide", false);
         _this.onShow = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "onShow", false);
+        _this.onUpdate = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "onUpdate", false);
         _this.namespace = "edges-nvd3-horizontal-multibar";
         _this.draw = function() {
             // no need for data conversion on this graph type
@@ -4649,7 +4654,10 @@ var $8ff5b3d2c2ab6201$export$6d5fb309d07d7299 = /*#__PURE__*/ function(Renderer)
                 customAttributes = 'style="height:' + height + 'px"';
             }
             var title = "";
-            if (_this.title !== false) title = _this.title;
+            if (_this.title !== false) {
+                var titleClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(_this.namespace, "title", $f483f7288df68fd0$export$9099ad97b570f7c(_this));
+                title = "<h4 class=\"".concat(titleClass, "\">").concat(_this.title, "</h4>");
+            }
             var svgId = $d48cc3604bf30e24$export$bf52b203d82ff901(_this.namespace, "svg", $f483f7288df68fd0$export$9099ad97b570f7c(_this));
             var svgSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(_this.namespace, "svg", $f483f7288df68fd0$export$9099ad97b570f7c(_this));
             _this.component.context.html(title + '<div ' + customAttributes + '><svg id="' + svgId + '"></svg></div>');
@@ -4664,7 +4672,7 @@ var $8ff5b3d2c2ab6201$export$6d5fb309d07d7299 = /*#__PURE__*/ function(Renderer)
                     right: that.marginRight,
                     bottom: that.marginBottom,
                     left: that.marginLeft
-                }).showValues(that.showValues).tooltips(that.toolTips).showControls(that.controls).showLegend(that.legend);
+                }).showValues(that.showValues).tooltips(that.toolTips).showControls(that.controls).showLegend(that.legend).showXAxis(that.showXAxis).showYAxis(that.showYAxis);
                 if (that.stacked) chart.multibar.stacked(that.stacked);
                 if (that.yTickFormat) {
                     var fn = that.yTickFormat;
@@ -4696,6 +4704,7 @@ var $8ff5b3d2c2ab6201$export$6d5fb309d07d7299 = /*#__PURE__*/ function(Renderer)
                     maxWidth: that.marginLeft - 5,
                     maxHeight: that.barHeight
                 });
+                if (that.onUpdate) that.onUpdate();
                 function updateChart() {
                     chart.update();
                     if (that.xAxisLabelWrap) $fdccde0d4dd41d73$export$e85e6981b6330071({
@@ -4703,6 +4712,7 @@ var $8ff5b3d2c2ab6201$export$6d5fb309d07d7299 = /*#__PURE__*/ function(Renderer)
                         maxWidth: that.marginLeft - 5,
                         maxHeight: that.barHeight
                     });
+                    if (that.onUpdate) that.onUpdate();
                 }
                 $b76ad79e27dc7523$export$8698b599d6b7d9a0.utils.windowResize(updateChart);
                 return chart;
@@ -4974,27 +4984,19 @@ nglp.g001.init = function(params) {
                     countFormat: countFormat
                 })
             }),
-            new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
-                id: "g001-top-investigations",
-                dataFunction: $ae46249d8a2a7b6d$export$4c2a251a86bb620b({
-                    aggs: [
-                        {
-                            events: {
-                                keys: [
-                                    "investigation"
-                                ],
-                                aggs: [
-                                    "formats"
-                                ]
-                            }
-                        }
-                    ]
-                }),
-                renderer: new $8ff5b3d2c2ab6201$export$6d5fb309d07d7299({
-                    title: "Investigations",
-                    legend: false
-                })
-            }),
+            // this doesn't work - there isn't format information associated with investigations
+            // new Chart({
+            //     id: "g001-top-investigations",
+            //     dataFunction: nestedTerms({
+            //         aggs: [
+            //             {events: {keys : ["investigation"], aggs: ["formats"]}}
+            //         ]
+            //     }),
+            //     renderer: new HorizontalMultibarRenderer({
+            //         title: "Investigations",
+            //         legend: false
+            //     })
+            // }),
             new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
                 id: "g001-top-downloads",
                 dataFunction: $ae46249d8a2a7b6d$export$4c2a251a86bb620b({
@@ -5009,11 +5011,32 @@ nglp.g001.init = function(params) {
                                 ]
                             }
                         }
-                    ]
+                    ],
+                    seriesName: "request"
                 }),
                 renderer: new $8ff5b3d2c2ab6201$export$6d5fb309d07d7299({
                     title: "Downloads",
-                    legend: false
+                    legend: false,
+                    valueFormat: countFormat,
+                    color: function color(d, i) {
+                        return palette[d.key];
+                    },
+                    showXAxis: true,
+                    showYAxis: false,
+                    marginLeft: 0,
+                    marginRight: 0,
+                    marginTop: 0,
+                    marginBottom: 0,
+                    groupSpacing: 0.7,
+                    onUpdate: function() {
+                        var ticks = $99b6183ba65dae12$export$4048ae5fe51d81b7("#g001-top-downloads .tick text");
+                        for(var i = 0; i < ticks.length; i++){
+                            var tick = $99b6183ba65dae12$export$4048ae5fe51d81b7(ticks[i]);
+                            tick.attr("x", 0);
+                            tick.attr("y", 20);
+                            tick.css("text-anchor", "start");
+                        }
+                    }
                 })
             }),
             new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
@@ -5030,7 +5053,8 @@ nglp.g001.init = function(params) {
                                 ]
                             }
                         }
-                    ]
+                    ],
+                    seriesName: "export"
                 }),
                 renderer: new $8ff5b3d2c2ab6201$export$6d5fb309d07d7299({
                     title: "Exports",
@@ -5075,7 +5099,7 @@ nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
             value: function draw(edge) {
                 this.edge = edge;
                 var checkboxId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, "show-as-table");
-                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G001: Article  Downloads for  Unit Administrators</h1>\n                <h2>Article downloads by format, including landing page and metadata exports in aggregate, with information about users who downloaded them</h2> \n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g001-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-md-3\">\n                <div id=\"g001-interactions\"></div>\n                <div id=\"g001-format\"></div>\n            </div>\n            <div class=\"col-md-9\">\n                <p><input type=\"checkbox\" name=\"".concat(checkboxId, "\" id=\"").concat(checkboxId, "\"> Show as table</p>\n                <div id=\"g001-interactions-chart\"></div>\n                <div id=\"g001-interactions-table\" style=\"display:none\">TABLE HERE</div>\n                <div id=\"g001-interactions-map\"></div>\n                <div class=\"row formats-header\">\n                    <div class=\"col-xs-12\">\n                        <h3>Top 3 Formats</h3>\n                    </div>\n                </div>\n                <div class=\"row\">\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-investigations\"></div>\n                    </div>\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-downloads\"></div>\n                    </div>\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-exports\"></div>\n                    </div>\n                </div>\n            </div>\n        </div>");
+                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G001: Article  Downloads for  Unit Administrators</h1>\n                <h2>Article downloads by format, including landing page and metadata exports in aggregate, with information about users who downloaded them</h2> \n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g001-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-md-3\">\n                <div id=\"g001-interactions\"></div>\n                <div id=\"g001-format\"></div>\n            </div>\n            <div class=\"col-md-9\">\n                <p><input type=\"checkbox\" name=\"".concat(checkboxId, "\" id=\"").concat(checkboxId, "\"> Show as table</p>\n                <div id=\"g001-interactions-chart\"></div>\n                <div id=\"g001-interactions-table\" style=\"display:none\">TABLE HERE</div>\n                <div id=\"g001-interactions-map\"></div>\n                <div class=\"row formats-header\">\n                    <div class=\"col-xs-12\">\n                        <h3>Top 3 Formats</h3>\n                    </div>\n                </div>\n                <div class=\"row\">\n<!--                    <div class=\"col-md-4\">-->\n<!--                        <div id=\"g001-top-investigations\"></div>-->\n<!--                    </div>-->\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-downloads\"></div>\n                    </div>\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-exports\"></div>\n                    </div>\n                </div>\n            </div>\n        </div>");
                 edge.context.html(frame);
                 var checkboxSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, "show-as-table");
                 $d48cc3604bf30e24$export$b4cd8de5710bc55c(checkboxSelector, "change", this, "toggleTable");
