@@ -2,12 +2,15 @@ import {$} from "../vendor/edges2/dependencies/jquery"
 import {es} from "../vendor/edges2/dependencies/es"
 
 import {Edge, Template} from "../vendor/edges2/src/core"
-import {ComponentList} from "../vendor/edges2/src/templates/html/ComponentList";
-import {Chart, dateHistogram} from "../vendor/edges2/src/components/Chart";
+import {Chart, termSplitDateHistogram, nestedTerms} from "../vendor/edges2/src/components/Chart";
 import {MultibarRenderer} from "../vendor/edges2/src/renderers/nvd3/MultibarRenderer";
-import {numFormat} from "../vendor/edges2/src/utils";
+import {htmlID, numFormat, idSelector, on} from "../vendor/edges2/src/utils";
 import {GeohashedZoomableMap} from "../vendor/edges2/src/components/GeohashedZoomableMap";
 import {GoogleMapView} from "../vendor/edges2/src/renderers/googlemap/GoogleMapView";
+import {ORTermSelector} from "../vendor/edges2/src/components/ORTermSelector";
+import {ORTermSelectorRenderer} from "../vendor/edges2/src/renderers/bs3/ORTermSelectorRenderer";
+import {HorizontalMultibarRenderer} from "../vendor/edges2/src/renderers/nvd3/HorizontalMultibarRenderer";
+import {ChartDataTable} from "../vendor/edges2/src/renderers/bs3/ChartDataTable";
 
 global.nglp = {}
 nglp.g001 = {
@@ -40,21 +43,38 @@ nglp.g001.init = function (params) {
                 new es.DateHistogramAggregation({
                     name: "occurred_at",
                     field: "occurred_at",
-                    interval: "1M"
+                    interval: "1M",
+                    aggs: [
+                        new es.TermsAggregation({
+                            name: "events",
+                            field: "event.exact"
+                        })
+                    ]
                 }),
                 new es.GeohashGridAggregation({
                     name: "geo",
                     field: "location",
                     precision: 1
+                }),
+                new es.TermsAggregation({
+                    name: "events",
+                    field: "event.exact",
+                    aggs: [
+                        new es.TermsAggregation({
+                            name: "formats",
+                            field: "format.exact",
+                            size: 3
+                        })
+                    ]
                 })
             ]
         }),
         components : [
             new Chart({
                 id: "g001-interactions-chart",
-                dataFunction: dateHistogram({
-                    agg: "occurred_at",
-                    seriesName: "Occurred At"
+                dataFunction: termSplitDateHistogram({
+                    histogramAgg: "occurred_at",
+                    termsAgg: "events"
                 }),
                 renderer : new MultibarRenderer({
                     xTickFormat: function(d) { return d3.time.format('%b %y')(new Date(d))},
@@ -63,7 +83,20 @@ nglp.g001.init = function (params) {
                     showLegend: false,
                     xAxisLabel: "Occurred At",
                     yAxisLabel: "Article Interactions",
-                    marginLeft: 80
+                    marginLeft: 80,
+                    stacked: true,
+                    groupSpacing: 0.7
+                })
+            }),
+            new Chart({
+                id: "g001-interactions-table",
+                dataFunction: termSplitDateHistogram({
+                    histogramAgg: "occurred_at",
+                    termsAgg: "events"
+                }),
+                renderer : new ChartDataTable({
+                    labelFormat: function(d) { return d3.time.format('%b %y')(new Date(d))},
+                    valueFormat: countFormat
                 })
             }),
             new GeohashedZoomableMap({
@@ -80,13 +113,89 @@ nglp.g001.init = function (params) {
                         100: "/static/img/m5.png"
                     }
                 })
+            }),
+            new ORTermSelector({
+                id: "g001-interactions",
+                field: "event.exact",
+                syncCounts: false,
+                lifecycle: "update",
+                updateType: "fresh",
+                orderBy: "term",
+                orderDir: "asc",
+                renderer: new ORTermSelectorRenderer({
+                    title: "Interactions",
+                    open: true,
+                    togglable: false,
+                    showCount: true
+                })
+            }),
+            new ORTermSelector({
+                id: "g001-format",
+                field: "format.exact",
+                size: 10,
+                syncCounts: false,
+                lifecycle: "static",
+                orderBy: "count",
+                orderDir: "desc",
+                renderer: new ORTermSelectorRenderer({
+                    title: "Format",
+                    open: true,
+                    togglable: false,
+                    showCount: true
+                })
+            }),
+            new Chart({
+                id: "g001-top-investigations",
+                dataFunction: nestedTerms({
+                    aggs: [
+                        {events: {keys : ["investigation"], aggs: ["formats"]}}
+                    ]
+                }),
+                renderer: new HorizontalMultibarRenderer({
+                    title: "Investigations",
+                    legend: false
+                })
+            }),
+            new Chart({
+                id: "g001-top-downloads",
+                dataFunction: nestedTerms({
+                    aggs: [
+                        {events: {keys : ["request"], aggs: ["formats"]}}
+                    ]
+                }),
+                renderer: new HorizontalMultibarRenderer({
+                    title: "Downloads",
+                    legend: false
+                })
+            }),
+            new Chart({
+                id: "g001-top-exports",
+                dataFunction: nestedTerms({
+                    aggs: [
+                        {events: {keys : ["export"], aggs: ["formats"]}}
+                    ]
+                }),
+                renderer: new HorizontalMultibarRenderer({
+                    title: "Exports",
+                    legend: false
+                })
             })
         ]
     })
 }
 
 nglp.g001.G001Template = class extends Template {
+    constructor() {
+        super();
+        this.edge = false;
+        this.showing = "chart";
+        this.namespace = "g001-template";
+    }
+
     draw(edge) {
+        this.edge = edge;
+        let checkboxId = htmlID(this.namespace, "show-as-table");
+
         let frame = `<div class="row header">
             <div class="col-xs-12">
                 <h1>G001: Article  Downloads for  Unit Administrators</h1>
@@ -104,14 +213,21 @@ nglp.g001.G001Template = class extends Template {
                 <div id="g001-date-range"></div>
             </div>
         </div>
-        <div class="row">
+        <div class="row report-area">
             <div class="col-md-3">
                 <div id="g001-interactions"></div>
                 <div id="g001-format"></div>
             </div>
             <div class="col-md-9">
+                <p><input type="checkbox" name="${checkboxId}" id="${checkboxId}"> Show as table</p>
                 <div id="g001-interactions-chart"></div>
+                <div id="g001-interactions-table" style="display:none">TABLE HERE</div>
                 <div id="g001-interactions-map"></div>
+                <div class="row formats-header">
+                    <div class="col-xs-12">
+                        <h3>Top 3 Formats</h3>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md-4">
                         <div id="g001-top-investigations"></div>
@@ -127,6 +243,23 @@ nglp.g001.G001Template = class extends Template {
         </div>`;
 
         edge.context.html(frame);
+
+        let checkboxSelector = idSelector(this.namespace, "show-as-table");
+        on(checkboxSelector, "change", this, "toggleTable");
+    }
+
+    toggleTable() {
+        let chart = this.edge.jq("#g001-interactions-chart");
+        let table = this.edge.jq("#g001-interactions-table");
+        if (this.showing === "chart") {
+            chart.hide();
+            table.show();
+            this.showing = "table"
+        } else {
+            table.hide();
+            chart.show();
+            this.showing = "chart"
+        }
     }
 }
 
