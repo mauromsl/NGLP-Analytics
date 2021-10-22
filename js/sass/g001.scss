@@ -2,9 +2,24 @@
 
 
 @import "base/palette",
-    "../vendor/edges2/sass/renderers/bs3/or-term-selector",
-    "../vendor/edges2/sass/renderers/bs3/chart-data-table",
+    "../vendor/edges2/sass/renderers/bs3/checkbox-or-term-selector",
     "../vendor/edges2/sass/renderers/googlemap/google-map-view";
+
+// export the key bits of the pallette as stylesheet rules, to be read by the JS
+// for injection into visualisation components
+#palette {
+    #investigations {
+        background: $investigations;
+    }
+
+    #requests {
+        background: $requests;
+    }
+
+    #exports {
+        background: $exports;
+    }
+}
 
 
 #g001 {
@@ -58,5 +73,33 @@
 
     #g001-top-exports svg {
         height: 300px;
+    }
+
+    .edges-bs3-checkboxortermselector_header {
+        text-transform: uppercase;
+        color: $title-text;
+    }
+
+    .edges-bs3-chartdatatable_table {
+        width: 100%;
+
+        thead {
+            font-weight: bold;
+            text-transform: uppercase;
+            color: $title-text;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid $table-divider;
+
+            td {
+                padding: 5px;
+
+                &:first-of-type {
+                    font-weight: bold;
+                    color: $title-text
+                }
+            }
+        }
     }
 }

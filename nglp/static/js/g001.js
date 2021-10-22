@@ -2256,6 +2256,9 @@ function $d48cc3604bf30e24$export$5e20d0a3120d6c07(unsafe, def) {
         return def;
     }
 }
+function $d48cc3604bf30e24$export$63ba8ea1e92c906(unsafe) {
+    return unsafe.replace(/&/g, "_").replace(/</g, "_").replace(/>/g, "_").replace(/"/g, "_").replace(/'/g, "_").replace(/\./gi, '_').replace(/\:/gi, '_').replace(/\s/gi, "_");
+}
 function $d48cc3604bf30e24$export$48334dba1de70fbe(params) {
     var reflectNonNumbers = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "reflectNonNumbers", false);
     var prefix = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "prefix", "");
@@ -3466,6 +3469,7 @@ var $f29180d7a0e96438$export$1b75c0a6cacf635c = /*#__PURE__*/ function(Renderer)
         _this.transitionDuration = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "transitionDuration", 500);
         _this.controls = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "controls", false);
         _this.barColor = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "barColor", false);
+        _this.color = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "color", false);
         _this.showLegend = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "showLegend", true);
         _this.xAxisLabel = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "xAxisLabel", "");
         _this.yAxisLabel = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "yAxisLabel", "");
@@ -3523,6 +3527,7 @@ var $f29180d7a0e96438$export$1b75c0a6cacf635c = /*#__PURE__*/ function(Renderer)
                         chart.yAxis.tickFormat(fn);
                     }
                     if (that.barColor) chart.barColor(that.barColor);
+                    if (that.color) chart.color(that.color);
                     chart.showLegend(that.showLegend);
                     $f5a419d63f8f3762$export$6343839093e1c21d.select(svgSelector).datum(data_series).transition().duration(that.transitionDuration).call(chart);
                     $b76ad79e27dc7523$export$8698b599d6b7d9a0.utils.windowResize(chart.update);
@@ -4390,13 +4395,13 @@ var $2c48e414d79136ba$export$845e14b82c9a4f95 = /*#__PURE__*/ function(Component
 
 
 
-var $2b034dd3c059ba31$export$aa372d4baef28733 = /*#__PURE__*/ function(Renderer) {
+var $135bcb32af9eb45d$export$4b392426dd40333d = /*#__PURE__*/ function(Renderer) {
     "use strict";
-    $bca7673885229bfd$export$9099ad97b570f7c($2b034dd3c059ba31$export$aa372d4baef28733, Renderer);
-    function $2b034dd3c059ba31$export$aa372d4baef28733(params) {
-        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $2b034dd3c059ba31$export$aa372d4baef28733);
+    $bca7673885229bfd$export$9099ad97b570f7c($135bcb32af9eb45d$export$4b392426dd40333d, Renderer);
+    function $135bcb32af9eb45d$export$4b392426dd40333d(params) {
+        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $135bcb32af9eb45d$export$4b392426dd40333d);
         var _this;
-        _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($2b034dd3c059ba31$export$aa372d4baef28733).call(this, params));
+        _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($135bcb32af9eb45d$export$4b392426dd40333d).call(this));
         _this.title = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "title", "Select");
         // whether the facet should be open or closed
         // can be initialised and is then used to track internal state
@@ -4405,101 +4410,101 @@ var $2b034dd3c059ba31$export$aa372d4baef28733 = /*#__PURE__*/ function(Renderer)
         // whether the count should be displayed along with the term
         // defaults to false because count may be confusing to the user in an OR selector
         _this.showCount = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "showCount", false);
+        _this.countFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "countFormat", false);
         // whether counts of 0 should prevent the value being rendered
         _this.hideEmpty = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "hideEmpty", false);
         _this.openIcon = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "openIcon", "glyphicon glyphicon-plus");
         _this.closeIcon = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "closeIcon", "glyphicon glyphicon-minus");
+        // don't display the facet at all if there is no data to display
+        _this.hideIfNoData = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "hideIfNoData", true);
         _this.layout = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "layout", "left");
         // namespace to use in the page
-        _this.namespace = "edges-bs3-or-term-selector";
+        _this.namespace = "edges-bs3-checkboxortermselector";
         return _this;
     }
-    $67866ae5f3a26802$export$9099ad97b570f7c($2b034dd3c059ba31$export$aa372d4baef28733, [
+    $67866ae5f3a26802$export$9099ad97b570f7c($135bcb32af9eb45d$export$4b392426dd40333d, [
         {
             key: "draw",
             value: function draw() {
                 // for convenient short references ...
                 var ts = this.component;
                 var namespace = this.namespace;
+                if (this.hideIfNoData && ts.edge.result && ts.terms.length === 0) {
+                    this.component.context.html("");
+                    return;
+                }
                 // sort out all the classes that we're going to be using
-                var resultClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "result", this);
-                var valClass = $d48cc3604bf30e24$export$e516ebba864be69d(namespace, "value", this);
-                var filterRemoveClass = $d48cc3604bf30e24$export$e516ebba864be69d(namespace, "filter-remove", this);
+                var countClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "count", this);
+                var checkboxClass = $d48cc3604bf30e24$export$e516ebba864be69d(namespace, "selector", this);
                 var facetClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "facet", this);
                 var headerClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "header", this);
-                var selectionsClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "selections", this);
                 var bodyClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "body", this);
-                var countClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "count", this);
+                var listClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "list", this);
+                var labelClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "label", this);
                 var toggleId = $d48cc3604bf30e24$export$bf52b203d82ff901(namespace, "toggle", this);
                 var resultsId = $d48cc3604bf30e24$export$bf52b203d82ff901(namespace, "results", this);
-                // this is what's displayed in the body if there are no results
-                var results = "Loading...";
-                // render a list of the values
-                if (ts.terms.length > 0) {
-                    results = "";
-                    // render each value, if it is not also a filter that has been set
-                    for(var i = 0; i < ts.terms.length; i++){
-                        var val = ts.terms[i];
-                        // should we ignore the empty counts
-                        if (val.count === 0 && this.hideEmpty) continue;
-                        // otherwise, render any that aren't selected already
-                        if ($.inArray(val.term.toString(), ts.selected) === -1) {
-                            results += '<div class="' + resultClass + '"><a href="#" class="' + valClass + '" data-key="' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(val.term) + '">' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(val.display) + "</a>";
-                            if (this.showCount) results += ' <span class="' + countClass + '">(' + val.count + ')</span>';
-                            results += "</div>";
+                // this is what's displayed in the body if there are no results or the page is loading
+                var results = "<li class='loading'>Loading choices...</li>";
+                if (ts.edge.result) results = "<li>No data to show</li>";
+                // if we want the active filters, render them
+                var filterFrag = "";
+                if (ts.selected.length > 0) {
+                    var resultClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "result", this);
+                    for(var i = 0; i < ts.selected.length; i++){
+                        var filt = ts.selected[i];
+                        var def = this._getFilterDef(filt);
+                        if (def) {
+                            var display = this.component._translate(filt);
+                            var id = $d48cc3604bf30e24$export$63ba8ea1e92c906(filt);
+                            var count = "";
+                            if (this.showCount) {
+                                var cv = def.count;
+                                if (this.countFormat) cv = this.countFormat(cv);
+                                count = ' <span class="' + countClass + '">(' + cv + ')</span>';
+                            }
+                            filterFrag += '<li>\
+                        <input class="' + checkboxClass + '" data-key="' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(filt) + '" id="' + id + '" type="checkbox" name="' + id + '" checked="checked">\
+                        <label for="' + id + '" class="' + labelClass + '">' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(display) + count + '</label>\
+                    </li>';
                         }
                     }
                 }
-                // if we want the active filters, render them
-                var filterFrag = "";
-                if (ts.selected.length > 0) for(var i = 0; i < ts.selected.length; i++){
-                    var filt = ts.selected[i];
-                    var def = this._getFilterDef(filt);
-                    if (def) {
-                        filterFrag += '<div class="' + resultClass + '"><strong>' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(def.display);
-                        if (this.showCount) filterFrag += " (" + def.count + ")";
-                        filterFrag += '&nbsp;<a href="#" class="' + filterRemoveClass + '" data-key="' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(def.term) + '">';
-                        filterFrag += '<i class="glyphicon glyphicon-black glyphicon-remove"></i></a>';
-                        filterFrag += "</strong></a></div>";
+                // render a list of the values
+                if (ts.terms.length > 0) {
+                    results = "";
+                    for(var i = 0; i < ts.terms.length; i++){
+                        var val = ts.terms[i];
+                        if (val.count === 0 && this.hideEmpty) continue;
+                        var active = $.inArray(val.term.toString(), ts.selected) > -1;
+                        var checked = "";
+                        if (active) continue;
+                        var count = "";
+                        if (this.showCount) count = ' <span class="' + countClass + '">(' + val.count + ')</span>';
+                        var id = $d48cc3604bf30e24$export$63ba8ea1e92c906(val.term);
+                        results += '<li>\
+                    <input class="' + checkboxClass + '" data-key="' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(val.term) + '" id="' + id + '" type="checkbox" name="' + id + '"' + checked + '>\
+                    <label for="' + id + '" class="' + labelClass + '">' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(val.display) + count + '</label>\
+                </li>';
                     }
                 }
                 var header = this.headerLayout({
                     toggleId: toggleId
                 });
                 // render the overall facet
-                var frag = '<div class="' + facetClass + '">\
-                <div class="' + headerClass + '"><div class="row"> \
-                    <div class="col-md-12">\
-                        ' + header + '\
-                    </div>\
-                </div></div>\
-                <div class="' + bodyClass + '">\
-                    <div class="row" style="display:none" id="' + resultsId + '">\
-                        <div class="col-md-12">\
-                            {{SELECTED}}\
-                        </div>\
-                        <div class="col-md-12"><div class="' + selectionsClass + '">\
-                            {{RESULTS}}\
-                        </div>\
+                var frag = "<div class=\"".concat(facetClass, "\">\n                <div class=\"").concat(headerClass, "\"><div class=\"row\">\n                    <div class=\"col-md-12\">\n                        ").concat(header, "\n                    </div>\n                </div></div>\n                <div class=\"").concat(bodyClass, "\">\n                    <div class=\"row\" style=\"display:none\" id=\"").concat(resultsId, "\">\n                        <div class=\"col-md-12\">\n                            <ul class=\"").concat(listClass, "\">{{FILTERS}}</ul>\n                        </div>\
                     </div>\
                 </div>\
-                </div></div>';
+                </div></div>");
                 // substitute in the component parts
-                frag = frag.replace(/{{RESULTS}}/g, results).replace(/{{SELECTED}}/g, filterFrag);
+                frag = frag.replace(/{{FILTERS}}/g, filterFrag + results);
                 // now render it into the page
                 ts.context.html(frag);
                 // trigger all the post-render set-up functions
                 this.setUIOpen();
-                // sort out the selectors we're going to be needing
-                var valueSelector = $d48cc3604bf30e24$export$b1157bd4df096bce(namespace, "value", this);
-                var filterRemoveSelector = $d48cc3604bf30e24$export$b1157bd4df096bce(namespace, "filter-remove", this);
+                var checkboxSelector = $d48cc3604bf30e24$export$b1157bd4df096bce(namespace, "selector", this);
+                $d48cc3604bf30e24$export$b4cd8de5710bc55c(checkboxSelector, "change", this, "filterToggle");
                 var toggleSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(namespace, "toggle", this);
-                // for when a value in the facet is selected
-                $d48cc3604bf30e24$export$b4cd8de5710bc55c(valueSelector, "click", this, "termSelected");
-                // for when the open button is clicked
                 $d48cc3604bf30e24$export$b4cd8de5710bc55c(toggleSelector, "click", this, "toggleOpen");
-                // for when a filter remove button is clicked
-                $d48cc3604bf30e24$export$b4cd8de5710bc55c(filterRemoveSelector, "click", this, "removeFilter");
             }
         },
         {
@@ -4514,7 +4519,7 @@ var $2b034dd3c059ba31$export$aa372d4baef28733 = /*#__PURE__*/ function(Renderer)
                 } else if (this.layout === "right") {
                     var tog = "";
                     if (this.togglable) tog = '<a href="#" id="' + toggleId + '">' + this.title + '&nbsp;<i class="' + this.openIcon + ' ' + iconClass + '"></i></a>';
-                    else tog = this.component.title;
+                    else tog = this.title;
                     return tog;
                 }
             }
@@ -4543,17 +4548,12 @@ var $2b034dd3c059ba31$export$aa372d4baef28733 = /*#__PURE__*/ function(Renderer)
             }
         },
         {
-            key: "termSelected",
-            value: function termSelected(element) {
+            key: "filterToggle",
+            value: function filterToggle(element) {
                 var term = this.component.jq(element).attr("data-key");
-                this.component.selectTerm(term);
-            }
-        },
-        {
-            key: "removeFilter",
-            value: function removeFilter(element) {
-                var term = this.component.jq(element).attr("data-key");
-                this.component.removeFilter(term);
+                var checked = this.component.jq(element).is(":checked");
+                if (checked) this.component.selectTerm(term);
+                else this.component.removeFilter(term);
             }
         },
         {
@@ -4574,7 +4574,7 @@ var $2b034dd3c059ba31$export$aa372d4baef28733 = /*#__PURE__*/ function(Renderer)
             }
         }
     ]);
-    return $2b034dd3c059ba31$export$aa372d4baef28733;
+    return $135bcb32af9eb45d$export$4b392426dd40333d;
 }($6cf4dc301226cb87$export$a695173e2ecfa9b);
 
 
@@ -4819,6 +4819,12 @@ nglp.g001.init = function(params) {
     var countFormat = $d48cc3604bf30e24$export$48334dba1de70fbe({
         thousandsSeparator: ","
     });
+    var palette = nglp.g001.extractPalette();
+    var interactionValueMap = {
+        "investigation": "VIEWS",
+        "export": "EXPORTS",
+        "request": "DOWNLOADS"
+    };
     nglp.g001.active[selector] = new $6cf4dc301226cb87$export$22ad9a5707a07e9c({
         selector: selector,
         template: new nglp.g001.G001Template(),
@@ -4889,9 +4895,9 @@ nglp.g001.init = function(params) {
                     xTickFormat: function xTickFormat(d) {
                         return d3.time.format('%b %y')(new Date(d));
                     },
-                    barColor: [
-                        "#1e9dd8"
-                    ],
+                    color: function color(d, i) {
+                        return palette[d.key];
+                    },
                     yTickFormat: ",.0f",
                     showLegend: false,
                     xAxisLabel: "Occurred At",
@@ -4911,7 +4917,10 @@ nglp.g001.init = function(params) {
                     labelFormat: function labelFormat(d) {
                         return d3.time.format('%b %y')(new Date(d));
                     },
-                    valueFormat: countFormat
+                    valueFormat: countFormat,
+                    headerFormat: function headerFormat(d) {
+                        return interactionValueMap[d] || d;
+                    }
                 })
             }),
             new $7ac4d4ec044faea2$export$c57445924c23547b({
@@ -4937,11 +4946,13 @@ nglp.g001.init = function(params) {
                 updateType: "fresh",
                 orderBy: "term",
                 orderDir: "asc",
-                renderer: new $2b034dd3c059ba31$export$aa372d4baef28733({
+                valueMap: interactionValueMap,
+                renderer: new $135bcb32af9eb45d$export$4b392426dd40333d({
                     title: "Interactions",
                     open: true,
                     togglable: false,
-                    showCount: true
+                    showCount: true,
+                    countFormat: countFormat
                 })
             }),
             new $2c48e414d79136ba$export$845e14b82c9a4f95({
@@ -4952,11 +4963,15 @@ nglp.g001.init = function(params) {
                 lifecycle: "static",
                 orderBy: "count",
                 orderDir: "desc",
-                renderer: new $2b034dd3c059ba31$export$aa372d4baef28733({
+                valueFunction: function(v) {
+                    return v.toUpperCase();
+                },
+                renderer: new $135bcb32af9eb45d$export$4b392426dd40333d({
                     title: "Format",
                     open: true,
                     togglable: false,
-                    showCount: true
+                    showCount: true,
+                    countFormat: countFormat
                 })
             }),
             new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
@@ -5024,6 +5039,23 @@ nglp.g001.init = function(params) {
             })
         ]
     });
+};
+nglp.g001.extractPalette = function() {
+    var palette = {
+        investigation: false,
+        export: false,
+        request: false
+    };
+    for(var i = 0; i < document.styleSheets.length; i++){
+        var sheet = document.styleSheets[i];
+        if (sheet.href && sheet.href.includes("g001.css")) for(var j = 0; j < sheet.rules.length; j++){
+            var rule = sheet.rules[j];
+            if (rule.selectorText === "#palette #investigations") palette.investigation = rule.style.background;
+            else if (rule.selectorText === "#palette #exports") palette.export = rule.style.background;
+            else if (rule.selectorText === "#palette #requests") palette.request = rule.style.background;
+        }
+    }
+    return palette;
 };
 nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
     "use strict";

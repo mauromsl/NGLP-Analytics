@@ -8,7 +8,7 @@ import {htmlID, numFormat, idSelector, on} from "../vendor/edges2/src/utils";
 import {GeohashedZoomableMap} from "../vendor/edges2/src/components/GeohashedZoomableMap";
 import {GoogleMapView} from "../vendor/edges2/src/renderers/googlemap/GoogleMapView";
 import {ORTermSelector} from "../vendor/edges2/src/components/ORTermSelector";
-import {ORTermSelectorRenderer} from "../vendor/edges2/src/renderers/bs3/ORTermSelectorRenderer";
+import {CheckboxORTermSelector} from "../vendor/edges2/src/renderers/bs3/CheckboxORTermSelector";
 import {HorizontalMultibarRenderer} from "../vendor/edges2/src/renderers/nvd3/HorizontalMultibarRenderer";
 import {ChartDataTable} from "../vendor/edges2/src/renderers/bs3/ChartDataTable";
 
@@ -26,6 +26,14 @@ nglp.g001.init = function (params) {
     var countFormat = numFormat({
         thousandsSeparator: ","
     });
+
+    let palette = nglp.g001.extractPalette();
+
+    let interactionValueMap = {
+        "investigation" : "VIEWS",
+        "export" : "EXPORTS",
+        "request" : "DOWNLOADS"
+    }
 
     nglp.g001.active[selector] = new Edge({
         selector: selector,
@@ -78,7 +86,9 @@ nglp.g001.init = function (params) {
                 }),
                 renderer : new MultibarRenderer({
                     xTickFormat: function(d) { return d3.time.format('%b %y')(new Date(d))},
-                    barColor : ["#1e9dd8"],
+                    color: function(d, i) {
+                        return palette[d.key]
+                    },
                     yTickFormat : ",.0f",
                     showLegend: false,
                     xAxisLabel: "Occurred At",
@@ -96,7 +106,10 @@ nglp.g001.init = function (params) {
                 }),
                 renderer : new ChartDataTable({
                     labelFormat: function(d) { return d3.time.format('%b %y')(new Date(d))},
-                    valueFormat: countFormat
+                    valueFormat: countFormat,
+                    headerFormat: function(d) {
+                        return interactionValueMap[d] || d;
+                    }
                 })
             }),
             new GeohashedZoomableMap({
@@ -122,11 +135,13 @@ nglp.g001.init = function (params) {
                 updateType: "fresh",
                 orderBy: "term",
                 orderDir: "asc",
-                renderer: new ORTermSelectorRenderer({
+                valueMap: interactionValueMap,
+                renderer: new CheckboxORTermSelector({
                     title: "Interactions",
                     open: true,
                     togglable: false,
-                    showCount: true
+                    showCount: true,
+                    countFormat: countFormat
                 })
             }),
             new ORTermSelector({
@@ -137,11 +152,15 @@ nglp.g001.init = function (params) {
                 lifecycle: "static",
                 orderBy: "count",
                 orderDir: "desc",
-                renderer: new ORTermSelectorRenderer({
+                valueFunction : (v) => {
+                    return v.toUpperCase();
+                },
+                renderer: new CheckboxORTermSelector({
                     title: "Format",
                     open: true,
                     togglable: false,
-                    showCount: true
+                    showCount: true,
+                    countFormat: countFormat
                 })
             }),
             new Chart({
@@ -182,6 +201,30 @@ nglp.g001.init = function (params) {
             })
         ]
     })
+}
+
+nglp.g001.extractPalette = function() {
+    let palette = {
+        investigation: false,
+        export: false,
+        request: false
+    }
+    for (let i = 0; i < document.styleSheets.length; i++) {
+        let sheet = document.styleSheets[i];
+        if (sheet.href && sheet.href.includes("g001.css")) {
+            for (let j = 0; j < sheet.rules.length; j++) {
+                let rule = sheet.rules[j];
+                if (rule.selectorText === "#palette #investigations") {
+                    palette.investigation = rule.style.background;
+                } else if (rule.selectorText === "#palette #exports") {
+                    palette.export = rule.style.background;
+                } else if (rule.selectorText === "#palette #requests") {
+                    palette.request = rule.style.background;
+                }
+            }
+        }
+    }
+    return palette;
 }
 
 nglp.g001.G001Template = class extends Template {
