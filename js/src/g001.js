@@ -285,7 +285,7 @@ nglp.g001.G001Template = class extends Template {
         let frame = `<div class="row header">
             <div class="col-xs-12">
                 <h1>G001: Article  Downloads for  Unit Administrators</h1>
-                <h2>Article downloads by format, including landing page and metadata exports in aggregate, with information about users who downloaded them</h2> 
+                <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2> 
             </div>
         </div>
         <div class="row controls">
