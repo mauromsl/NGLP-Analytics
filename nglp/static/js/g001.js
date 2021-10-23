@@ -5058,7 +5058,27 @@ nglp.g001.init = function(params) {
                 }),
                 renderer: new $8ff5b3d2c2ab6201$export$6d5fb309d07d7299({
                     title: "Exports",
-                    legend: false
+                    legend: false,
+                    valueFormat: countFormat,
+                    color: function color(d, i) {
+                        return palette[d.key];
+                    },
+                    showXAxis: true,
+                    showYAxis: false,
+                    marginLeft: 0,
+                    marginRight: 0,
+                    marginTop: 0,
+                    marginBottom: 0,
+                    groupSpacing: 0.7,
+                    onUpdate: function() {
+                        var ticks = $99b6183ba65dae12$export$4048ae5fe51d81b7("#g001-top-exports .tick text");
+                        for(var i = 0; i < ticks.length; i++){
+                            var tick = $99b6183ba65dae12$export$4048ae5fe51d81b7(ticks[i]);
+                            tick.attr("x", 0);
+                            tick.attr("y", 20);
+                            tick.css("text-anchor", "start");
+                        }
+                    }
                 })
             })
         ]

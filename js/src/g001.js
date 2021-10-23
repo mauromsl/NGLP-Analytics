@@ -219,7 +219,27 @@ nglp.g001.init = function (params) {
                 }),
                 renderer: new HorizontalMultibarRenderer({
                     title: "Exports",
-                    legend: false
+                    legend: false,
+                    valueFormat: countFormat,
+                    color: function(d, i) {
+                        return palette[d.key]
+                    },
+                    showXAxis: true,
+                    showYAxis: false,
+                    marginLeft: 0,
+                    marginRight: 0,
+                    marginTop: 0,
+                    marginBottom: 0,
+                    groupSpacing: 0.7,
+                    onUpdate: () => {
+                        let ticks = $("#g001-top-exports .tick text");
+                        for (let i = 0; i < ticks.length; i++) {
+                            let tick = $(ticks[i]);
+                            tick.attr("x", 0);
+                            tick.attr("y", 20);
+                            tick.css("text-anchor", "start");
+                        }
+                    }
                 })
             })
         ]
