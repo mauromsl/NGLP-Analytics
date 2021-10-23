@@ -231,6 +231,34 @@ class CoreEvent(SeamlessMixin, CoreEventInterfaceMixin, BaseDAO):
     def mappings(self):
         return es_data_mapping.create_mapping(self.__seamless_struct__.raw, MAPPING_OPTS)
 
+    @property
+    def data(self):
+        return self.__seamless__.data
+
+    @property
+    def id(self):
+        return self.__seamless__.get_single("id")
+
+    @id.setter
+    def id(self, val):
+        self.__seamless__.set_with_struct("id", val)
+
+    @property
+    def last_updated(self):
+        return self.__seamless__.get_single("record_last_updated")
+
+    @last_updated.setter
+    def last_updated(self, val):
+        self.__seamless__.set_with_struct("record_last_updated", val)
+
+    @property
+    def created_date(self):
+        return self.__seamless__.get_single("record_created")
+
+    @created_date.setter
+    def created_date(self, val):
+        self.__seamless__.set_with_struct("record_created", val)
+
     @classmethod
     def find(cls, object_ids: List[str]=None, source_ids: List[str]=None, categories: List[str]=None, size: int=10):
         q = CoreEventQuery(object_ids, source_ids, categories, size)

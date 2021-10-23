@@ -326,7 +326,9 @@ CORE_EVENT_STRUCTURE = {
         "ip": {"coerce": "ip"},
         "city": {"coerce": "unicode"},
         "country": {"coerce": "unicode"},
-        "user_org": {"coerce": "unicode"}
+        "user_org": {"coerce": "unicode"},
+        "record_created": {"coerce": "datetime"},
+        "record_last_updated" : {"coerce" : "datetime"}
     },
     "lists": {
         "object_id": {"contains": "field", "coerce": "unicode"},
