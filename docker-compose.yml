@@ -1,0 +1,53 @@
+version: '2.4'
+services:
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    image: 'bitnami/kafka:latest'
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9103,EXTERNAL://:9092,INTERNAL://:19092,
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9103,EXTERNAL://localhost:9092,,INTERNAL://kafka:19092
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--list", "--zookeeper", "zookeeper:2181"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+
+  analytics:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8800:8000'
+    depends_on:
+      kafka:
+         condition: service_healthy
+
+  nglp-events-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile-events-consumer
+    volumes:
+      - "./logs:/app/store/pipeline:rw"
+    depends_on:
+      - analytics
+
+  nglp-oids-consumer:
+    build:
+      context: .
+      dockerfile: Dockerfile-oids-consumer
+    volumes:
+      - "./logs:/app/store/pipeline:rw"
+    depends_on:
+      - nglp-events-consumer
