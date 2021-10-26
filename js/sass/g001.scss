@@ -1,0 +1,116 @@
+@charset "utf-8";
+
+
+@import "base/palette",
+    "../vendor/edges2/sass/renderers/bs3/checkbox-or-term-selector",
+    "../vendor/edges2/sass/renderers/googlemap/google-map-view";
+
+// export the key bits of the pallette as stylesheet rules, to be read by the JS
+// for injection into visualisation components
+#palette {
+    #investigations {
+        background: $investigations;
+    }
+
+    #requests {
+        background: $requests;
+    }
+
+    #exports {
+        background: $exports;
+    }
+}
+
+
+#g001 {
+    .header {
+        background: $header;
+        color: $header-text;
+    }
+
+    .controls {
+        background: $control;
+        color: $header-text;
+        margin-bottom: 50px;
+    }
+
+    .nav {
+        list-style-type: none;
+
+        li {
+            float: left;
+            margin-right: 0.5em;
+
+            a {
+                color: $header-text;
+            }
+        }
+    }
+
+    .formats-header {
+        margin-top: 100px;
+        color: $title-text;
+
+        h3 {
+            font-weight: bold;
+        }
+    }
+
+    #g001-interactions {
+        margin-bottom: 50px;
+    }
+
+    #g001-interactions-chart {
+        height: 500px;
+    }
+
+    #g001-interactions-map {
+        margin-top: 100px;
+    }
+
+    #g001-top-investigations svg {
+        height: 300px;
+    }
+
+    #g001-top-downloads svg {
+        height: 300px;
+    }
+
+    #g001-top-exports svg {
+        height: 300px;
+    }
+
+    .edges-bs3-checkboxortermselector_header {
+        text-transform: uppercase;
+        color: $title-text;
+    }
+
+    .edges-bs3-chartdatatable_table {
+        width: 100%;
+
+        thead {
+            font-weight: bold;
+            text-transform: uppercase;
+            color: $title-text;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid $table-divider;
+
+            td {
+                padding: 5px;
+
+                &:first-of-type {
+                    font-weight: bold;
+                    color: $title-text
+                }
+            }
+        }
+    }
+
+    .edges-nvd3-horizontal-multibar_title {
+        font-weight: bold;
+        color: $title-text;
+        text-transform: uppercase;
+    }
+}

@@ -16,7 +16,6 @@ store/pipeline/*.log
 
 *.pyc
 *.egg-info/*
-src*
 .Python
 build/*
 dist/*
@@ -66,3 +65,7 @@ app.cfg
 Network Trash Folder
 Temporary Items
 
+# Parcel build stuff
+js/.parcel-cache
+js/dist
+js/node_modules

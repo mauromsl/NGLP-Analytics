@@ -1,4 +1,4 @@
-from elasticsearch import Elasticsearch, NotFoundError, TransportError
+from elasticsearch import Elasticsearch
 import uuid
 import time
 import json
