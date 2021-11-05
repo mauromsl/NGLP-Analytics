@@ -3606,6 +3606,7 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
         $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $26b66f4c4ad5f83b$export$dda19d2613327857);
         var _this;
         _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($26b66f4c4ad5f83b$export$dda19d2613327857).call(this));
+        _this.includeHeaderRow = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "includeHeaderRow", true);
         _this.valueFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "valueFormat", false);
         _this.labelFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "labelFormat", false);
         _this.headerFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "headerFormat", false);
@@ -3622,17 +3623,20 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
                 }
                 var tableData = this._dataSeriesToTable();
                 var headFrag = "";
-                for(var i = 0; i < tableData.head.length; i++){
-                    var header = tableData.head[i];
-                    headFrag += "<tr><td>" + header.join("</td><td>") + "</td></tr>";
+                if (this.includeHeaderRow) {
+                    for(var i = 0; i < tableData.head.length; i++){
+                        var header = tableData.head[i];
+                        headFrag += "<tr><td>" + header.join("</td><td>") + "</td></tr>";
+                    }
+                    headFrag = "<thead>".concat(headFrag, "</thead>");
                 }
                 var bodyFrag = "";
-                for(var i1 = 0; i1 < tableData.body.length; i1++){
-                    var row = tableData.body[i1];
+                for(var i = 0; i < tableData.body.length; i++){
+                    var row = tableData.body[i];
                     bodyFrag += "<tr><td>" + row.join("</td><td>") + "</td></tr>";
                 }
                 var tableClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "table", this);
-                var frag = "\n            <table class=\"".concat(tableClass, "\">\n                <thead>").concat(headFrag, "</thead>\n                <tbody>").concat(bodyFrag, "</tbody>\n            </table>\n        ");
+                var frag = "\n            <table class=\"".concat(tableClass, "\">\n                ").concat(headFrag, "\n                <tbody>").concat(bodyFrag, "</tbody>\n            </table>\n        ");
                 this.component.context.html(frag);
             }
         },
@@ -4006,36 +4010,29 @@ nglp.g014.init = function(params) {
     var workflowComponents = [
         new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
             id: "g014-workflow-capacity-chart",
-            dataFunction: function dataFunction(component) {
-                var dataset = [];
-                // let states = component.edge.result.aggregation("states");
-                var states = component.edge.secondaryResults["capacity"].aggregation("states");
-                for(var i3 = 0; i3 < states.buckets.length; i3++){
-                    var bucket = states.buckets[i3];
-                    var keys = Object.keys(bucket.time.buckets);
-                    keys.sort();
-                    var values = [];
-                    for(var j = 0; j < keys.length; j++){
-                        var cap = bucket.time.buckets[keys[j]];
-                        var pair = {
-                            label: parseInt(keys[j]),
-                            value: cap.doc_count
-                        };
-                        values.push(pair);
-                    }
-                    var series = {
-                        key: bucket.key,
-                        values: values
-                    };
-                    dataset.push(series);
-                }
-                return dataset;
-            },
+            dataFunction: $6ec8c71f816e3f1f$var$workflowCapacityDataFunction,
             renderer: new $e2db652327571723$export$aee0d0b293b2739({
                 xTickFormat: function xTickFormat(d) {
                     return d3.time.format('%B %Y')(new Date(d));
                 },
                 controls: false
+            })
+        }),
+        new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
+            id: "g014-workflow-capacity-table",
+            dataFunction: $6ec8c71f816e3f1f$var$workflowCapacityDataFunction,
+            renderer: new $26b66f4c4ad5f83b$export$dda19d2613327857({
+                labelFormat: function labelFormat(d) {
+                    return d3.time.format('%b %y')(new Date(d));
+                },
+                valueFormat: countFormat,
+                headerFormat: function headerFormat(d) {
+                    for(var i3 = 0; i3 < stateProgression.length; i3++){
+                        var state = stateProgression[i3];
+                        if (state[0] === d) return state[1];
+                    }
+                    return d;
+                }
             })
         })
     ];
@@ -4191,9 +4188,9 @@ nglp.g014.G014Template = /*#__PURE__*/ (function(Template) {
                 var tableRows = "";
                 for(var i = 0; i < this.stateProgression.length; i++){
                     var state = this.stateProgression[i];
-                    tableRows += "\n                <tr>\n                    <td>".concat(state[1], "</td>\n                    <td id=\"g014-total-").concat(state[0], "\"></td>\n                    <td id=\"g014-mean-").concat(state[0], "\"></td>\n                    <td>\n                        <div id=\"g014-age-chart-").concat(state[0], "\" class=\"").concat(ageChartClasses, "\"></div>\n                        <div id=\"g014-age-table-").concat(state[0], "\" class=\"").concat(ageTableClasses, "\" style=\"display:none\">TABLE HERE</div>\n                    </td>\n                </tr>\n            ");
+                    tableRows += "\n                <tr>\n                    <td>".concat(state[1], "</td>\n                    <td id=\"g014-total-").concat(state[0], "\"></td>\n                    <td id=\"g014-mean-").concat(state[0], "\"></td>\n                    <td>\n                        <div id=\"g014-age-chart-").concat(state[0], "\" class=\"").concat(ageChartClasses, "\"></div>\n                        <div id=\"g014-age-table-").concat(state[0], "\" class=\"").concat(ageTableClasses, "\" style=\"display:none\"></div>\n                    </td>\n                </tr>\n            ");
                 }
-                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G014: Progress of articles through the editorial workflow</h1>\n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g014-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-xs-12\">\n                <h3>Statistics per workflow state</h3>\n                <table class=\"".concat(tableClasses, "\">\n                    <thead>\n                        <tr>\n                            <td></td>\n                            <td>In Total Today</td>\n                            <td>Mean Time to Progress</td>\n                            <td>\n                                Age of Items\n                                <p><input type=\"checkbox\" name=\"").concat(ageId, "\" id=\"").concat(ageId, "\"> Show as table</p>\n                            </td>\n                        </tr>\n                    </thead>\n                    <tbody>\n                        ").concat(tableRows, "\n                    </tbody>\n                </table>\n                \n                <h3>Workflow Capacity</h3>\n                <p><input type=\"checkbox\" name=\"").concat(capacityId, "\" id=\"").concat(capacityId, "\"> Show as table</p>\n                <div id=\"g014-workflow-capacity-chart\"></div>\n                <div id=\"g014-workflow-capacity-table\">TABLE HERE</div>\n                \n            </div>\n        </div>");
+                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G014: Progress of articles through the editorial workflow</h1>\n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g014-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-xs-12\">\n                <h3>Statistics per workflow state</h3>\n                <table class=\"".concat(tableClasses, "\">\n                    <thead>\n                        <tr>\n                            <td></td>\n                            <td>In Total Today</td>\n                            <td>Mean Time to Progress</td>\n                            <td>\n                                Age of Items\n                                <p><input type=\"checkbox\" name=\"").concat(ageId, "\" id=\"").concat(ageId, "\"> Show as table</p>\n                            </td>\n                        </tr>\n                    </thead>\n                    <tbody>\n                        ").concat(tableRows, "\n                    </tbody>\n                </table>\n                \n                <h3>Workflow Capacity</h3>\n                <p><input type=\"checkbox\" name=\"").concat(capacityId, "\" id=\"").concat(capacityId, "\"> Show as table</p>\n                <div id=\"g014-workflow-capacity-chart\"></div>\n                <div id=\"g014-workflow-capacity-table\" style=\"display: none\"></div>\n                \n            </div>\n        </div>");
                 edge.context.html(frame);
                 var ageSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, "age-show-as-table");
                 $d48cc3604bf30e24$export$b4cd8de5710bc55c(ageSelector, "change", this, "toggleAgeTables");
@@ -4286,17 +4283,27 @@ function $6ec8c71f816e3f1f$var$stateDataFunction(state) {
 function $6ec8c71f816e3f1f$var$getAgeComponents(stateProgression, countFormat) {
     // Age distribution
     var ageComponents = [];
-    for(var j = 0; j < stateProgression.length; j++)ageComponents.push(new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
-        id: "g014-age-chart-" + stateProgression[j][0],
-        dataFunction: $6ec8c71f816e3f1f$var$stateDataFunction(stateProgression[j][0]),
-        renderer: new $8ff5b3d2c2ab6201$export$6d5fb309d07d7299({
-            // barColor: ["#1e9dd8"],
-            legend: false,
-            controls: false,
-            valueFormat: countFormat,
-            marginLeft: 80
-        })
-    }));
+    for(var j = 0; j < stateProgression.length; j++){
+        ageComponents.push(new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
+            id: "g014-age-chart-" + stateProgression[j][0],
+            dataFunction: $6ec8c71f816e3f1f$var$stateDataFunction(stateProgression[j][0]),
+            renderer: new $8ff5b3d2c2ab6201$export$6d5fb309d07d7299({
+                // barColor: ["#1e9dd8"],
+                legend: false,
+                controls: false,
+                valueFormat: countFormat,
+                marginLeft: 80
+            })
+        }));
+        ageComponents.push(new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
+            id: "g014-age-table-" + stateProgression[j][0],
+            dataFunction: $6ec8c71f816e3f1f$var$stateDataFunction(stateProgression[j][0]),
+            renderer: new $26b66f4c4ad5f83b$export$dda19d2613327857({
+                valueFormat: countFormat,
+                includeHeaderRow: false
+            })
+        }));
+    }
     return ageComponents;
 }
 function $6ec8c71f816e3f1f$var$rangeGenerator(params) {
@@ -4335,6 +4342,30 @@ function $6ec8c71f816e3f1f$var$isoDateStr(date) {
     M = padder(M);
     S = padder(S);
     return y + "-" + m + "-" + d + "T" + H + ":" + M + ":" + S + "Z";
+}
+function $6ec8c71f816e3f1f$var$workflowCapacityDataFunction(component) {
+    var dataset = [];
+    var states = component.edge.secondaryResults["capacity"].aggregation("states");
+    for(var i = 0; i < states.buckets.length; i++){
+        var bucket = states.buckets[i];
+        var keys = Object.keys(bucket.time.buckets);
+        keys.sort();
+        var values = [];
+        for(var j = 0; j < keys.length; j++){
+            var cap = bucket.time.buckets[keys[j]];
+            var pair = {
+                label: parseInt(keys[j]),
+                value: cap.doc_count
+            };
+            values.push(pair);
+        }
+        var series = {
+            key: bucket.key,
+            values: values
+        };
+        dataset.push(series);
+    }
+    return dataset;
 }
 var $6ec8c71f816e3f1f$export$9099ad97b570f7c = nglp;
 

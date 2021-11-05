@@ -118,30 +118,29 @@ nglp.g014.init = function (params) {
     let workflowComponents = [
         new Chart({
             id: "g014-workflow-capacity-chart",
-            dataFunction: function(component) {
-                let dataset = [];
-                // let states = component.edge.result.aggregation("states");
-                let states = component.edge.secondaryResults["capacity"].aggregation("states");
-                for (let i = 0; i < states.buckets.length; i++) {
-                    let bucket = states.buckets[i];
-                    let keys = Object.keys(bucket.time.buckets);
-                    keys.sort()
-                    let values = []
-                    for (let j = 0; j < keys.length; j++) {
-                        let cap = bucket.time.buckets[keys[j]];
-                        let pair = {label: parseInt(keys[j]), value: cap.doc_count}
-                        values.push(pair);
-                    }
-                    let series = {key: bucket.key, values: values};
-                    dataset.push(series);
-                }
-                return dataset;
-            },
+            dataFunction: workflowCapacityDataFunction,
             renderer: new StackedAreaChart({
                 xTickFormat: function(d) {
                     return d3.time.format('%B %Y')(new Date(d))
                 },
                 controls: false
+            })
+        }),
+        new Chart({
+            id: "g014-workflow-capacity-table",
+            dataFunction: workflowCapacityDataFunction,
+            renderer: new ChartDataTable({
+                labelFormat: function(d) { return d3.time.format('%b %y')(new Date(d))},
+                valueFormat: countFormat,
+                headerFormat: function(d) {
+                    for (let i = 0; i < stateProgression.length; i++) {
+                        let state = stateProgression[i];
+                        if (state[0] === d) {
+                            return state[1];
+                        }
+                    }
+                    return d;
+                }
             })
         })
     ]
@@ -261,7 +260,7 @@ nglp.g014.G014Template = class extends Template {
                     <td id="g014-mean-${state[0]}"></td>
                     <td>
                         <div id="g014-age-chart-${state[0]}" class="${ageChartClasses}"></div>
-                        <div id="g014-age-table-${state[0]}" class="${ageTableClasses}" style="display:none">TABLE HERE</div>
+                        <div id="g014-age-table-${state[0]}" class="${ageTableClasses}" style="display:none"></div>
                     </td>
                 </tr>
             `;
@@ -306,7 +305,7 @@ nglp.g014.G014Template = class extends Template {
                 <h3>Workflow Capacity</h3>
                 <p><input type="checkbox" name="${capacityId}" id="${capacityId}"> Show as table</p>
                 <div id="g014-workflow-capacity-chart"></div>
-                <div id="g014-workflow-capacity-table">TABLE HERE</div>
+                <div id="g014-workflow-capacity-table" style="display: none"></div>
                 
             </div>
         </div>`;
@@ -404,6 +403,16 @@ function getAgeComponents(stateProgression, countFormat) {
                     marginLeft: 80
                 })
             })
+        );
+        ageComponents.push(
+            new Chart({
+                id: "g014-age-table-" + stateProgression[j][0],
+                dataFunction: stateDataFunction(stateProgression[j][0]),
+                renderer: new ChartDataTable({
+                    valueFormat: countFormat,
+                    includeHeaderRow: false
+                })
+            })
         )
     }
     return ageComponents;
@@ -450,6 +459,25 @@ function isoDateStr(date) {
     S = padder(S);
 
     return y + "-" + m + "-" + d + "T" + H + ":" + M + ":" + S + "Z";
+}
+
+function workflowCapacityDataFunction(component) {
+    let dataset = [];
+    let states = component.edge.secondaryResults["capacity"].aggregation("states");
+    for (let i = 0; i < states.buckets.length; i++) {
+        let bucket = states.buckets[i];
+        let keys = Object.keys(bucket.time.buckets);
+        keys.sort()
+        let values = []
+        for (let j = 0; j < keys.length; j++) {
+            let cap = bucket.time.buckets[keys[j]];
+            let pair = {label: parseInt(keys[j]), value: cap.doc_count}
+            values.push(pair);
+        }
+        let series = {key: bucket.key, values: values};
+        dataset.push(series);
+    }
+    return dataset;
 }
 
 export default nglp;
