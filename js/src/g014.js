@@ -3,7 +3,7 @@ import {es} from "../vendor/edges2/dependencies/es"
 
 import {Edge, Template} from "../vendor/edges2/src/core"
 import {Chart} from "../vendor/edges2/src/components/Chart";
-import {htmlID, numFormat, idSelector, on, getParam} from "../vendor/edges2/src/utils";
+import {htmlID, numFormat, idSelector, on, getParam, jsClasses, jsClassSelector} from "../vendor/edges2/src/utils";
 import {HorizontalMultibarRenderer} from "../vendor/edges2/src/renderers/nvd3/HorizontalMultibarRenderer";
 import {ChartDataTable} from "../vendor/edges2/src/renderers/bs3/ChartDataTable";
 import {ImportantNumbers} from "../vendor/edges2/src/components/ImportantNumbers";
@@ -236,7 +236,8 @@ nglp.g014.G014Template = class extends Template {
     constructor(params) {
         super();
         this.edge = false;
-        this.showing = "chart";
+        this.showingAge = "chart";
+        this.showingCapacity = "chart";
         this.namespace = "g014-template";
 
         this.stateProgression = getParam(params, "stateProgression", []);
@@ -247,6 +248,8 @@ nglp.g014.G014Template = class extends Template {
         let ageId = htmlID(this.namespace, "age-show-as-table");
         let capacityId = htmlID(this.namespace, "capacity-show-as-table");
         let tableClasses = styleClasses(this.namespace, "stats");
+        let ageChartClasses = jsClasses(this.namespace, "age-chart");
+        let ageTableClasses = jsClasses(this.namespace, "age-table");
 
         let tableRows = "";
         for (let i = 0; i < this.stateProgression.length; i++) {
@@ -257,8 +260,8 @@ nglp.g014.G014Template = class extends Template {
                     <td id="g014-total-${state[0]}"></td>
                     <td id="g014-mean-${state[0]}"></td>
                     <td>
-                        <div id="g014-age-chart-${state[0]}"></div>
-                        <div id="g014-age-table-${state[0]}" style="display:none"></div>
+                        <div id="g014-age-chart-${state[0]}" class="${ageChartClasses}"></div>
+                        <div id="g014-age-table-${state[0]}" class="${ageTableClasses}" style="display:none">TABLE HERE</div>
                     </td>
                 </tr>
             `;
@@ -303,7 +306,7 @@ nglp.g014.G014Template = class extends Template {
                 <h3>Workflow Capacity</h3>
                 <p><input type="checkbox" name="${capacityId}" id="${capacityId}"> Show as table</p>
                 <div id="g014-workflow-capacity-chart"></div>
-                <div id="g014-workflow-capacity-table"></div>
+                <div id="g014-workflow-capacity-table">TABLE HERE</div>
                 
             </div>
         </div>`;
@@ -320,19 +323,31 @@ nglp.g014.G014Template = class extends Template {
     toggleCapacityTable() {
         let chart = this.edge.jq("#g014-workflow-capacity-chart");
         let table = this.edge.jq("#g014-workflow-capacity-table");
-        if (this.showing === "chart") {
+        if (this.showingCapacity === "chart") {
             chart.hide();
             table.show();
-            this.showing = "table"
+            this.showingCapacity = "table"
         } else {
             table.hide();
             chart.show();
-            this.showing = "chart"
+            this.showingCapacity = "chart"
         }
     }
 
     toggleAgeTables() {
-        // TODO
+        let chartSelector = jsClassSelector(this.namespace, "age-chart");
+        let tableSelector = jsClassSelector(this.namespace, "age-table");
+        let charts = this.edge.jq(chartSelector);
+        let tables = this.edge.jq(tableSelector);
+        if (this.showingAge === "chart") {
+            charts.hide();
+            tables.show();
+            this.showingAge = "table";
+        } else {
+            tables.hide();
+            charts.show();
+            this.showingAge = "chart";
+        }
     }
 }
 
