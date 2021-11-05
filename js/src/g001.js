@@ -12,6 +12,8 @@ import {CheckboxORTermSelector} from "../vendor/edges2/src/renderers/bs3/Checkbo
 import {HorizontalMultibarRenderer} from "../vendor/edges2/src/renderers/nvd3/HorizontalMultibarRenderer";
 import {ChartDataTable} from "../vendor/edges2/src/renderers/bs3/ChartDataTable";
 
+import {extractPalette} from "./nglpcommon";
+
 global.nglp = {}
 nglp.g001 = {
     active: {}
@@ -27,7 +29,7 @@ nglp.g001.init = function (params) {
         thousandsSeparator: ","
     });
 
-    let palette = nglp.g001.extractPalette();
+    let palette = extractPalette("g001.css");
 
     let interactionValueMap = {
         "investigation" : "VIEWS",
@@ -244,30 +246,6 @@ nglp.g001.init = function (params) {
             })
         ]
     })
-}
-
-nglp.g001.extractPalette = function() {
-    let palette = {
-        investigation: false,
-        export: false,
-        request: false
-    }
-    for (let i = 0; i < document.styleSheets.length; i++) {
-        let sheet = document.styleSheets[i];
-        if (sheet.href && sheet.href.includes("g001.css")) {
-            for (let j = 0; j < sheet.rules.length; j++) {
-                let rule = sheet.rules[j];
-                if (rule.selectorText === "#palette #investigations") {
-                    palette.investigation = rule.style.background;
-                } else if (rule.selectorText === "#palette #exports") {
-                    palette.export = rule.style.background;
-                } else if (rule.selectorText === "#palette #requests") {
-                    palette.request = rule.style.background;
-                }
-            }
-        }
-    }
-    return palette;
 }
 
 nglp.g001.G001Template = class extends Template {

@@ -1,0 +1,94 @@
+@charset "utf-8";
+
+
+@import "base/palette";
+
+// export the key bits of the palette as stylesheet rules, to be read by the JS
+// for injection into visualisation components
+#palette {
+    #investigations {
+        background: $investigations;
+    }
+
+    #requests {
+        background: $requests;
+    }
+
+    #exports {
+        background: $exports;
+    }
+}
+
+#g014 {
+    .header {
+        background: $header;
+        color: $header-text;
+    }
+
+    .controls {
+        background: $control;
+        color: $header-text;
+        margin-bottom: 50px;
+    }
+
+    .nav {
+        list-style-type: none;
+
+        li {
+            float: left;
+            margin-right: 0.5em;
+
+            a {
+                color: $header-text;
+            }
+        }
+    }
+
+    .g014-template_stats {
+        width: 100%;
+
+        tr {
+            border-bottom: 2px solid $table-divider;
+        }
+
+        thead {
+            font-weight: bold;
+            text-transform: uppercase;
+            color: $title-text;
+
+            td {
+                vertical-align: top;
+                text-align: left;
+
+                p {
+                    color: $regular-text;
+                    font-weight: normal;
+                }
+            }
+        }
+
+        td {
+            width: 25%;
+            vertical-align: middle;
+
+            &:first-of-type {
+                font-weight: bold;
+                text-transform: uppercase;
+                color: $title-text
+            }
+        }
+    }
+
+    #g014-workflow-capacity-chart {
+        height: 600px;
+    }
+    //#age_submit, #age_first_decision, #age_review, #age_accept, #age_publish {
+    //    height: 500px;
+    //    width: 20%;
+    //    float: left;
+    //}
+    //
+    //#age_submit svg, #age_first_decision svg, #age_review svg, #age_accept svg, #age_publish svg {
+    //    height: 450px;
+    //}
+}
