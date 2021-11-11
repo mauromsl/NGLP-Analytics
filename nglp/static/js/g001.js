@@ -8953,6 +8953,75 @@ function $4002aa3570a5e3f8$export$8e8129eda99077(sheetName) {
 }
 
 
+
+
+
+var $beec1707b43a9eb2$export$2a05ec748c9cb22d = /*#__PURE__*/ function(Renderer) {
+    "use strict";
+    $bca7673885229bfd$export$9099ad97b570f7c($beec1707b43a9eb2$export$2a05ec748c9cb22d, Renderer);
+    function $beec1707b43a9eb2$export$2a05ec748c9cb22d(params) {
+        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $beec1707b43a9eb2$export$2a05ec748c9cb22d);
+        var _this;
+        _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($beec1707b43a9eb2$export$2a05ec748c9cb22d).call(this, params));
+        _this.title = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "title", false);
+        _this.countFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "countFormat", false);
+        _this.noResultsText = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "noResultsText", "No data to display");
+        _this.namespace = "edges-html-relativesizebars";
+        return _this;
+    }
+    $67866ae5f3a26802$export$9099ad97b570f7c($beec1707b43a9eb2$export$2a05ec748c9cb22d, [
+        {
+            key: "draw",
+            value: function draw() {
+                var title = "";
+                if (this.title !== false) {
+                    var titleClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "title", this);
+                    title = "<h4 class=\"".concat(titleClass, "\">").concat(this.title, "</h4>");
+                }
+                var data_series = this.component.dataSeries;
+                if (!data_series || data_series.length === 0) {
+                    this.component.context.html(title + this.noResultsText);
+                    return;
+                }
+                // this renderer will only work on a single data series
+                var ds = data_series[0];
+                if (ds.values.length === 0) {
+                    this.component.context.html(title + this.noResultsText);
+                    return;
+                }
+                // first we need to find the largest value
+                var max = 0;
+                for(var i = 0; i < ds.values.length; i++){
+                    var value = ds.values[i];
+                    if (value.value > max) max = value.value;
+                }
+                var rows = "";
+                for(var i1 = 0; i1 < ds.values.length; i1++){
+                    var value = ds.values[i1];
+                    var prog = this._calculateProgress(value.value, max);
+                    var count = value.value;
+                    if (this.countFormat) count = this.countFormat(count);
+                    var label = "".concat(value.label, " (").concat(count, ")");
+                    rows += "<tr><td>\n                <progress value=\"".concat(prog, "\" max=\"100\">").concat(prog, "</progress><br>\n                ").concat(label, "\n            </td></tr>");
+                }
+                var tableClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "table", this);
+                var frag = "".concat(title, "<br><table class=\"").concat(tableClass, "\">").concat(rows, "</table>");
+                this.component.context.html(frag);
+            }
+        },
+        {
+            key: "_calculateProgress",
+            value: function _calculateProgress(value, max) {
+                if (max === 0) return 100;
+                if (value < 0) return 0;
+                return Math.floor(value / max * 100);
+            }
+        }
+    ]);
+    return $beec1707b43a9eb2$export$2a05ec748c9cb22d;
+}($6cf4dc301226cb87$export$a695173e2ecfa9b);
+
+
 $parcel$global.nglp = {
 };
 nglp.g001 = {
@@ -9167,29 +9236,33 @@ nglp.g001.init = function(params) {
                     ],
                     seriesName: "request"
                 }),
-                renderer: new $8ff5b3d2c2ab6201$export$6d5fb309d07d7299({
+                // renderer: new HorizontalMultibarRenderer({
+                //     title: "Downloads",
+                //     legend: false,
+                //     valueFormat: countFormat,
+                //     color: function(d, i) {
+                //         return palette[d.key]
+                //     },
+                //     showXAxis: true,
+                //     showYAxis: false,
+                //     marginLeft: 0,
+                //     marginRight: 0,
+                //     marginTop: 0,
+                //     marginBottom: 0,
+                //     groupSpacing: 0.7,
+                //     onUpdate: () => {
+                //         let ticks = $("#g001-top-downloads .tick text");
+                //         for (let i = 0; i < ticks.length; i++) {
+                //             let tick = $(ticks[i]);
+                //             tick.attr("x", 0);
+                //             tick.attr("y", 20);
+                //             tick.css("text-anchor", "start");
+                //         }
+                //     }
+                // })
+                renderer: new $beec1707b43a9eb2$export$2a05ec748c9cb22d({
                     title: "Downloads",
-                    legend: false,
-                    valueFormat: countFormat,
-                    color: function color(d, i) {
-                        return palette[d.key];
-                    },
-                    showXAxis: true,
-                    showYAxis: false,
-                    marginLeft: 0,
-                    marginRight: 0,
-                    marginTop: 0,
-                    marginBottom: 0,
-                    groupSpacing: 0.7,
-                    onUpdate: function() {
-                        var ticks = $99b6183ba65dae12$export$4048ae5fe51d81b7("#g001-top-downloads .tick text");
-                        for(var i = 0; i < ticks.length; i++){
-                            var tick = $99b6183ba65dae12$export$4048ae5fe51d81b7(ticks[i]);
-                            tick.attr("x", 0);
-                            tick.attr("y", 20);
-                            tick.css("text-anchor", "start");
-                        }
-                    }
+                    countFormat: countFormat
                 })
             }),
             new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
@@ -9209,29 +9282,9 @@ nglp.g001.init = function(params) {
                     ],
                     seriesName: "export"
                 }),
-                renderer: new $8ff5b3d2c2ab6201$export$6d5fb309d07d7299({
+                renderer: new $beec1707b43a9eb2$export$2a05ec748c9cb22d({
                     title: "Exports",
-                    legend: false,
-                    valueFormat: countFormat,
-                    color: function color(d, i) {
-                        return palette[d.key];
-                    },
-                    showXAxis: true,
-                    showYAxis: false,
-                    marginLeft: 0,
-                    marginRight: 0,
-                    marginTop: 0,
-                    marginBottom: 0,
-                    groupSpacing: 0.7,
-                    onUpdate: function() {
-                        var ticks = $99b6183ba65dae12$export$4048ae5fe51d81b7("#g001-top-exports .tick text");
-                        for(var i = 0; i < ticks.length; i++){
-                            var tick = $99b6183ba65dae12$export$4048ae5fe51d81b7(ticks[i]);
-                            tick.attr("x", 0);
-                            tick.attr("y", 20);
-                            tick.css("text-anchor", "start");
-                        }
-                    }
+                    countFormat: countFormat
                 })
             })
         ]
@@ -9257,7 +9310,7 @@ nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
             value: function draw(edge) {
                 this.edge = edge;
                 var checkboxId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, "show-as-table");
-                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G001: Article  Downloads for  Unit Administrators</h1>\n                <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2> \n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g001-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-md-3\">\n                <div id=\"g001-interactions\"></div>\n                <div id=\"g001-format\"></div>\n            </div>\n            <div class=\"col-md-9\">\n                <p><input type=\"checkbox\" name=\"".concat(checkboxId, "\" id=\"").concat(checkboxId, "\"> Show as table</p>\n                <div id=\"g001-interactions-chart\"></div>\n                <div id=\"g001-interactions-table\" style=\"display:none\">TABLE HERE</div>\n                <div id=\"g001-interactions-map\"></div>\n                <div class=\"row formats-header\">\n                    <div class=\"col-xs-12\">\n                        <h3>Top 3 Formats</h3>\n                    </div>\n                </div>\n                <div class=\"row\">\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-downloads\"></div>\n                    </div>\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-exports\"></div>\n                    </div>\n                </div>\n            </div>\n        </div>");
+                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G001: Article  Downloads for  Unit Administrators</h1>\n                <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2> \n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g001-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-md-3\">\n                <div id=\"g001-interactions\"></div>\n                <div id=\"g001-format\"></div>\n            </div>\n            <div class=\"col-md-9\">\n                <p><input type=\"checkbox\" name=\"".concat(checkboxId, "\" id=\"").concat(checkboxId, "\"> Show as table</p>\n                <div id=\"g001-interactions-chart\"></div>\n                <div id=\"g001-interactions-table\" style=\"display:none\">TABLE HERE</div>\n                <div id=\"g001-interactions-map\"></div>\n                <div class=\"row formats-header\">\n                    <div class=\"col-xs-12\">\n                        <h3>Top 3 Formats</h3>\n                    </div>\n                </div>\n                <div class=\"row\">\n                    <div class=\"col-md-6\">\n                        <div id=\"g001-top-downloads\"></div>\n                    </div>\n                    <div class=\"col-md-6\">\n                        <div id=\"g001-top-exports\"></div>\n                    </div>\n                </div>\n            </div>\n        </div>");
                 edge.context.html(frame);
                 var checkboxSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, "show-as-table");
                 $d48cc3604bf30e24$export$b4cd8de5710bc55c(checkboxSelector, "change", this, "toggleTable");
@@ -9270,41 +9323,16 @@ nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
                 var table = this.edge.jq("#g001-interactions-table");
                 if (this.showing === "chart") {
                     chart.hide();
-                    // this.hideOffScreen("#g001-interactions-chart");
                     table.show();
                     this.showing = "table";
                 } else {
                     table.hide();
                     chart.show();
-                    // this.bringIn("#g001-interactions-chart");
                     this.showing = "chart";
                     this.edge.getComponent({
                         id: "g001-interactions-chart"
                     }).draw();
                 }
-            }
-        },
-        {
-            key: "hideOffScreen",
-            value: function hideOffScreen(selector) {
-                if (selector in this.hidden) return;
-                var el = this.edge.jq(selector);
-                this.hidden[selector] = {
-                    "position": el.css("position"),
-                    "margin": el.css("margin-left")
-                };
-                el.css("position", "absolute").css("margin-left", -9999);
-            }
-        },
-        {
-            key: "bringIn",
-            value: function bringIn(selector) {
-                if (!this.hidden[selector]) return;
-                var pos = this.hidden[selector].position;
-                var mar = this.hidden[selector].margin;
-                var el = this.edge.jq(selector);
-                el.css("position", pos).css("margin-left", mar);
-                delete this.hidden[selector];
             }
         }
     ]);

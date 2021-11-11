@@ -14,6 +14,7 @@ import {HorizontalMultibarRenderer} from "../vendor/edges2/src/renderers/nvd3/Ho
 import {ChartDataTable} from "../vendor/edges2/src/renderers/bs3/ChartDataTable";
 
 import {extractPalette} from "./nglpcommon";
+import {RelativeSizeBars} from "../vendor/edges2/src/renderers/html/RelativeSizeBars";
 
 global.nglp = {}
 nglp.g001 = {
@@ -214,29 +215,33 @@ nglp.g001.init = function (params) {
                     ],
                     seriesName: "request"
                 }),
-                renderer: new HorizontalMultibarRenderer({
+                // renderer: new HorizontalMultibarRenderer({
+                //     title: "Downloads",
+                //     legend: false,
+                //     valueFormat: countFormat,
+                //     color: function(d, i) {
+                //         return palette[d.key]
+                //     },
+                //     showXAxis: true,
+                //     showYAxis: false,
+                //     marginLeft: 0,
+                //     marginRight: 0,
+                //     marginTop: 0,
+                //     marginBottom: 0,
+                //     groupSpacing: 0.7,
+                //     onUpdate: () => {
+                //         let ticks = $("#g001-top-downloads .tick text");
+                //         for (let i = 0; i < ticks.length; i++) {
+                //             let tick = $(ticks[i]);
+                //             tick.attr("x", 0);
+                //             tick.attr("y", 20);
+                //             tick.css("text-anchor", "start");
+                //         }
+                //     }
+                // })
+                renderer: new RelativeSizeBars({
                     title: "Downloads",
-                    legend: false,
-                    valueFormat: countFormat,
-                    color: function(d, i) {
-                        return palette[d.key]
-                    },
-                    showXAxis: true,
-                    showYAxis: false,
-                    marginLeft: 0,
-                    marginRight: 0,
-                    marginTop: 0,
-                    marginBottom: 0,
-                    groupSpacing: 0.7,
-                    onUpdate: () => {
-                        let ticks = $("#g001-top-downloads .tick text");
-                        for (let i = 0; i < ticks.length; i++) {
-                            let tick = $(ticks[i]);
-                            tick.attr("x", 0);
-                            tick.attr("y", 20);
-                            tick.css("text-anchor", "start");
-                        }
-                    }
+                    countFormat: countFormat
                 })
             }),
             new Chart({
@@ -247,30 +252,34 @@ nglp.g001.init = function (params) {
                     ],
                     seriesName: "export"
                 }),
-                renderer: new HorizontalMultibarRenderer({
+                renderer: new RelativeSizeBars({
                     title: "Exports",
-                    legend: false,
-                    valueFormat: countFormat,
-                    color: function(d, i) {
-                        return palette[d.key]
-                    },
-                    showXAxis: true,
-                    showYAxis: false,
-                    marginLeft: 0,
-                    marginRight: 0,
-                    marginTop: 0,
-                    marginBottom: 0,
-                    groupSpacing: 0.7,
-                    onUpdate: () => {
-                        let ticks = $("#g001-top-exports .tick text");
-                        for (let i = 0; i < ticks.length; i++) {
-                            let tick = $(ticks[i]);
-                            tick.attr("x", 0);
-                            tick.attr("y", 20);
-                            tick.css("text-anchor", "start");
-                        }
-                    }
+                    countFormat: countFormat
                 })
+                // renderer: new HorizontalMultibarRenderer({
+                //     title: "Exports",
+                //     legend: false,
+                //     valueFormat: countFormat,
+                //     color: function(d, i) {
+                //         return palette[d.key]
+                //     },
+                //     showXAxis: true,
+                //     showYAxis: false,
+                //     marginLeft: 0,
+                //     marginRight: 0,
+                //     marginTop: 0,
+                //     marginBottom: 0,
+                //     groupSpacing: 0.7,
+                //     onUpdate: () => {
+                //         let ticks = $("#g001-top-exports .tick text");
+                //         for (let i = 0; i < ticks.length; i++) {
+                //             let tick = $(ticks[i]);
+                //             tick.attr("x", 0);
+                //             tick.attr("y", 20);
+                //             tick.css("text-anchor", "start");
+                //         }
+                //     }
+                // })
             })
         ]
     })
@@ -322,10 +331,10 @@ nglp.g001.G001Template = class extends Template {
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div id="g001-top-downloads"></div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div id="g001-top-exports"></div>
                     </div>
                 </div>
@@ -343,36 +352,14 @@ nglp.g001.G001Template = class extends Template {
         let table = this.edge.jq("#g001-interactions-table");
         if (this.showing === "chart") {
             chart.hide();
-            // this.hideOffScreen("#g001-interactions-chart");
             table.show();
             this.showing = "table"
         } else {
             table.hide();
             chart.show();
-            // this.bringIn("#g001-interactions-chart");
             this.showing = "chart"
             this.edge.getComponent({id: "g001-interactions-chart"}).draw();
         }
-    }
-
-    hideOffScreen(selector) {
-        if (selector in this.hidden) {
-            return
-        }
-        var el = this.edge.jq(selector);
-        this.hidden[selector] = {"position": el.css("position"), "margin": el.css("margin-left")};
-        el.css("position", "absolute").css("margin-left", -9999);
-    }
-
-    bringIn(selector) {
-        if (!this.hidden[selector]) {
-            return;
-        }
-        var pos = this.hidden[selector].position;
-        var mar = this.hidden[selector].margin;
-        var el = this.edge.jq(selector);
-        el.css("position", pos).css("margin-left", mar);
-        delete this.hidden[selector];
     }
 }
 
