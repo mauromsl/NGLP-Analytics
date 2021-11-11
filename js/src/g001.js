@@ -118,15 +118,26 @@ nglp.g001.init = function (params) {
             new GeohashedZoomableMap({
                 id: "g001-interactions-map",
                 geoHashAggregation: "geo",
+                zoomToPrecisionMap : {
+                    0: 5,
+                    3: 7,
+                    5: 9
+                },
                 renderer: new GoogleMapView({
-                    clusterByCount: true,
+                    cluster: true,
+                    labelFunction : (loc) => {
+                        // be very careful changing this, the MapPointRenderer relies on this as the way
+                        // to find out what the count of the nested cluster is
+                        return loc.count.toString()
+                    },
+                    renderCluster : new MapPointRenderer(),
                     reQueryOnBoundsChange: true,
                     clusterIcons: {
-                        0: "/static/img/m1.png",
-                        2: "/static/img/m2.png",
-                        20: "/static/img/m3.png",
-                        50: "/static/img/m4.png",
-                        100: "/static/img/m5.png"
+                        0: "/static/img/m1.png"
+                        // 2: "/static/img/m2.png",
+                        // 20: "/static/img/m3.png",
+                        // 50: "/static/img/m4.png",
+                        // 100: "/static/img/m5.png"
                     }
                 })
             }),
@@ -338,6 +349,27 @@ nglp.g001.G001Template = class extends Template {
         var el = this.edge.jq(selector);
         el.css("position", pos).css("margin-left", mar);
         delete this.hidden[selector];
+    }
+}
+
+class MapPointRenderer {
+    constructor(params) {}
+
+    render(cluster, stats) {
+        let sum = 0;
+        for (let i = 0; i < cluster.markers.length; i++) {
+            let marker = cluster.markers[i];
+            sum += parseInt(marker.label.text);
+        }
+        return new google.maps.Marker({
+            position: cluster.position,
+            icon: "/static/img/m1.png",
+            label: {
+                text: String(sum)
+            },
+            // adjust zIndex to be above other markers
+            zIndex: Number(google.maps.Marker.MAX_ZINDEX) + sum,
+        });
     }
 }
 
