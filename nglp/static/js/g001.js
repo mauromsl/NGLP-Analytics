@@ -3501,9 +3501,9 @@ var $f29180d7a0e96438$export$1b75c0a6cacf635c = /*#__PURE__*/ function(Renderer)
                         if (this.onHide) this.onHide();
                         return;
                     }
+                    this.component.context.show();
+                    if (this.onShow) this.onShow();
                 }
-                this.component.context.show();
-                if (this.onShow) this.onShow();
                 var svgId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, "svg", this);
                 var svgSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, "svg", this);
                 this.component.context.html('<svg id="' + svgId + '"></svg>');
@@ -4629,31 +4629,6 @@ var $2039d36394fce070$export$d3ad1026b19abbfd = /*#__PURE__*/ function(Renderer)
                 var labelClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "label", this);
                 var toggleId = $d48cc3604bf30e24$export$bf52b203d82ff901(namespace, "toggle", this);
                 var resultsId = $d48cc3604bf30e24$export$bf52b203d82ff901(namespace, "results", this);
-                // if we want the active filters, render them
-                // var filterFrag = "";
-                // if (ts.selected.length > 0) {
-                //     var resultClass = styleClasses(namespace, "result", this);
-                //     for (var i = 0; i < ts.selected.length; i++) {
-                //         var filt = ts.selected[i];
-                //         var def = this._getFilterDef(filt);
-                //         if (def) {
-                //             var display = this.component._translate(filt);
-                //             let id = safeId(filt);
-                //             var count = "";
-                //             if (this.showCount) {
-                //                 let cv = def.count;
-                //                 if (this.countFormat) {
-                //                     cv = this.countFormat(cv);
-                //                 }
-                //                 count = ' <span class="' + countClass + '">(' + cv + ')</span>';
-                //             }
-                //             filterFrag += '<li>\
-                //                 <input class="' + checkboxClass + '" data-key="' + escapeHtml(filt) + '" id="' + id + '" type="checkbox" name="' + id + '" checked="checked">\
-                //                 <label for="' + id + '" class="' + labelClass + '">' + escapeHtml(display) + count + '</label>\
-                //             </li>';
-                //         }
-                //     }
-                // }
                 var results = "";
                 for(var i = 0; i < this.fixedTerms.length; i++){
                     var ft = this.fixedTerms[i];
@@ -4673,32 +4648,6 @@ var $2039d36394fce070$export$d3ad1026b19abbfd = /*#__PURE__*/ function(Renderer)
                         }
                     }
                 }
-                // render a list of the values
-                // if (ts.terms.length > 0) {
-                //     results = "";
-                //
-                //     for (var i = 0; i < ts.terms.length; i++) {
-                //         var val = ts.terms[i];
-                //         if (val.count === 0 && this.hideEmpty) {
-                //             continue
-                //         }
-                //
-                //         var active = $.inArray(val.term.toString(), ts.selected) > -1;
-                //         var checked = "";
-                //         if (active) {
-                //             continue;
-                //         }
-                //         var count = "";
-                //         if (this.showCount) {
-                //             count = ' <span class="' + countClass + '">(' + val.count + ')</span>';
-                //         }
-                //         var id = safeId(val.term);
-                //         results += '<li>\
-                //             <input class="' + checkboxClass + '" data-key="' + escapeHtml(val.term) + '" id="' + id + '" type="checkbox" name="' + id + '"' + checked + '>\
-                //             <label for="' + id + '" class="' + labelClass + '">' + escapeHtml(val.display) + count + '</label>\
-                //         </li>';
-                //     }
-                // }
                 // this is what's displayed in the body if there are no results or the page is loading
                 if (results === "") {
                     if (ts.edge.result) results = "<li>No data to show</li>";
@@ -5225,19 +5174,6 @@ nglp.g001.init = function(params) {
                     countFormat: countFormat
                 })
             }),
-            // this doesn't work - there isn't format information associated with investigations
-            // new Chart({
-            //     id: "g001-top-investigations",
-            //     dataFunction: nestedTerms({
-            //         aggs: [
-            //             {events: {keys : ["investigation"], aggs: ["formats"]}}
-            //         ]
-            //     }),
-            //     renderer: new HorizontalMultibarRenderer({
-            //         title: "Investigations",
-            //         legend: false
-            //     })
-            // }),
             new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
                 id: "g001-top-downloads",
                 dataFunction: $ae46249d8a2a7b6d$export$4c2a251a86bb620b({
@@ -5334,6 +5270,8 @@ nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
         _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c(_class).call(this));
         _this.edge = false;
         _this.showing = "chart";
+        _this.hidden = {
+        };
         _this.namespace = "g001-template";
         return _this;
     }
@@ -5343,7 +5281,7 @@ nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
             value: function draw(edge) {
                 this.edge = edge;
                 var checkboxId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, "show-as-table");
-                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G001: Article  Downloads for  Unit Administrators</h1>\n                <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2> \n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g001-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-md-3\">\n                <div id=\"g001-interactions\"></div>\n                <div id=\"g001-format\"></div>\n            </div>\n            <div class=\"col-md-9\">\n                <p><input type=\"checkbox\" name=\"".concat(checkboxId, "\" id=\"").concat(checkboxId, "\"> Show as table</p>\n                <div id=\"g001-interactions-chart\"></div>\n                <div id=\"g001-interactions-table\" style=\"display:none\">TABLE HERE</div>\n                <div id=\"g001-interactions-map\"></div>\n                <div class=\"row formats-header\">\n                    <div class=\"col-xs-12\">\n                        <h3>Top 3 Formats</h3>\n                    </div>\n                </div>\n                <div class=\"row\">\n<!--                    <div class=\"col-md-4\">-->\n<!--                        <div id=\"g001-top-investigations\"></div>-->\n<!--                    </div>-->\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-downloads\"></div>\n                    </div>\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-exports\"></div>\n                    </div>\n                </div>\n            </div>\n        </div>");
+                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G001: Article  Downloads for  Unit Administrators</h1>\n                <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2> \n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g001-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-md-3\">\n                <div id=\"g001-interactions\"></div>\n                <div id=\"g001-format\"></div>\n            </div>\n            <div class=\"col-md-9\">\n                <p><input type=\"checkbox\" name=\"".concat(checkboxId, "\" id=\"").concat(checkboxId, "\"> Show as table</p>\n                <div id=\"g001-interactions-chart\"></div>\n                <div id=\"g001-interactions-table\" style=\"display:none\">TABLE HERE</div>\n                <div id=\"g001-interactions-map\"></div>\n                <div class=\"row formats-header\">\n                    <div class=\"col-xs-12\">\n                        <h3>Top 3 Formats</h3>\n                    </div>\n                </div>\n                <div class=\"row\">\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-downloads\"></div>\n                    </div>\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-exports\"></div>\n                    </div>\n                </div>\n            </div>\n        </div>");
                 edge.context.html(frame);
                 var checkboxSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, "show-as-table");
                 $d48cc3604bf30e24$export$b4cd8de5710bc55c(checkboxSelector, "change", this, "toggleTable");
@@ -5356,13 +5294,41 @@ nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
                 var table = this.edge.jq("#g001-interactions-table");
                 if (this.showing === "chart") {
                     chart.hide();
+                    // this.hideOffScreen("#g001-interactions-chart");
                     table.show();
                     this.showing = "table";
                 } else {
                     table.hide();
                     chart.show();
+                    // this.bringIn("#g001-interactions-chart");
                     this.showing = "chart";
+                    this.edge.getComponent({
+                        id: "g001-interactions-chart"
+                    }).draw();
                 }
+            }
+        },
+        {
+            key: "hideOffScreen",
+            value: function hideOffScreen(selector) {
+                if (selector in this.hidden) return;
+                var el = this.edge.jq(selector);
+                this.hidden[selector] = {
+                    "position": el.css("position"),
+                    "margin": el.css("margin-left")
+                };
+                el.css("position", "absolute").css("margin-left", -9999);
+            }
+        },
+        {
+            key: "bringIn",
+            value: function bringIn(selector) {
+                if (!this.hidden[selector]) return;
+                var pos = this.hidden[selector].position;
+                var mar = this.hidden[selector].margin;
+                var el = this.edge.jq(selector);
+                el.css("position", pos).css("margin-left", mar);
+                delete this.hidden[selector];
             }
         }
     ]);

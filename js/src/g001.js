@@ -171,19 +171,6 @@ nglp.g001.init = function (params) {
                     countFormat: countFormat
                 })
             }),
-            // this doesn't work - there isn't format information associated with investigations
-            // new Chart({
-            //     id: "g001-top-investigations",
-            //     dataFunction: nestedTerms({
-            //         aggs: [
-            //             {events: {keys : ["investigation"], aggs: ["formats"]}}
-            //         ]
-            //     }),
-            //     renderer: new HorizontalMultibarRenderer({
-            //         title: "Investigations",
-            //         legend: false
-            //     })
-            // }),
             new Chart({
                 id: "g001-top-downloads",
                 dataFunction: nestedTerms({
@@ -259,6 +246,7 @@ nglp.g001.G001Template = class extends Template {
         super();
         this.edge = false;
         this.showing = "chart";
+        this.hidden = {};
         this.namespace = "g001-template";
     }
 
@@ -299,9 +287,6 @@ nglp.g001.G001Template = class extends Template {
                     </div>
                 </div>
                 <div class="row">
-<!--                    <div class="col-md-4">-->
-<!--                        <div id="g001-top-investigations"></div>-->
-<!--                    </div>-->
                     <div class="col-md-4">
                         <div id="g001-top-downloads"></div>
                     </div>
@@ -323,13 +308,36 @@ nglp.g001.G001Template = class extends Template {
         let table = this.edge.jq("#g001-interactions-table");
         if (this.showing === "chart") {
             chart.hide();
+            // this.hideOffScreen("#g001-interactions-chart");
             table.show();
             this.showing = "table"
         } else {
             table.hide();
             chart.show();
+            // this.bringIn("#g001-interactions-chart");
             this.showing = "chart"
+            this.edge.getComponent({id: "g001-interactions-chart"}).draw();
         }
+    }
+
+    hideOffScreen(selector) {
+        if (selector in this.hidden) {
+            return
+        }
+        var el = this.edge.jq(selector);
+        this.hidden[selector] = {"position": el.css("position"), "margin": el.css("margin-left")};
+        el.css("position", "absolute").css("margin-left", -9999);
+    }
+
+    bringIn(selector) {
+        if (!this.hidden[selector]) {
+            return;
+        }
+        var pos = this.hidden[selector].position;
+        var mar = this.hidden[selector].margin;
+        var el = this.edge.jq(selector);
+        el.css("position", pos).css("margin-left", mar);
+        delete this.hidden[selector];
     }
 }
 
