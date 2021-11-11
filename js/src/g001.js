@@ -9,6 +9,7 @@ import {GeohashedZoomableMap} from "../vendor/edges2/src/components/GeohashedZoo
 import {GoogleMapView} from "../vendor/edges2/src/renderers/googlemap/GoogleMapView";
 import {ORTermSelector} from "../vendor/edges2/src/components/ORTermSelector";
 import {CheckboxORTermSelector} from "../vendor/edges2/src/renderers/bs3/CheckboxORTermSelector";
+import {FixedSelectionCheckboxORTermSelector} from "../vendor/edges2/src/renderers/bs3/FixedSelectionCheckboxORTermSelector";
 import {HorizontalMultibarRenderer} from "../vendor/edges2/src/renderers/nvd3/HorizontalMultibarRenderer";
 import {ChartDataTable} from "../vendor/edges2/src/renderers/bs3/ChartDataTable";
 
@@ -138,12 +139,17 @@ nglp.g001.init = function (params) {
                 orderBy: "term",
                 orderDir: "asc",
                 valueMap: interactionValueMap,
-                renderer: new CheckboxORTermSelector({
+                renderer: new FixedSelectionCheckboxORTermSelector({
                     title: "Interactions",
                     open: true,
                     togglable: false,
                     showCount: true,
-                    countFormat: countFormat
+                    countFormat: countFormat,
+                    fixedTerms : [
+                        "investigation",
+                        "export",
+                        "request"
+                    ]
                 })
             }),
             new ORTermSelector({

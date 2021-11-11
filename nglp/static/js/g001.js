@@ -2140,8 +2140,8 @@ var $d48cc3604bf30e24$export$a25557390a09e78a = /*#__PURE__*/ function() {
                     var context = {
                         index: i
                     };
-                    var success_callback = edges.objClosure(this, "_actionSuccess", this.successCallbackArgs, context);
-                    var error_callback = edges.objClosure(this, "_actionError", this.successCallbackArgs, context);
+                    var success_callback = $d48cc3604bf30e24$export$367047a567f2342b(this, "_actionSuccess", this.successCallbackArgs, context);
+                    var error_callback = $d48cc3604bf30e24$export$367047a567f2342b(this, "_actionError", this.successCallbackArgs, context);
                     var complete_callback = false;
                     this.functions.action({
                         entry: this.list[i],
@@ -2776,8 +2776,8 @@ var $6cf4dc301226cb87$export$22ad9a5707a07e9c = /*#__PURE__*/ function() {
                     };
                     entry["query"] = this.secondaryQueries[key](this);
                     entry["id"] = key;
-                    entry["search_url"] = this.searchUrl;
-                    if (this.secondaryUrls !== false && this.secondaryUrls.hasOwnProperty(key)) entry["search_url"] = this.secondaryUrls[key];
+                    entry["searchUrl"] = this.searchUrl;
+                    if (this.secondaryUrls !== false && this.secondaryUrls.hasOwnProperty(key)) entry["searchUrl"] = this.secondaryUrls[key];
                     entries.push(entry);
                     this.realisedSecondaryQueries[key] = entry.query;
                 }
@@ -4582,6 +4582,219 @@ var $135bcb32af9eb45d$export$4b392426dd40333d = /*#__PURE__*/ function(Renderer)
 
 
 
+var $2039d36394fce070$export$d3ad1026b19abbfd = /*#__PURE__*/ function(Renderer) {
+    "use strict";
+    $bca7673885229bfd$export$9099ad97b570f7c($2039d36394fce070$export$d3ad1026b19abbfd, Renderer);
+    function $2039d36394fce070$export$d3ad1026b19abbfd(params) {
+        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $2039d36394fce070$export$d3ad1026b19abbfd);
+        var _this;
+        _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($2039d36394fce070$export$d3ad1026b19abbfd).call(this));
+        _this.title = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "title", "Select");
+        // whether the facet should be open or closed
+        // can be initialised and is then used to track internal state
+        _this.open = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "open", false);
+        _this.togglable = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "togglable", true);
+        // whether the count should be displayed along with the term
+        // defaults to false because count may be confusing to the user in an OR selector
+        _this.showCount = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "showCount", false);
+        _this.countFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "countFormat", false);
+        _this.fixedTerms = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "fixedTerms", []);
+        _this.openIcon = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "openIcon", "glyphicon glyphicon-plus");
+        _this.closeIcon = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "closeIcon", "glyphicon glyphicon-minus");
+        // don't display the facet at all if there is no data to display
+        _this.hideIfNoData = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "hideIfNoData", true);
+        _this.layout = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "layout", "left");
+        // namespace to use in the page
+        _this.namespace = "edges-bs3-fixedselectioncheckboxortermselector";
+        return _this;
+    }
+    $67866ae5f3a26802$export$9099ad97b570f7c($2039d36394fce070$export$d3ad1026b19abbfd, [
+        {
+            key: "draw",
+            value: function draw() {
+                // for convenient short references ...
+                var ts = this.component;
+                var namespace = this.namespace;
+                if (this.hideIfNoData && ts.edge.result && ts.terms.length === 0) {
+                    this.component.context.html("");
+                    return;
+                }
+                // sort out all the classes that we're going to be using
+                var countClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "count", this);
+                var checkboxClass = $d48cc3604bf30e24$export$e516ebba864be69d(namespace, "selector", this);
+                var facetClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "facet", this);
+                var headerClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "header", this);
+                var bodyClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "body", this);
+                var listClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "list", this);
+                var labelClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "label", this);
+                var toggleId = $d48cc3604bf30e24$export$bf52b203d82ff901(namespace, "toggle", this);
+                var resultsId = $d48cc3604bf30e24$export$bf52b203d82ff901(namespace, "results", this);
+                // if we want the active filters, render them
+                // var filterFrag = "";
+                // if (ts.selected.length > 0) {
+                //     var resultClass = styleClasses(namespace, "result", this);
+                //     for (var i = 0; i < ts.selected.length; i++) {
+                //         var filt = ts.selected[i];
+                //         var def = this._getFilterDef(filt);
+                //         if (def) {
+                //             var display = this.component._translate(filt);
+                //             let id = safeId(filt);
+                //             var count = "";
+                //             if (this.showCount) {
+                //                 let cv = def.count;
+                //                 if (this.countFormat) {
+                //                     cv = this.countFormat(cv);
+                //                 }
+                //                 count = ' <span class="' + countClass + '">(' + cv + ')</span>';
+                //             }
+                //             filterFrag += '<li>\
+                //                 <input class="' + checkboxClass + '" data-key="' + escapeHtml(filt) + '" id="' + id + '" type="checkbox" name="' + id + '" checked="checked">\
+                //                 <label for="' + id + '" class="' + labelClass + '">' + escapeHtml(display) + count + '</label>\
+                //             </li>';
+                //         }
+                //     }
+                // }
+                var results = "";
+                for(var i = 0; i < this.fixedTerms.length; i++){
+                    var ft = this.fixedTerms[i];
+                    for(var j = 0; j < ts.terms.length; j++){
+                        var val = ts.terms[j];
+                        if (val.term === ft) {
+                            var active = $.inArray(val.term.toString(), ts.selected) > -1;
+                            var checked = "";
+                            if (active) checked = " checked=\"checked\" ";
+                            var count = "";
+                            if (this.showCount) count = ' <span class="' + countClass + '">(' + this._formatCount(val.count) + ')</span>';
+                            var id = $d48cc3604bf30e24$export$63ba8ea1e92c906(val.term);
+                            results += '<li>\
+                        <input class="' + checkboxClass + '" data-key="' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(val.term) + '" id="' + id + '" type="checkbox" name="' + id + '"' + checked + '>\
+                        <label for="' + id + '" class="' + labelClass + '">' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(val.display) + count + '</label>\
+                    </li>';
+                        }
+                    }
+                }
+                // render a list of the values
+                // if (ts.terms.length > 0) {
+                //     results = "";
+                //
+                //     for (var i = 0; i < ts.terms.length; i++) {
+                //         var val = ts.terms[i];
+                //         if (val.count === 0 && this.hideEmpty) {
+                //             continue
+                //         }
+                //
+                //         var active = $.inArray(val.term.toString(), ts.selected) > -1;
+                //         var checked = "";
+                //         if (active) {
+                //             continue;
+                //         }
+                //         var count = "";
+                //         if (this.showCount) {
+                //             count = ' <span class="' + countClass + '">(' + val.count + ')</span>';
+                //         }
+                //         var id = safeId(val.term);
+                //         results += '<li>\
+                //             <input class="' + checkboxClass + '" data-key="' + escapeHtml(val.term) + '" id="' + id + '" type="checkbox" name="' + id + '"' + checked + '>\
+                //             <label for="' + id + '" class="' + labelClass + '">' + escapeHtml(val.display) + count + '</label>\
+                //         </li>';
+                //     }
+                // }
+                // this is what's displayed in the body if there are no results or the page is loading
+                if (results === "") {
+                    if (ts.edge.result) results = "<li>No data to show</li>";
+                    else results = "<li class='loading'>Loading choices...</li>";
+                }
+                var header = this.headerLayout({
+                    toggleId: toggleId
+                });
+                // render the overall facet
+                var frag = "<div class=\"".concat(facetClass, "\">\n                <div class=\"").concat(headerClass, "\"><div class=\"row\">\n                    <div class=\"col-md-12\">\n                        ").concat(header, "\n                    </div>\n                </div></div>\n                <div class=\"").concat(bodyClass, "\">\n                    <div class=\"row\" style=\"display:none\" id=\"").concat(resultsId, "\">\n                        <div class=\"col-md-12\">\n                            <ul class=\"").concat(listClass, "\">{{FILTERS}}</ul>\n                        </div>\
+                    </div>\
+                </div>\
+                </div></div>");
+                // substitute in the component parts
+                frag = frag.replace(/{{FILTERS}}/g, results);
+                // now render it into the page
+                ts.context.html(frag);
+                // trigger all the post-render set-up functions
+                this.setUIOpen();
+                var checkboxSelector = $d48cc3604bf30e24$export$b1157bd4df096bce(namespace, "selector", this);
+                $d48cc3604bf30e24$export$b4cd8de5710bc55c(checkboxSelector, "change", this, "filterToggle");
+                var toggleSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(namespace, "toggle", this);
+                $d48cc3604bf30e24$export$b4cd8de5710bc55c(toggleSelector, "click", this, "toggleOpen");
+            }
+        },
+        {
+            key: "_formatCount",
+            value: function _formatCount(count) {
+                if (this.countFormat) return this.countFormat(count);
+                return count;
+            }
+        },
+        {
+            key: "headerLayout",
+            value: function headerLayout(params) {
+                var toggleId = params.toggleId;
+                var iconClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "icon", this);
+                if (this.layout === "left") {
+                    var tog = this.title;
+                    if (this.togglable) tog = '<a href="#" id="' + toggleId + '"><i class="' + this.openIcon + '"></i>&nbsp;' + tog + "</a>";
+                    return tog;
+                } else if (this.layout === "right") {
+                    var tog = "";
+                    if (this.togglable) tog = '<a href="#" id="' + toggleId + '">' + this.title + '&nbsp;<i class="' + this.openIcon + ' ' + iconClass + '"></i></a>';
+                    else tog = this.title;
+                    return tog;
+                }
+            }
+        },
+        {
+            key: "setUIOpen",
+            value: function setUIOpen() {
+                // the selectors that we're going to use
+                var resultsSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, "results", this);
+                var toggleSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, "toggle", this);
+                var results = this.component.jq(resultsSelector);
+                var toggle = this.component.jq(toggleSelector);
+                var openBits = this.openIcon.split(" ");
+                var closeBits = this.closeIcon.split(" ");
+                if (this.open) {
+                    var i = toggle.find("i");
+                    for(var j = 0; j < openBits.length; j++)i.removeClass(openBits[j]);
+                    for(var j = 0; j < closeBits.length; j++)i.addClass(closeBits[j]);
+                    results.show();
+                } else {
+                    var i = toggle.find("i");
+                    for(var j = 0; j < closeBits.length; j++)i.removeClass(closeBits[j]);
+                    for(var j = 0; j < openBits.length; j++)i.addClass(openBits[j]);
+                    results.hide();
+                }
+            }
+        },
+        {
+            key: "filterToggle",
+            value: function filterToggle(element) {
+                var term = this.component.jq(element).attr("data-key");
+                var checked = this.component.jq(element).is(":checked");
+                if (checked) this.component.selectTerm(term);
+                else this.component.removeFilter(term);
+            }
+        },
+        {
+            key: "toggleOpen",
+            value: function toggleOpen(element) {
+                this.open = !this.open;
+                this.setUIOpen();
+            }
+        }
+    ]);
+    return $2039d36394fce070$export$d3ad1026b19abbfd;
+}($6cf4dc301226cb87$export$a695173e2ecfa9b);
+
+
+
+
+
 
 
 
@@ -4734,6 +4947,7 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
         $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $26b66f4c4ad5f83b$export$dda19d2613327857);
         var _this;
         _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($26b66f4c4ad5f83b$export$dda19d2613327857).call(this));
+        _this.includeHeaderRow = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "includeHeaderRow", true);
         _this.valueFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "valueFormat", false);
         _this.labelFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "labelFormat", false);
         _this.headerFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "headerFormat", false);
@@ -4750,17 +4964,20 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
                 }
                 var tableData = this._dataSeriesToTable();
                 var headFrag = "";
-                for(var i = 0; i < tableData.head.length; i++){
-                    var header = tableData.head[i];
-                    headFrag += "<tr><td>" + header.join("</td><td>") + "</td></tr>";
+                if (this.includeHeaderRow) {
+                    for(var i = 0; i < tableData.head.length; i++){
+                        var header = tableData.head[i];
+                        headFrag += "<tr><td>" + header.join("</td><td>") + "</td></tr>";
+                    }
+                    headFrag = "<thead>".concat(headFrag, "</thead>");
                 }
                 var bodyFrag = "";
-                for(var i1 = 0; i1 < tableData.body.length; i1++){
-                    var row = tableData.body[i1];
+                for(var i = 0; i < tableData.body.length; i++){
+                    var row = tableData.body[i];
                     bodyFrag += "<tr><td>" + row.join("</td><td>") + "</td></tr>";
                 }
                 var tableClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "table", this);
-                var frag = "\n            <table class=\"".concat(tableClass, "\">\n                <thead>").concat(headFrag, "</thead>\n                <tbody>").concat(bodyFrag, "</tbody>\n            </table>\n        ");
+                var frag = "\n            <table class=\"".concat(tableClass, "\">\n                ").concat(headFrag, "\n                <tbody>").concat(bodyFrag, "</tbody>\n            </table>\n        ");
                 this.component.context.html(frag);
             }
         },
@@ -4815,6 +5032,25 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
 }($6cf4dc301226cb87$export$a695173e2ecfa9b);
 
 
+function $4002aa3570a5e3f8$export$8e8129eda99077(sheetName) {
+    var palette = {
+        investigation: false,
+        export: false,
+        request: false
+    };
+    for(var i = 0; i < document.styleSheets.length; i++){
+        var sheet = document.styleSheets[i];
+        if (sheet.href && sheet.href.includes(sheetName)) for(var j = 0; j < sheet.rules.length; j++){
+            var rule = sheet.rules[j];
+            if (rule.selectorText === "#palette #investigations") palette.investigation = rule.style.background;
+            else if (rule.selectorText === "#palette #exports") palette.export = rule.style.background;
+            else if (rule.selectorText === "#palette #requests") palette.request = rule.style.background;
+        }
+    }
+    return palette;
+}
+
+
 $parcel$global.nglp = {
 };
 nglp.g001 = {
@@ -4829,7 +5065,7 @@ nglp.g001.init = function(params) {
     var countFormat = $d48cc3604bf30e24$export$48334dba1de70fbe({
         thousandsSeparator: ","
     });
-    var palette = nglp.g001.extractPalette();
+    var palette = $4002aa3570a5e3f8$export$8e8129eda99077("g001.css");
     var interactionValueMap = {
         "investigation": "VIEWS",
         "export": "EXPORTS",
@@ -4957,12 +5193,17 @@ nglp.g001.init = function(params) {
                 orderBy: "term",
                 orderDir: "asc",
                 valueMap: interactionValueMap,
-                renderer: new $135bcb32af9eb45d$export$4b392426dd40333d({
+                renderer: new $2039d36394fce070$export$d3ad1026b19abbfd({
                     title: "Interactions",
                     open: true,
                     togglable: false,
                     showCount: true,
-                    countFormat: countFormat
+                    countFormat: countFormat,
+                    fixedTerms: [
+                        "investigation",
+                        "export",
+                        "request"
+                    ]
                 })
             }),
             new $2c48e414d79136ba$export$845e14b82c9a4f95({
@@ -5084,23 +5325,6 @@ nglp.g001.init = function(params) {
         ]
     });
 };
-nglp.g001.extractPalette = function() {
-    var palette = {
-        investigation: false,
-        export: false,
-        request: false
-    };
-    for(var i = 0; i < document.styleSheets.length; i++){
-        var sheet = document.styleSheets[i];
-        if (sheet.href && sheet.href.includes("g001.css")) for(var j = 0; j < sheet.rules.length; j++){
-            var rule = sheet.rules[j];
-            if (rule.selectorText === "#palette #investigations") palette.investigation = rule.style.background;
-            else if (rule.selectorText === "#palette #exports") palette.export = rule.style.background;
-            else if (rule.selectorText === "#palette #requests") palette.request = rule.style.background;
-        }
-    }
-    return palette;
-};
 nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
     "use strict";
     $bca7673885229bfd$export$9099ad97b570f7c(_class, Template);
@@ -5119,7 +5343,7 @@ nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
             value: function draw(edge) {
                 this.edge = edge;
                 var checkboxId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, "show-as-table");
-                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G001: Article  Downloads for  Unit Administrators</h1>\n                <h2>Article downloads by format, including landing page and metadata exports in aggregate, with information about users who downloaded them</h2> \n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g001-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-md-3\">\n                <div id=\"g001-interactions\"></div>\n                <div id=\"g001-format\"></div>\n            </div>\n            <div class=\"col-md-9\">\n                <p><input type=\"checkbox\" name=\"".concat(checkboxId, "\" id=\"").concat(checkboxId, "\"> Show as table</p>\n                <div id=\"g001-interactions-chart\"></div>\n                <div id=\"g001-interactions-table\" style=\"display:none\">TABLE HERE</div>\n                <div id=\"g001-interactions-map\"></div>\n                <div class=\"row formats-header\">\n                    <div class=\"col-xs-12\">\n                        <h3>Top 3 Formats</h3>\n                    </div>\n                </div>\n                <div class=\"row\">\n<!--                    <div class=\"col-md-4\">-->\n<!--                        <div id=\"g001-top-investigations\"></div>-->\n<!--                    </div>-->\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-downloads\"></div>\n                    </div>\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-exports\"></div>\n                    </div>\n                </div>\n            </div>\n        </div>");
+                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G001: Article  Downloads for  Unit Administrators</h1>\n                <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2> \n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g001-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-md-3\">\n                <div id=\"g001-interactions\"></div>\n                <div id=\"g001-format\"></div>\n            </div>\n            <div class=\"col-md-9\">\n                <p><input type=\"checkbox\" name=\"".concat(checkboxId, "\" id=\"").concat(checkboxId, "\"> Show as table</p>\n                <div id=\"g001-interactions-chart\"></div>\n                <div id=\"g001-interactions-table\" style=\"display:none\">TABLE HERE</div>\n                <div id=\"g001-interactions-map\"></div>\n                <div class=\"row formats-header\">\n                    <div class=\"col-xs-12\">\n                        <h3>Top 3 Formats</h3>\n                    </div>\n                </div>\n                <div class=\"row\">\n<!--                    <div class=\"col-md-4\">-->\n<!--                        <div id=\"g001-top-investigations\"></div>-->\n<!--                    </div>-->\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-downloads\"></div>\n                    </div>\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-exports\"></div>\n                    </div>\n                </div>\n            </div>\n        </div>");
                 edge.context.html(frame);
                 var checkboxSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, "show-as-table");
                 $d48cc3604bf30e24$export$b4cd8de5710bc55c(checkboxSelector, "change", this, "toggleTable");
