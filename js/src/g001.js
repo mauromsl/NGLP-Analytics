@@ -39,6 +39,12 @@ nglp.g001.init = function (params) {
         "request" : "DOWNLOADS"
     }
 
+    let presentationOrder = [
+        "investigation",
+        "export",
+        "request"
+    ];
+
     nglp.g001.active[selector] = new Edge({
         selector: selector,
         template: new nglp.g001.G001Template(),
@@ -137,6 +143,18 @@ nglp.g001.init = function (params) {
                     valueFormat: countFormat,
                     headerFormat: function(d) {
                         return interactionValueMap[d] || d;
+                    },
+                    seriesOrderFunction: function(dataSeries) {
+                        let ordered = []
+                        for (let j = 0; j < presentationOrder.length; j++) {
+                            for (let i = 0; i < dataSeries.length; i++) {
+                                let series = dataSeries[i];
+                                if (series.key === presentationOrder[j]) {
+                                    ordered.push(series);
+                                }
+                            }
+                        }
+                        return ordered;
                     }
                 })
             }),
@@ -181,11 +199,7 @@ nglp.g001.init = function (params) {
                     togglable: false,
                     showCount: true,
                     countFormat: countFormat,
-                    fixedTerms : [
-                        "investigation",
-                        "export",
-                        "request"
-                    ]
+                    fixedTerms : presentationOrder
                 })
             }),
             new ORTermSelector({

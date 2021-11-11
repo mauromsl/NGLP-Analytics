@@ -8852,6 +8852,7 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
         _this.valueFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "valueFormat", false);
         _this.labelFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "labelFormat", false);
         _this.headerFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "headerFormat", false);
+        _this.seriesOrderFunction = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "seriesOrderFunction", false);
         _this.namespace = "edges-bs3-chartdatatable";
         return _this;
     }
@@ -8891,6 +8892,7 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
                     body: []
                 };
                 if (!ds || ds.length === 0) return table;
+                if (this.seriesOrderFunction) ds = this.seriesOrderFunction(ds);
                 var headers = [
                     ""
                 ];
@@ -9042,6 +9044,11 @@ nglp.g001.init = function(params) {
         "export": "EXPORTS",
         "request": "DOWNLOADS"
     };
+    var presentationOrder = [
+        "investigation",
+        "export",
+        "request"
+    ];
     nglp.g001.active[selector] = new $6cf4dc301226cb87$export$22ad9a5707a07e9c({
         selector: selector,
         template: new nglp.g001.G001Template(),
@@ -9153,6 +9160,14 @@ nglp.g001.init = function(params) {
                     valueFormat: countFormat,
                     headerFormat: function headerFormat(d) {
                         return interactionValueMap[d] || d;
+                    },
+                    seriesOrderFunction: function seriesOrderFunction(dataSeries) {
+                        var ordered = [];
+                        for(var j = 0; j < presentationOrder.length; j++)for(var i = 0; i < dataSeries.length; i++){
+                            var series = dataSeries[i];
+                            if (series.key === presentationOrder[j]) ordered.push(series);
+                        }
+                        return ordered;
                     }
                 })
             }),
@@ -9193,11 +9208,7 @@ nglp.g001.init = function(params) {
                     togglable: false,
                     showCount: true,
                     countFormat: countFormat,
-                    fixedTerms: [
-                        "investigation",
-                        "export",
-                        "request"
-                    ]
+                    fixedTerms: presentationOrder
                 })
             }),
             new $2c48e414d79136ba$export$845e14b82c9a4f95({
