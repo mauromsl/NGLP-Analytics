@@ -3208,6 +3208,12 @@ var $ae46249d8a2a7b6d$export$7decb792461ef5a9 = /*#__PURE__*/ function(Component
         // function which will generate the data series, which will be
         // written to this.dataSeries if that is not provided
         _this.dataFunction = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "dataFunction", false);
+        // should we enforce a rectangular shape on the data series for when there is
+        // more than one series to be displayed?
+        _this.rectangulate = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "rectangulate", false);
+        // function which will sort the values of a series, used when rectangulate is
+        // set to true
+        _this.seriesSort = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "seriesSort", false);
         return _this;
     }
     $67866ae5f3a26802$export$9099ad97b570f7c($ae46249d8a2a7b6d$export$7decb792461ef5a9, [
@@ -3215,6 +3221,40 @@ var $ae46249d8a2a7b6d$export$7decb792461ef5a9 = /*#__PURE__*/ function(Component
             key: "synchronise",
             value: function synchronise() {
                 if (this.dataFunction) this.dataSeries = this.dataFunction(this);
+                if (this.rectangulate) this._rectangulate();
+            }
+        },
+        {
+            key: "_rectangulate",
+            value: function _rectangulate() {
+                if (this.dataSeries.length === 1) // if there's only one series, it is rectangular by definition
+                return;
+                // first index all the keys in the data series values for all
+                // data series
+                var allLabels = [];
+                for(var i = 0; i < this.dataSeries.length; i++){
+                    var series = this.dataSeries[i];
+                    for(var j = 0; j < series.values.length; j++){
+                        var point = series.values[j];
+                        if (!allLabels.includes(point.label)) allLabels.push(point.label);
+                    }
+                }
+                // now we have a full list of labels, check they are all present
+                // in each series, and if not set a default value of 0
+                for(var i1 = 0; i1 < this.dataSeries.length; i1++){
+                    var series = this.dataSeries[i1];
+                    var currentLabels = series.values.map(function(x) {
+                        return x.label;
+                    });
+                    for(var j = 0; j < allLabels.length; j++){
+                        var considerLabel = allLabels[j];
+                        if (!currentLabels.includes(considerLabel)) series.values.push({
+                            label: considerLabel,
+                            value: 0
+                        }); // NOTE: there is no sorting here, have to see what impact that has
+                    }
+                    if (this.seriesSort) series.values = this.seriesSort(series.values);
+                }
             }
         }
     ]);
@@ -8850,6 +8890,7 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
                     head: [],
                     body: []
                 };
+                if (!ds || ds.length === 0) return table;
                 var headers = [
                     ""
                 ];
@@ -8998,6 +9039,14 @@ nglp.g001.init = function(params) {
                     histogramAgg: "occurred_at",
                     termsAgg: "events"
                 }),
+                rectangulate: true,
+                seriesSort: function seriesSort(values) {
+                    return values.sort(function(a, b) {
+                        if (a.label < b.label) return -1;
+                        if (a.label > b.label) return 1;
+                        return 0;
+                    });
+                },
                 renderer: new $f29180d7a0e96438$export$1b75c0a6cacf635c({
                     xTickFormat: function xTickFormat(d) {
                         return d3.time.format('%b %y')(new Date(d));
@@ -9020,6 +9069,14 @@ nglp.g001.init = function(params) {
                     histogramAgg: "occurred_at",
                     termsAgg: "events"
                 }),
+                rectangulate: true,
+                seriesSort: function seriesSort(values) {
+                    return values.sort(function(a, b) {
+                        if (a.label < b.label) return -1;
+                        if (a.label > b.label) return 1;
+                        return 0;
+                    });
+                },
                 renderer: new $26b66f4c4ad5f83b$export$dda19d2613327857({
                     labelFormat: function labelFormat(d) {
                         return d3.time.format('%b %y')(new Date(d));

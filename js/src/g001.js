@@ -87,6 +87,18 @@ nglp.g001.init = function (params) {
                     histogramAgg: "occurred_at",
                     termsAgg: "events"
                 }),
+                rectangulate: true,
+                seriesSort: function(values) {
+                    return values.sort(function(a, b) {
+                        if (a.label < b.label) {
+                            return -1
+                        }
+                        if (a.label > b.label) {
+                            return 1
+                        }
+                        return 0;
+                    })
+                },
                 renderer : new MultibarRenderer({
                     xTickFormat: function(d) { return d3.time.format('%b %y')(new Date(d))},
                     color: function(d, i) {
@@ -107,6 +119,18 @@ nglp.g001.init = function (params) {
                     histogramAgg: "occurred_at",
                     termsAgg: "events"
                 }),
+                rectangulate: true,
+                seriesSort: function(values) {
+                    return values.sort(function(a, b) {
+                        if (a.label < b.label) {
+                            return -1
+                        }
+                        if (a.label > b.label) {
+                            return 1
+                        }
+                        return 0;
+                    })
+                },
                 renderer : new ChartDataTable({
                     labelFormat: function(d) { return d3.time.format('%b %y')(new Date(d))},
                     valueFormat: countFormat,
