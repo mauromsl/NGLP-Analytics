@@ -11,9 +11,10 @@ SASS = os.path.join("..", "js", "sass")
 STYLE = "compressed"
 
 # SASS and error file for the main CSS
-MAIN_SETTINGS = (os.path.join(SASS, "g001.scss"),
-                 os.path.join("static", "css", "g001.css"),
-                 os.path.join("..", "error_sass.txt"))
+MAIN_SETTINGS = [
+    (os.path.join(SASS, "g001.scss"),os.path.join("static", "css", "g001.css"), os.path.join("..", "error_sass.txt")),
+    (os.path.join(SASS, "g014.scss"),os.path.join("static", "css", "g014.css"), os.path.join("..", "error_sass.txt"))
+]
 
 
 def _localise_paths(paths, base_path=None):
@@ -94,4 +95,5 @@ def build(paths, base_path=None):
 
 if __name__ == "__main__":
     # Build the site CSS
-    build(MAIN_SETTINGS)
+    for settings in MAIN_SETTINGS:
+        build(settings)

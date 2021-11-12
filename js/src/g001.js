@@ -1,5 +1,6 @@
 import {$} from "../vendor/edges2/dependencies/jquery"
 import {es} from "../vendor/edges2/dependencies/es"
+import {moment} from "../vendor/edges2/dependencies/moment";    // FIXME: note that we want to replace moment with something newer, just using it for now as it's here and a requirement anyway
 
 import {Edge, Template} from "../vendor/edges2/src/core"
 import {Chart, termSplitDateHistogram, nestedTerms} from "../vendor/edges2/src/components/Chart";
@@ -9,8 +10,14 @@ import {GeohashedZoomableMap} from "../vendor/edges2/src/components/GeohashedZoo
 import {GoogleMapView} from "../vendor/edges2/src/renderers/googlemap/GoogleMapView";
 import {ORTermSelector} from "../vendor/edges2/src/components/ORTermSelector";
 import {CheckboxORTermSelector} from "../vendor/edges2/src/renderers/bs3/CheckboxORTermSelector";
+import {FixedSelectionCheckboxORTermSelector} from "../vendor/edges2/src/renderers/bs3/FixedSelectionCheckboxORTermSelector";
 import {HorizontalMultibarRenderer} from "../vendor/edges2/src/renderers/nvd3/HorizontalMultibarRenderer";
 import {ChartDataTable} from "../vendor/edges2/src/renderers/bs3/ChartDataTable";
+
+import {extractPalette} from "./nglpcommon";
+import {RelativeSizeBars} from "../vendor/edges2/src/renderers/html/RelativeSizeBars";
+import {MultiDateRangeEntry} from "../vendor/edges2/src/components/MultiDateRangeEntry";
+import {MultiDateRangeCombineSelector} from "../vendor/edges2/src/renderers/bs3/MultiDateRangeCombineSelector";
 
 global.nglp = {}
 nglp.g001 = {
@@ -27,13 +34,21 @@ nglp.g001.init = function (params) {
         thousandsSeparator: ","
     });
 
-    let palette = nglp.g001.extractPalette();
+    let palette = extractPalette("g001.css");
 
     let interactionValueMap = {
         "investigation" : "VIEWS",
         "export" : "EXPORTS",
         "request" : "DOWNLOADS"
     }
+
+    let presentationOrder = [
+        "investigation",
+        "export",
+        "request"
+    ];
+
+    let initialDateRange = getInitialDateRange();
 
     nglp.g001.active[selector] = new Edge({
         selector: selector,
@@ -44,7 +59,7 @@ nglp.g001.init = function (params) {
             must : [
                 new es.TermsFilter({field: "event.exact", values: ["request", "investigation", "export"]}),
                 new es.TermsFilter({field: "object_type.exact", values: ["article", "file"]}),
-                new es.RangeFilter({field : "occurred_at", gte: "2020-05-01", lte: "2021-07-01"})    // FIXME: these will need to be wired up to a date selector
+                new es.RangeFilter({field : "occurred_at", gte: initialDateRange.gte, lte: initialDateRange.lte})
             ],
             size: 0,
             aggs: [
@@ -78,12 +93,33 @@ nglp.g001.init = function (params) {
             ]
         }),
         components : [
+            new MultiDateRangeEntry({
+                id : "g001-date-range",
+                display: "REPORT PERIOD:<br>",
+                fields : [
+                    {field : "occurred_at", display: "Event Date"}
+                ],
+                autoLookupRange: true,
+                renderer : new MultiDateRangeCombineSelector({})
+            }),
             new Chart({
                 id: "g001-interactions-chart",
                 dataFunction: termSplitDateHistogram({
                     histogramAgg: "occurred_at",
                     termsAgg: "events"
                 }),
+                rectangulate: true,
+                seriesSort: function(values) {
+                    return values.sort(function(a, b) {
+                        if (a.label < b.label) {
+                            return -1
+                        }
+                        if (a.label > b.label) {
+                            return 1
+                        }
+                        return 0;
+                    })
+                },
                 renderer : new MultibarRenderer({
                     xTickFormat: function(d) { return d3.time.format('%b %y')(new Date(d))},
                     color: function(d, i) {
@@ -104,26 +140,61 @@ nglp.g001.init = function (params) {
                     histogramAgg: "occurred_at",
                     termsAgg: "events"
                 }),
+                rectangulate: true,
+                seriesSort: function(values) {
+                    return values.sort(function(a, b) {
+                        if (a.label < b.label) {
+                            return -1
+                        }
+                        if (a.label > b.label) {
+                            return 1
+                        }
+                        return 0;
+                    })
+                },
                 renderer : new ChartDataTable({
                     labelFormat: function(d) { return d3.time.format('%b %y')(new Date(d))},
                     valueFormat: countFormat,
                     headerFormat: function(d) {
                         return interactionValueMap[d] || d;
+                    },
+                    seriesOrderFunction: function(dataSeries) {
+                        let ordered = []
+                        for (let j = 0; j < presentationOrder.length; j++) {
+                            for (let i = 0; i < dataSeries.length; i++) {
+                                let series = dataSeries[i];
+                                if (series.key === presentationOrder[j]) {
+                                    ordered.push(series);
+                                }
+                            }
+                        }
+                        return ordered;
                     }
                 })
             }),
             new GeohashedZoomableMap({
                 id: "g001-interactions-map",
                 geoHashAggregation: "geo",
+                zoomToPrecisionMap : {
+                    0: 5,
+                    3: 7,
+                    5: 9
+                },
                 renderer: new GoogleMapView({
-                    clusterByCount: true,
+                    cluster: true,
+                    labelFunction : (loc) => {
+                        // be very careful changing this, the MapPointRenderer relies on this as the way
+                        // to find out what the count of the nested cluster is
+                        return loc.count.toString()
+                    },
+                    renderCluster : new MapPointRenderer(),
                     reQueryOnBoundsChange: true,
                     clusterIcons: {
-                        0: "/static/img/m1.png",
-                        2: "/static/img/m2.png",
-                        20: "/static/img/m3.png",
-                        50: "/static/img/m4.png",
-                        100: "/static/img/m5.png"
+                        0: "/static/img/m1.png"
+                        // 2: "/static/img/m2.png",
+                        // 20: "/static/img/m3.png",
+                        // 50: "/static/img/m4.png",
+                        // 100: "/static/img/m5.png"
                     }
                 })
             }),
@@ -136,12 +207,13 @@ nglp.g001.init = function (params) {
                 orderBy: "term",
                 orderDir: "asc",
                 valueMap: interactionValueMap,
-                renderer: new CheckboxORTermSelector({
+                renderer: new FixedSelectionCheckboxORTermSelector({
                     title: "Interactions",
                     open: true,
                     togglable: false,
                     showCount: true,
-                    countFormat: countFormat
+                    countFormat: countFormat,
+                    fixedTerms : presentationOrder
                 })
             }),
             new ORTermSelector({
@@ -163,19 +235,6 @@ nglp.g001.init = function (params) {
                     countFormat: countFormat
                 })
             }),
-            // this doesn't work - there isn't format information associated with investigations
-            // new Chart({
-            //     id: "g001-top-investigations",
-            //     dataFunction: nestedTerms({
-            //         aggs: [
-            //             {events: {keys : ["investigation"], aggs: ["formats"]}}
-            //         ]
-            //     }),
-            //     renderer: new HorizontalMultibarRenderer({
-            //         title: "Investigations",
-            //         legend: false
-            //     })
-            // }),
             new Chart({
                 id: "g001-top-downloads",
                 dataFunction: nestedTerms({
@@ -184,29 +243,33 @@ nglp.g001.init = function (params) {
                     ],
                     seriesName: "request"
                 }),
-                renderer: new HorizontalMultibarRenderer({
+                // renderer: new HorizontalMultibarRenderer({
+                //     title: "Downloads",
+                //     legend: false,
+                //     valueFormat: countFormat,
+                //     color: function(d, i) {
+                //         return palette[d.key]
+                //     },
+                //     showXAxis: true,
+                //     showYAxis: false,
+                //     marginLeft: 0,
+                //     marginRight: 0,
+                //     marginTop: 0,
+                //     marginBottom: 0,
+                //     groupSpacing: 0.7,
+                //     onUpdate: () => {
+                //         let ticks = $("#g001-top-downloads .tick text");
+                //         for (let i = 0; i < ticks.length; i++) {
+                //             let tick = $(ticks[i]);
+                //             tick.attr("x", 0);
+                //             tick.attr("y", 20);
+                //             tick.css("text-anchor", "start");
+                //         }
+                //     }
+                // })
+                renderer: new RelativeSizeBars({
                     title: "Downloads",
-                    legend: false,
-                    valueFormat: countFormat,
-                    color: function(d, i) {
-                        return palette[d.key]
-                    },
-                    showXAxis: true,
-                    showYAxis: false,
-                    marginLeft: 0,
-                    marginRight: 0,
-                    marginTop: 0,
-                    marginBottom: 0,
-                    groupSpacing: 0.7,
-                    onUpdate: () => {
-                        let ticks = $("#g001-top-downloads .tick text");
-                        for (let i = 0; i < ticks.length; i++) {
-                            let tick = $(ticks[i]);
-                            tick.attr("x", 0);
-                            tick.attr("y", 20);
-                            tick.css("text-anchor", "start");
-                        }
-                    }
+                    countFormat: countFormat
                 })
             }),
             new Chart({
@@ -217,57 +280,37 @@ nglp.g001.init = function (params) {
                     ],
                     seriesName: "export"
                 }),
-                renderer: new HorizontalMultibarRenderer({
+                renderer: new RelativeSizeBars({
                     title: "Exports",
-                    legend: false,
-                    valueFormat: countFormat,
-                    color: function(d, i) {
-                        return palette[d.key]
-                    },
-                    showXAxis: true,
-                    showYAxis: false,
-                    marginLeft: 0,
-                    marginRight: 0,
-                    marginTop: 0,
-                    marginBottom: 0,
-                    groupSpacing: 0.7,
-                    onUpdate: () => {
-                        let ticks = $("#g001-top-exports .tick text");
-                        for (let i = 0; i < ticks.length; i++) {
-                            let tick = $(ticks[i]);
-                            tick.attr("x", 0);
-                            tick.attr("y", 20);
-                            tick.css("text-anchor", "start");
-                        }
-                    }
+                    countFormat: countFormat
                 })
+                // renderer: new HorizontalMultibarRenderer({
+                //     title: "Exports",
+                //     legend: false,
+                //     valueFormat: countFormat,
+                //     color: function(d, i) {
+                //         return palette[d.key]
+                //     },
+                //     showXAxis: true,
+                //     showYAxis: false,
+                //     marginLeft: 0,
+                //     marginRight: 0,
+                //     marginTop: 0,
+                //     marginBottom: 0,
+                //     groupSpacing: 0.7,
+                //     onUpdate: () => {
+                //         let ticks = $("#g001-top-exports .tick text");
+                //         for (let i = 0; i < ticks.length; i++) {
+                //             let tick = $(ticks[i]);
+                //             tick.attr("x", 0);
+                //             tick.attr("y", 20);
+                //             tick.css("text-anchor", "start");
+                //         }
+                //     }
+                // })
             })
         ]
     })
-}
-
-nglp.g001.extractPalette = function() {
-    let palette = {
-        investigation: false,
-        export: false,
-        request: false
-    }
-    for (let i = 0; i < document.styleSheets.length; i++) {
-        let sheet = document.styleSheets[i];
-        if (sheet.href && sheet.href.includes("g001.css")) {
-            for (let j = 0; j < sheet.rules.length; j++) {
-                let rule = sheet.rules[j];
-                if (rule.selectorText === "#palette #investigations") {
-                    palette.investigation = rule.style.background;
-                } else if (rule.selectorText === "#palette #exports") {
-                    palette.export = rule.style.background;
-                } else if (rule.selectorText === "#palette #requests") {
-                    palette.request = rule.style.background;
-                }
-            }
-        }
-    }
-    return palette;
 }
 
 nglp.g001.G001Template = class extends Template {
@@ -275,6 +318,7 @@ nglp.g001.G001Template = class extends Template {
         super();
         this.edge = false;
         this.showing = "chart";
+        this.hidden = {};
         this.namespace = "g001-template";
     }
 
@@ -315,13 +359,10 @@ nglp.g001.G001Template = class extends Template {
                     </div>
                 </div>
                 <div class="row">
-<!--                    <div class="col-md-4">-->
-<!--                        <div id="g001-top-investigations"></div>-->
-<!--                    </div>-->
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div id="g001-top-downloads"></div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div id="g001-top-exports"></div>
                     </div>
                 </div>
@@ -345,8 +386,37 @@ nglp.g001.G001Template = class extends Template {
             table.hide();
             chart.show();
             this.showing = "chart"
+            this.edge.getComponent({id: "g001-interactions-chart"}).draw();
         }
     }
+}
+
+class MapPointRenderer {
+    constructor(params) {}
+
+    render(cluster, stats) {
+        let sum = 0;
+        for (let i = 0; i < cluster.markers.length; i++) {
+            let marker = cluster.markers[i];
+            sum += parseInt(marker.label.text);
+        }
+        return new google.maps.Marker({
+            position: cluster.position,
+            icon: "/static/img/m1.png",
+            label: {
+                text: String(sum)
+            },
+            // adjust zIndex to be above other markers
+            zIndex: Number(google.maps.Marker.MAX_ZINDEX) + sum,
+        });
+    }
+}
+
+function getInitialDateRange() {
+    let now = moment();
+    let lte = now.format("YYYY-MM-DD");
+    let gte = now.subtract(1, "years").format("YYYY-MM-DD");
+    return {gte: gte, lte: lte}
 }
 
 export default nglp;

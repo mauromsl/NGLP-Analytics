@@ -9,6 +9,37 @@ typeof globalThis !== 'undefined'
   : typeof global !== 'undefined'
   ? global
   : {};
+function $parcel$interopDefault(a) {
+  return a && a.__esModule ? a.default : a;
+}
+var $parcel$modules = {};
+var $parcel$inits = {};
+
+var parcelRequire = $parcel$global["parcelRequire94c2"];
+if (parcelRequire == null) {
+  parcelRequire = function(id) {
+    if (id in $parcel$modules) {
+      return $parcel$modules[id].exports;
+    }
+    if (id in $parcel$inits) {
+      var init = $parcel$inits[id];
+      delete $parcel$inits[id];
+      var module = {id: id, exports: {}};
+      $parcel$modules[id] = module;
+      init.call(module.exports, module, module.exports);
+      return module.exports;
+    }
+    var err = new Error("Cannot find module '" + id + "'");
+    err.code = 'MODULE_NOT_FOUND';
+    throw err;
+  };
+
+  parcelRequire.register = function register(id, init) {
+    $parcel$inits[id] = init;
+  };
+
+  $parcel$global["parcelRequire94c2"] = parcelRequire;
+}
 function $f483f7288df68fd0$export$9099ad97b570f7c(self) {
     if (self === void 0) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     return self;
@@ -2030,6 +2061,9 @@ function $8d94b5f2509b6cf5$var$_classExtends(clazz, ref) {
 
 
 
+var $bccd1ba82d89ceaa$export$137cea99ac96085 = window.moment;
+
+
 
 
 
@@ -2140,8 +2174,8 @@ var $d48cc3604bf30e24$export$a25557390a09e78a = /*#__PURE__*/ function() {
                     var context = {
                         index: i
                     };
-                    var success_callback = edges.objClosure(this, "_actionSuccess", this.successCallbackArgs, context);
-                    var error_callback = edges.objClosure(this, "_actionError", this.successCallbackArgs, context);
+                    var success_callback = $d48cc3604bf30e24$export$367047a567f2342b(this, "_actionSuccess", this.successCallbackArgs, context);
+                    var error_callback = $d48cc3604bf30e24$export$367047a567f2342b(this, "_actionError", this.successCallbackArgs, context);
                     var complete_callback = false;
                     this.functions.action({
                         entry: this.list[i],
@@ -2776,8 +2810,8 @@ var $6cf4dc301226cb87$export$22ad9a5707a07e9c = /*#__PURE__*/ function() {
                     };
                     entry["query"] = this.secondaryQueries[key](this);
                     entry["id"] = key;
-                    entry["search_url"] = this.searchUrl;
-                    if (this.secondaryUrls !== false && this.secondaryUrls.hasOwnProperty(key)) entry["search_url"] = this.secondaryUrls[key];
+                    entry["searchUrl"] = this.searchUrl;
+                    if (this.secondaryUrls !== false && this.secondaryUrls.hasOwnProperty(key)) entry["searchUrl"] = this.secondaryUrls[key];
                     entries.push(entry);
                     this.realisedSecondaryQueries[key] = entry.query;
                 }
@@ -3177,6 +3211,12 @@ var $ae46249d8a2a7b6d$export$7decb792461ef5a9 = /*#__PURE__*/ function(Component
         // function which will generate the data series, which will be
         // written to this.dataSeries if that is not provided
         _this.dataFunction = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "dataFunction", false);
+        // should we enforce a rectangular shape on the data series for when there is
+        // more than one series to be displayed?
+        _this.rectangulate = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "rectangulate", false);
+        // function which will sort the values of a series, used when rectangulate is
+        // set to true
+        _this.seriesSort = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "seriesSort", false);
         return _this;
     }
     $67866ae5f3a26802$export$9099ad97b570f7c($ae46249d8a2a7b6d$export$7decb792461ef5a9, [
@@ -3184,6 +3224,40 @@ var $ae46249d8a2a7b6d$export$7decb792461ef5a9 = /*#__PURE__*/ function(Component
             key: "synchronise",
             value: function synchronise() {
                 if (this.dataFunction) this.dataSeries = this.dataFunction(this);
+                if (this.rectangulate) this._rectangulate();
+            }
+        },
+        {
+            key: "_rectangulate",
+            value: function _rectangulate() {
+                if (this.dataSeries.length === 1) // if there's only one series, it is rectangular by definition
+                return;
+                // first index all the keys in the data series values for all
+                // data series
+                var allLabels = [];
+                for(var i = 0; i < this.dataSeries.length; i++){
+                    var series = this.dataSeries[i];
+                    for(var j = 0; j < series.values.length; j++){
+                        var point = series.values[j];
+                        if (!allLabels.includes(point.label)) allLabels.push(point.label);
+                    }
+                }
+                // now we have a full list of labels, check they are all present
+                // in each series, and if not set a default value of 0
+                for(var i1 = 0; i1 < this.dataSeries.length; i1++){
+                    var series = this.dataSeries[i1];
+                    var currentLabels = series.values.map(function(x) {
+                        return x.label;
+                    });
+                    for(var j = 0; j < allLabels.length; j++){
+                        var considerLabel = allLabels[j];
+                        if (!currentLabels.includes(considerLabel)) series.values.push({
+                            label: considerLabel,
+                            value: 0
+                        }); // NOTE: there is no sorting here, have to see what impact that has
+                    }
+                    if (this.seriesSort) series.values = this.seriesSort(series.values);
+                }
             }
         }
     ]);
@@ -3501,9 +3575,9 @@ var $f29180d7a0e96438$export$1b75c0a6cacf635c = /*#__PURE__*/ function(Renderer)
                         if (this.onHide) this.onHide();
                         return;
                     }
+                    this.component.context.show();
+                    if (this.onShow) this.onShow();
                 }
-                this.component.context.show();
-                if (this.onShow) this.onShow();
                 var svgId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, "svg", this);
                 var svgSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, "svg", this);
                 this.component.context.html('<svg id="' + svgId + '"></svg>');
@@ -3926,6 +4000,3871 @@ var $7ac4d4ec044faea2$export$c57445924c23547b = /*#__PURE__*/ function(Component
 
 
 
+var $06fd7bba89ea2716$export$3b99b33fd41e6e1b = 6371008.8;
+var $06fd7bba89ea2716$export$6090225ba4bd5c27 = {
+    centimeters: $06fd7bba89ea2716$export$3b99b33fd41e6e1b * 100,
+    centimetres: $06fd7bba89ea2716$export$3b99b33fd41e6e1b * 100,
+    degrees: $06fd7bba89ea2716$export$3b99b33fd41e6e1b / 111325,
+    feet: $06fd7bba89ea2716$export$3b99b33fd41e6e1b * 3.28084,
+    inches: $06fd7bba89ea2716$export$3b99b33fd41e6e1b * 39.37,
+    kilometers: $06fd7bba89ea2716$export$3b99b33fd41e6e1b / 1000,
+    kilometres: $06fd7bba89ea2716$export$3b99b33fd41e6e1b / 1000,
+    meters: $06fd7bba89ea2716$export$3b99b33fd41e6e1b,
+    metres: $06fd7bba89ea2716$export$3b99b33fd41e6e1b,
+    miles: $06fd7bba89ea2716$export$3b99b33fd41e6e1b / 1609.344,
+    millimeters: $06fd7bba89ea2716$export$3b99b33fd41e6e1b * 1000,
+    millimetres: $06fd7bba89ea2716$export$3b99b33fd41e6e1b * 1000,
+    nauticalmiles: $06fd7bba89ea2716$export$3b99b33fd41e6e1b / 1852,
+    radians: 1,
+    yards: $06fd7bba89ea2716$export$3b99b33fd41e6e1b * 1.0936
+};
+var $06fd7bba89ea2716$export$da3eb65231fe0ad8 = {
+    centimeters: 100,
+    centimetres: 100,
+    degrees: 1 / 111325,
+    feet: 3.28084,
+    inches: 39.37,
+    kilometers: 0.001,
+    kilometres: 0.001,
+    meters: 1,
+    metres: 1,
+    miles: 1 / 1609.344,
+    millimeters: 1000,
+    millimetres: 1000,
+    nauticalmiles: 1 / 1852,
+    radians: 1 / $06fd7bba89ea2716$export$3b99b33fd41e6e1b,
+    yards: 1.0936133
+};
+var $06fd7bba89ea2716$export$fb8fc03e58e95277 = {
+    acres: 0.000247105,
+    centimeters: 10000,
+    centimetres: 10000,
+    feet: 10.763910417,
+    hectares: 0.0001,
+    inches: 1550.003100006,
+    kilometers: 0.000001,
+    kilometres: 0.000001,
+    meters: 1,
+    metres: 1,
+    miles: 0.000000386,
+    millimeters: 1000000,
+    millimetres: 1000000,
+    yards: 1.195990046
+};
+function $06fd7bba89ea2716$export$afb26b2da2b9ec90(geom, properties, options) {
+    if (options === void 0) options = {
+    };
+    var feat = {
+        type: "Feature"
+    };
+    if (options.id === 0 || options.id) feat.id = options.id;
+    if (options.bbox) feat.bbox = options.bbox;
+    feat.properties = properties || {
+    };
+    feat.geometry = geom;
+    return feat;
+}
+function $06fd7bba89ea2716$export$6927473f28f5208a(type, coordinates, _options) {
+    if (_options === void 0) _options = {
+    };
+    switch(type){
+        case "Point":
+            return $06fd7bba89ea2716$export$8502864bca7c3201(coordinates).geometry;
+        case "LineString":
+            return $06fd7bba89ea2716$export$aca513e25ac14bc1(coordinates).geometry;
+        case "Polygon":
+            return $06fd7bba89ea2716$export$c9f721cf0a01d8ec(coordinates).geometry;
+        case "MultiPoint":
+            return $06fd7bba89ea2716$export$309bf52fb89f3663(coordinates).geometry;
+        case "MultiLineString":
+            return $06fd7bba89ea2716$export$e599217661506027(coordinates).geometry;
+        case "MultiPolygon":
+            return $06fd7bba89ea2716$export$4ecb90d6abcf292a(coordinates).geometry;
+        default:
+            throw new Error(type + " is invalid");
+    }
+}
+function $06fd7bba89ea2716$export$8502864bca7c3201(coordinates, properties, options) {
+    if (options === void 0) options = {
+    };
+    if (!coordinates) throw new Error("coordinates is required");
+    if (!Array.isArray(coordinates)) throw new Error("coordinates must be an Array");
+    if (coordinates.length < 2) throw new Error("coordinates must be at least 2 numbers long");
+    if (!$06fd7bba89ea2716$export$1b423f7fa395bc1f(coordinates[0]) || !$06fd7bba89ea2716$export$1b423f7fa395bc1f(coordinates[1])) throw new Error("coordinates must contain numbers");
+    var geom = {
+        type: "Point",
+        coordinates: coordinates
+    };
+    return $06fd7bba89ea2716$export$afb26b2da2b9ec90(geom, properties, options);
+}
+function $06fd7bba89ea2716$export$176cb2c78829af0(coordinates, properties, options) {
+    if (options === void 0) options = {
+    };
+    return $06fd7bba89ea2716$export$7c422acbc10e74d2(coordinates.map(function(coords) {
+        return $06fd7bba89ea2716$export$8502864bca7c3201(coords, properties);
+    }), options);
+}
+function $06fd7bba89ea2716$export$c9f721cf0a01d8ec(coordinates, properties, options) {
+    if (options === void 0) options = {
+    };
+    for(var _i = 0, coordinates_1 = coordinates; _i < coordinates_1.length; _i++){
+        var ring = coordinates_1[_i];
+        if (ring.length < 4) throw new Error("Each LinearRing of a Polygon must have 4 or more Positions.");
+        for(var j = 0; j < ring[ring.length - 1].length; j++){
+            // Check if first point of Polygon contains two numbers
+            if (ring[ring.length - 1][j] !== ring[0][j]) throw new Error("First and last Position are not equivalent.");
+        }
+    }
+    var geom = {
+        type: "Polygon",
+        coordinates: coordinates
+    };
+    return $06fd7bba89ea2716$export$afb26b2da2b9ec90(geom, properties, options);
+}
+function $06fd7bba89ea2716$export$38859cbb8a8596d1(coordinates, properties, options) {
+    if (options === void 0) options = {
+    };
+    return $06fd7bba89ea2716$export$7c422acbc10e74d2(coordinates.map(function(coords) {
+        return $06fd7bba89ea2716$export$c9f721cf0a01d8ec(coords, properties);
+    }), options);
+}
+function $06fd7bba89ea2716$export$aca513e25ac14bc1(coordinates, properties, options) {
+    if (options === void 0) options = {
+    };
+    if (coordinates.length < 2) throw new Error("coordinates must be an array of two or more positions");
+    var geom = {
+        type: "LineString",
+        coordinates: coordinates
+    };
+    return $06fd7bba89ea2716$export$afb26b2da2b9ec90(geom, properties, options);
+}
+function $06fd7bba89ea2716$export$b73fd69eb064be2e(coordinates, properties, options) {
+    if (options === void 0) options = {
+    };
+    return $06fd7bba89ea2716$export$7c422acbc10e74d2(coordinates.map(function(coords) {
+        return $06fd7bba89ea2716$export$aca513e25ac14bc1(coords, properties);
+    }), options);
+}
+function $06fd7bba89ea2716$export$7c422acbc10e74d2(features, options) {
+    if (options === void 0) options = {
+    };
+    var fc = {
+        type: "FeatureCollection"
+    };
+    if (options.id) fc.id = options.id;
+    if (options.bbox) fc.bbox = options.bbox;
+    fc.features = features;
+    return fc;
+}
+function $06fd7bba89ea2716$export$e599217661506027(coordinates, properties, options) {
+    if (options === void 0) options = {
+    };
+    var geom = {
+        type: "MultiLineString",
+        coordinates: coordinates
+    };
+    return $06fd7bba89ea2716$export$afb26b2da2b9ec90(geom, properties, options);
+}
+function $06fd7bba89ea2716$export$309bf52fb89f3663(coordinates, properties, options) {
+    if (options === void 0) options = {
+    };
+    var geom = {
+        type: "MultiPoint",
+        coordinates: coordinates
+    };
+    return $06fd7bba89ea2716$export$afb26b2da2b9ec90(geom, properties, options);
+}
+function $06fd7bba89ea2716$export$4ecb90d6abcf292a(coordinates, properties, options) {
+    if (options === void 0) options = {
+    };
+    var geom = {
+        type: "MultiPolygon",
+        coordinates: coordinates
+    };
+    return $06fd7bba89ea2716$export$afb26b2da2b9ec90(geom, properties, options);
+}
+function $06fd7bba89ea2716$export$9666a975c039faf3(geometries, properties, options) {
+    if (options === void 0) options = {
+    };
+    var geom = {
+        type: "GeometryCollection",
+        geometries: geometries
+    };
+    return $06fd7bba89ea2716$export$afb26b2da2b9ec90(geom, properties, options);
+}
+function $06fd7bba89ea2716$export$f9488fbfb886385d(num, precision) {
+    if (precision === void 0) precision = 0;
+    if (precision && !(precision >= 0)) throw new Error("precision must be a positive number");
+    var multiplier = Math.pow(10, precision || 0);
+    return Math.round(num * multiplier) / multiplier;
+}
+function $06fd7bba89ea2716$export$a7371587dd3e0f79(radians, units) {
+    if (units === void 0) units = "kilometers";
+    var factor = $06fd7bba89ea2716$export$6090225ba4bd5c27[units];
+    if (!factor) throw new Error(units + " units is invalid");
+    return radians * factor;
+}
+function $06fd7bba89ea2716$export$6c073b3d621feb4b(distance, units) {
+    if (units === void 0) units = "kilometers";
+    var factor = $06fd7bba89ea2716$export$6090225ba4bd5c27[units];
+    if (!factor) throw new Error(units + " units is invalid");
+    return distance / factor;
+}
+function $06fd7bba89ea2716$export$4945b7cf3cb41899(distance, units) {
+    return $06fd7bba89ea2716$export$2bc59cfe0926807d($06fd7bba89ea2716$export$6c073b3d621feb4b(distance, units));
+}
+function $06fd7bba89ea2716$export$7ad1874be920d57b(bearing) {
+    var angle = bearing % 360;
+    if (angle < 0) angle += 360;
+    return angle;
+}
+function $06fd7bba89ea2716$export$2bc59cfe0926807d(radians) {
+    var degrees = radians % (2 * Math.PI);
+    return degrees * 180 / Math.PI;
+}
+function $06fd7bba89ea2716$export$3df9f87a6fcd617d(degrees) {
+    var radians = degrees % 360;
+    return radians * Math.PI / 180;
+}
+function $06fd7bba89ea2716$export$89c2cc3b6c94cff3(length, originalUnit, finalUnit) {
+    if (originalUnit === void 0) originalUnit = "kilometers";
+    if (finalUnit === void 0) finalUnit = "kilometers";
+    if (!(length >= 0)) throw new Error("length must be a positive number");
+    return $06fd7bba89ea2716$export$a7371587dd3e0f79($06fd7bba89ea2716$export$6c073b3d621feb4b(length, originalUnit), finalUnit);
+}
+function $06fd7bba89ea2716$export$a6884fee1809ec64(area, originalUnit, finalUnit) {
+    if (originalUnit === void 0) originalUnit = "meters";
+    if (finalUnit === void 0) finalUnit = "kilometers";
+    if (!(area >= 0)) throw new Error("area must be a positive number");
+    var startFactor = $06fd7bba89ea2716$export$fb8fc03e58e95277[originalUnit];
+    if (!startFactor) throw new Error("invalid original units");
+    var finalFactor = $06fd7bba89ea2716$export$fb8fc03e58e95277[finalUnit];
+    if (!finalFactor) throw new Error("invalid final units");
+    return area / startFactor * finalFactor;
+}
+function $06fd7bba89ea2716$export$1b423f7fa395bc1f(num) {
+    return !isNaN(num) && num !== null && !Array.isArray(num);
+}
+function $06fd7bba89ea2716$export$9ee30c9ec6e8e509(input) {
+    return !!input && input.constructor === Object;
+}
+function $06fd7bba89ea2716$export$62aae204e048857f(bbox) {
+    if (!bbox) throw new Error("bbox is required");
+    if (!Array.isArray(bbox)) throw new Error("bbox must be an Array");
+    if (bbox.length !== 4 && bbox.length !== 6) throw new Error("bbox must be an Array of 4 or 6 numbers");
+    bbox.forEach(function(num) {
+        if (!$06fd7bba89ea2716$export$1b423f7fa395bc1f(num)) throw new Error("bbox must only contain numbers");
+    });
+}
+function $06fd7bba89ea2716$export$f4624eca17ac14c9(id) {
+    if (!id) throw new Error("id is required");
+    if ([
+        "string",
+        "number"
+    ].indexOf(typeof id) === -1) throw new Error("id must be a number or a string");
+}
+
+
+/**
+ * Returns a cloned copy of the passed GeoJSON Object, including possible 'Foreign Members'.
+ * ~3-5x faster than the common JSON.parse + JSON.stringify combo method.
+ *
+ * @name clone
+ * @param {GeoJSON} geojson GeoJSON Object
+ * @returns {GeoJSON} cloned GeoJSON Object
+ * @example
+ * var line = turf.lineString([[-74, 40], [-78, 42], [-82, 35]], {color: 'red'});
+ *
+ * var lineCloned = turf.clone(line);
+ */ function $3cfd6d70d7301277$var$clone(geojson) {
+    if (!geojson) throw new Error("geojson is required");
+    switch(geojson.type){
+        case "Feature":
+            return $3cfd6d70d7301277$var$cloneFeature(geojson);
+        case "FeatureCollection":
+            return $3cfd6d70d7301277$var$cloneFeatureCollection(geojson);
+        case "Point":
+        case "LineString":
+        case "Polygon":
+        case "MultiPoint":
+        case "MultiLineString":
+        case "MultiPolygon":
+        case "GeometryCollection":
+            return $3cfd6d70d7301277$var$cloneGeometry(geojson);
+        default:
+            throw new Error("unknown GeoJSON type");
+    }
+}
+/**
+ * Clone Feature
+ *
+ * @private
+ * @param {Feature<any>} geojson GeoJSON Feature
+ * @returns {Feature<any>} cloned Feature
+ */ function $3cfd6d70d7301277$var$cloneFeature(geojson) {
+    var cloned = {
+        type: "Feature"
+    };
+    // Preserve Foreign Members
+    Object.keys(geojson).forEach(function(key) {
+        switch(key){
+            case "type":
+            case "properties":
+            case "geometry":
+                return;
+            default:
+                cloned[key] = geojson[key];
+        }
+    });
+    // Add properties & geometry last
+    cloned.properties = $3cfd6d70d7301277$var$cloneProperties(geojson.properties);
+    cloned.geometry = $3cfd6d70d7301277$var$cloneGeometry(geojson.geometry);
+    return cloned;
+}
+/**
+ * Clone Properties
+ *
+ * @private
+ * @param {Object} properties GeoJSON Properties
+ * @returns {Object} cloned Properties
+ */ function $3cfd6d70d7301277$var$cloneProperties(properties) {
+    var cloned = {
+    };
+    if (!properties) return cloned;
+    Object.keys(properties).forEach(function(key) {
+        var value = properties[key];
+        if (typeof value === "object") {
+            if (value === null) // handle null
+            cloned[key] = null;
+            else if (Array.isArray(value)) // handle Array
+            cloned[key] = value.map(function(item) {
+                return item;
+            });
+            else // handle generic Object
+            cloned[key] = $3cfd6d70d7301277$var$cloneProperties(value);
+        } else cloned[key] = value;
+    });
+    return cloned;
+}
+/**
+ * Clone Feature Collection
+ *
+ * @private
+ * @param {FeatureCollection<any>} geojson GeoJSON Feature Collection
+ * @returns {FeatureCollection<any>} cloned Feature Collection
+ */ function $3cfd6d70d7301277$var$cloneFeatureCollection(geojson) {
+    var cloned = {
+        type: "FeatureCollection"
+    };
+    // Preserve Foreign Members
+    Object.keys(geojson).forEach(function(key) {
+        switch(key){
+            case "type":
+            case "features":
+                return;
+            default:
+                cloned[key] = geojson[key];
+        }
+    });
+    // Add features
+    cloned.features = geojson.features.map(function(feature) {
+        return $3cfd6d70d7301277$var$cloneFeature(feature);
+    });
+    return cloned;
+}
+/**
+ * Clone Geometry
+ *
+ * @private
+ * @param {Geometry<any>} geometry GeoJSON Geometry
+ * @returns {Geometry<any>} cloned Geometry
+ */ function $3cfd6d70d7301277$var$cloneGeometry(geometry) {
+    var geom = {
+        type: geometry.type
+    };
+    if (geometry.bbox) geom.bbox = geometry.bbox;
+    if (geometry.type === "GeometryCollection") {
+        geom.geometries = geometry.geometries.map(function(g) {
+            return $3cfd6d70d7301277$var$cloneGeometry(g);
+        });
+        return geom;
+    }
+    geom.coordinates = $3cfd6d70d7301277$var$deepSlice(geometry.coordinates);
+    return geom;
+}
+/**
+ * Deep Slice coordinates
+ *
+ * @private
+ * @param {Coordinates} coords Coordinates
+ * @returns {Coordinates} all coordinates sliced
+ */ function $3cfd6d70d7301277$var$deepSlice(coords) {
+    var cloned = coords;
+    if (typeof cloned[0] !== "object") return cloned.slice();
+    return cloned.map(function(coord) {
+        return $3cfd6d70d7301277$var$deepSlice(coord);
+    });
+}
+var $3cfd6d70d7301277$export$9099ad97b570f7c = $3cfd6d70d7301277$var$clone;
+
+
+
+/**
+ * Callback for coordEach
+ *
+ * @callback coordEachCallback
+ * @param {Array<number>} currentCoord The current coordinate being processed.
+ * @param {number} coordIndex The current index of the coordinate being processed.
+ * @param {number} featureIndex The current index of the Feature being processed.
+ * @param {number} multiFeatureIndex The current index of the Multi-Feature being processed.
+ * @param {number} geometryIndex The current index of the Geometry being processed.
+ */ /**
+ * Iterate over coordinates in any GeoJSON object, similar to Array.forEach()
+ *
+ * @name coordEach
+ * @param {FeatureCollection|Feature|Geometry} geojson any GeoJSON object
+ * @param {Function} callback a method that takes (currentCoord, coordIndex, featureIndex, multiFeatureIndex)
+ * @param {boolean} [excludeWrapCoord=false] whether or not to include the final coordinate of LinearRings that wraps the ring in its iteration.
+ * @returns {void}
+ * @example
+ * var features = turf.featureCollection([
+ *   turf.point([26, 37], {"foo": "bar"}),
+ *   turf.point([36, 53], {"hello": "world"})
+ * ]);
+ *
+ * turf.coordEach(features, function (currentCoord, coordIndex, featureIndex, multiFeatureIndex, geometryIndex) {
+ *   //=currentCoord
+ *   //=coordIndex
+ *   //=featureIndex
+ *   //=multiFeatureIndex
+ *   //=geometryIndex
+ * });
+ */ function $5c76aa7c2c53dcdc$export$cccf52902b81b0d9(geojson, callback, excludeWrapCoord) {
+    // Handles null Geometry -- Skips this GeoJSON
+    if (geojson === null) return;
+    var j, k, l, geometry, stopG, coords, geometryMaybeCollection, wrapShrink = 0, coordIndex = 0, isGeometryCollection, type = geojson.type, isFeatureCollection = type === "FeatureCollection", isFeature = type === "Feature", stop = isFeatureCollection ? geojson.features.length : 1;
+    // This logic may look a little weird. The reason why it is that way
+    // is because it's trying to be fast. GeoJSON supports multiple kinds
+    // of objects at its root: FeatureCollection, Features, Geometries.
+    // This function has the responsibility of handling all of them, and that
+    // means that some of the `for` loops you see below actually just don't apply
+    // to certain inputs. For instance, if you give this just a
+    // Point geometry, then both loops are short-circuited and all we do
+    // is gradually rename the input until it's called 'geometry'.
+    //
+    // This also aims to allocate as few resources as possible: just a
+    // few numbers and booleans, rather than any temporary arrays as would
+    // be required with the normalization approach.
+    for(var featureIndex = 0; featureIndex < stop; featureIndex++){
+        geometryMaybeCollection = isFeatureCollection ? geojson.features[featureIndex].geometry : isFeature ? geojson.geometry : geojson;
+        isGeometryCollection = geometryMaybeCollection ? geometryMaybeCollection.type === "GeometryCollection" : false;
+        stopG = isGeometryCollection ? geometryMaybeCollection.geometries.length : 1;
+        for(var geomIndex = 0; geomIndex < stopG; geomIndex++){
+            var multiFeatureIndex = 0;
+            var geometryIndex = 0;
+            geometry = isGeometryCollection ? geometryMaybeCollection.geometries[geomIndex] : geometryMaybeCollection;
+            // Handles null Geometry -- Skips this geometry
+            if (geometry === null) continue;
+            coords = geometry.coordinates;
+            var geomType = geometry.type;
+            wrapShrink = excludeWrapCoord && (geomType === "Polygon" || geomType === "MultiPolygon") ? 1 : 0;
+            switch(geomType){
+                case null:
+                    break;
+                case "Point":
+                    if (callback(coords, coordIndex, featureIndex, multiFeatureIndex, geometryIndex) === false) return false;
+                    coordIndex++;
+                    multiFeatureIndex++;
+                    break;
+                case "LineString":
+                case "MultiPoint":
+                    for(j = 0; j < coords.length; j++){
+                        if (callback(coords[j], coordIndex, featureIndex, multiFeatureIndex, geometryIndex) === false) return false;
+                        coordIndex++;
+                        if (geomType === "MultiPoint") multiFeatureIndex++;
+                    }
+                    if (geomType === "LineString") multiFeatureIndex++;
+                    break;
+                case "Polygon":
+                case "MultiLineString":
+                    for(j = 0; j < coords.length; j++){
+                        for(k = 0; k < coords[j].length - wrapShrink; k++){
+                            if (callback(coords[j][k], coordIndex, featureIndex, multiFeatureIndex, geometryIndex) === false) return false;
+                            coordIndex++;
+                        }
+                        if (geomType === "MultiLineString") multiFeatureIndex++;
+                        if (geomType === "Polygon") geometryIndex++;
+                    }
+                    if (geomType === "Polygon") multiFeatureIndex++;
+                    break;
+                case "MultiPolygon":
+                    for(j = 0; j < coords.length; j++){
+                        geometryIndex = 0;
+                        for(k = 0; k < coords[j].length; k++){
+                            for(l = 0; l < coords[j][k].length - wrapShrink; l++){
+                                if (callback(coords[j][k][l], coordIndex, featureIndex, multiFeatureIndex, geometryIndex) === false) return false;
+                                coordIndex++;
+                            }
+                            geometryIndex++;
+                        }
+                        multiFeatureIndex++;
+                    }
+                    break;
+                case "GeometryCollection":
+                    for(j = 0; j < geometry.geometries.length; j++)if ($5c76aa7c2c53dcdc$export$cccf52902b81b0d9(geometry.geometries[j], callback, excludeWrapCoord) === false) return false;
+                    break;
+                default:
+                    throw new Error("Unknown Geometry Type");
+            }
+        }
+    }
+}
+/**
+ * Callback for coordReduce
+ *
+ * The first time the callback function is called, the values provided as arguments depend
+ * on whether the reduce method has an initialValue argument.
+ *
+ * If an initialValue is provided to the reduce method:
+ *  - The previousValue argument is initialValue.
+ *  - The currentValue argument is the value of the first element present in the array.
+ *
+ * If an initialValue is not provided:
+ *  - The previousValue argument is the value of the first element present in the array.
+ *  - The currentValue argument is the value of the second element present in the array.
+ *
+ * @callback coordReduceCallback
+ * @param {*} previousValue The accumulated value previously returned in the last invocation
+ * of the callback, or initialValue, if supplied.
+ * @param {Array<number>} currentCoord The current coordinate being processed.
+ * @param {number} coordIndex The current index of the coordinate being processed.
+ * Starts at index 0, if an initialValue is provided, and at index 1 otherwise.
+ * @param {number} featureIndex The current index of the Feature being processed.
+ * @param {number} multiFeatureIndex The current index of the Multi-Feature being processed.
+ * @param {number} geometryIndex The current index of the Geometry being processed.
+ */ /**
+ * Reduce coordinates in any GeoJSON object, similar to Array.reduce()
+ *
+ * @name coordReduce
+ * @param {FeatureCollection|Geometry|Feature} geojson any GeoJSON object
+ * @param {Function} callback a method that takes (previousValue, currentCoord, coordIndex)
+ * @param {*} [initialValue] Value to use as the first argument to the first call of the callback.
+ * @param {boolean} [excludeWrapCoord=false] whether or not to include the final coordinate of LinearRings that wraps the ring in its iteration.
+ * @returns {*} The value that results from the reduction.
+ * @example
+ * var features = turf.featureCollection([
+ *   turf.point([26, 37], {"foo": "bar"}),
+ *   turf.point([36, 53], {"hello": "world"})
+ * ]);
+ *
+ * turf.coordReduce(features, function (previousValue, currentCoord, coordIndex, featureIndex, multiFeatureIndex, geometryIndex) {
+ *   //=previousValue
+ *   //=currentCoord
+ *   //=coordIndex
+ *   //=featureIndex
+ *   //=multiFeatureIndex
+ *   //=geometryIndex
+ *   return currentCoord;
+ * });
+ */ function $5c76aa7c2c53dcdc$export$89a62b3a9bc53ead(geojson, callback, initialValue, excludeWrapCoord) {
+    var previousValue = initialValue;
+    $5c76aa7c2c53dcdc$export$cccf52902b81b0d9(geojson, function(currentCoord, coordIndex, featureIndex, multiFeatureIndex, geometryIndex) {
+        if (coordIndex === 0 && initialValue === undefined) previousValue = currentCoord;
+        else previousValue = callback(previousValue, currentCoord, coordIndex, featureIndex, multiFeatureIndex, geometryIndex);
+    }, excludeWrapCoord);
+    return previousValue;
+}
+/**
+ * Callback for propEach
+ *
+ * @callback propEachCallback
+ * @param {Object} currentProperties The current Properties being processed.
+ * @param {number} featureIndex The current index of the Feature being processed.
+ */ /**
+ * Iterate over properties in any GeoJSON object, similar to Array.forEach()
+ *
+ * @name propEach
+ * @param {FeatureCollection|Feature} geojson any GeoJSON object
+ * @param {Function} callback a method that takes (currentProperties, featureIndex)
+ * @returns {void}
+ * @example
+ * var features = turf.featureCollection([
+ *     turf.point([26, 37], {foo: 'bar'}),
+ *     turf.point([36, 53], {hello: 'world'})
+ * ]);
+ *
+ * turf.propEach(features, function (currentProperties, featureIndex) {
+ *   //=currentProperties
+ *   //=featureIndex
+ * });
+ */ function $5c76aa7c2c53dcdc$export$7e1319df03985d3a(geojson, callback) {
+    var i;
+    switch(geojson.type){
+        case "FeatureCollection":
+            for(i = 0; i < geojson.features.length; i++){
+                if (callback(geojson.features[i].properties, i) === false) break;
+            }
+            break;
+        case "Feature":
+            callback(geojson.properties, 0);
+            break;
+    }
+}
+/**
+ * Callback for propReduce
+ *
+ * The first time the callback function is called, the values provided as arguments depend
+ * on whether the reduce method has an initialValue argument.
+ *
+ * If an initialValue is provided to the reduce method:
+ *  - The previousValue argument is initialValue.
+ *  - The currentValue argument is the value of the first element present in the array.
+ *
+ * If an initialValue is not provided:
+ *  - The previousValue argument is the value of the first element present in the array.
+ *  - The currentValue argument is the value of the second element present in the array.
+ *
+ * @callback propReduceCallback
+ * @param {*} previousValue The accumulated value previously returned in the last invocation
+ * of the callback, or initialValue, if supplied.
+ * @param {*} currentProperties The current Properties being processed.
+ * @param {number} featureIndex The current index of the Feature being processed.
+ */ /**
+ * Reduce properties in any GeoJSON object into a single value,
+ * similar to how Array.reduce works. However, in this case we lazily run
+ * the reduction, so an array of all properties is unnecessary.
+ *
+ * @name propReduce
+ * @param {FeatureCollection|Feature} geojson any GeoJSON object
+ * @param {Function} callback a method that takes (previousValue, currentProperties, featureIndex)
+ * @param {*} [initialValue] Value to use as the first argument to the first call of the callback.
+ * @returns {*} The value that results from the reduction.
+ * @example
+ * var features = turf.featureCollection([
+ *     turf.point([26, 37], {foo: 'bar'}),
+ *     turf.point([36, 53], {hello: 'world'})
+ * ]);
+ *
+ * turf.propReduce(features, function (previousValue, currentProperties, featureIndex) {
+ *   //=previousValue
+ *   //=currentProperties
+ *   //=featureIndex
+ *   return currentProperties
+ * });
+ */ function $5c76aa7c2c53dcdc$export$6ea47a08cbf96668(geojson, callback, initialValue) {
+    var previousValue = initialValue;
+    $5c76aa7c2c53dcdc$export$7e1319df03985d3a(geojson, function(currentProperties, featureIndex) {
+        if (featureIndex === 0 && initialValue === undefined) previousValue = currentProperties;
+        else previousValue = callback(previousValue, currentProperties, featureIndex);
+    });
+    return previousValue;
+}
+/**
+ * Callback for featureEach
+ *
+ * @callback featureEachCallback
+ * @param {Feature<any>} currentFeature The current Feature being processed.
+ * @param {number} featureIndex The current index of the Feature being processed.
+ */ /**
+ * Iterate over features in any GeoJSON object, similar to
+ * Array.forEach.
+ *
+ * @name featureEach
+ * @param {FeatureCollection|Feature|Geometry} geojson any GeoJSON object
+ * @param {Function} callback a method that takes (currentFeature, featureIndex)
+ * @returns {void}
+ * @example
+ * var features = turf.featureCollection([
+ *   turf.point([26, 37], {foo: 'bar'}),
+ *   turf.point([36, 53], {hello: 'world'})
+ * ]);
+ *
+ * turf.featureEach(features, function (currentFeature, featureIndex) {
+ *   //=currentFeature
+ *   //=featureIndex
+ * });
+ */ function $5c76aa7c2c53dcdc$export$4ec429a16a391dd0(geojson, callback) {
+    if (geojson.type === "Feature") callback(geojson, 0);
+    else if (geojson.type === "FeatureCollection") for(var i = 0; i < geojson.features.length; i++){
+        if (callback(geojson.features[i], i) === false) break;
+    }
+}
+/**
+ * Callback for featureReduce
+ *
+ * The first time the callback function is called, the values provided as arguments depend
+ * on whether the reduce method has an initialValue argument.
+ *
+ * If an initialValue is provided to the reduce method:
+ *  - The previousValue argument is initialValue.
+ *  - The currentValue argument is the value of the first element present in the array.
+ *
+ * If an initialValue is not provided:
+ *  - The previousValue argument is the value of the first element present in the array.
+ *  - The currentValue argument is the value of the second element present in the array.
+ *
+ * @callback featureReduceCallback
+ * @param {*} previousValue The accumulated value previously returned in the last invocation
+ * of the callback, or initialValue, if supplied.
+ * @param {Feature} currentFeature The current Feature being processed.
+ * @param {number} featureIndex The current index of the Feature being processed.
+ */ /**
+ * Reduce features in any GeoJSON object, similar to Array.reduce().
+ *
+ * @name featureReduce
+ * @param {FeatureCollection|Feature|Geometry} geojson any GeoJSON object
+ * @param {Function} callback a method that takes (previousValue, currentFeature, featureIndex)
+ * @param {*} [initialValue] Value to use as the first argument to the first call of the callback.
+ * @returns {*} The value that results from the reduction.
+ * @example
+ * var features = turf.featureCollection([
+ *   turf.point([26, 37], {"foo": "bar"}),
+ *   turf.point([36, 53], {"hello": "world"})
+ * ]);
+ *
+ * turf.featureReduce(features, function (previousValue, currentFeature, featureIndex) {
+ *   //=previousValue
+ *   //=currentFeature
+ *   //=featureIndex
+ *   return currentFeature
+ * });
+ */ function $5c76aa7c2c53dcdc$export$aedc0a2449029016(geojson, callback, initialValue) {
+    var previousValue = initialValue;
+    $5c76aa7c2c53dcdc$export$4ec429a16a391dd0(geojson, function(currentFeature, featureIndex) {
+        if (featureIndex === 0 && initialValue === undefined) previousValue = currentFeature;
+        else previousValue = callback(previousValue, currentFeature, featureIndex);
+    });
+    return previousValue;
+}
+/**
+ * Get all coordinates from any GeoJSON object.
+ *
+ * @name coordAll
+ * @param {FeatureCollection|Feature|Geometry} geojson any GeoJSON object
+ * @returns {Array<Array<number>>} coordinate position array
+ * @example
+ * var features = turf.featureCollection([
+ *   turf.point([26, 37], {foo: 'bar'}),
+ *   turf.point([36, 53], {hello: 'world'})
+ * ]);
+ *
+ * var coords = turf.coordAll(features);
+ * //= [[26, 37], [36, 53]]
+ */ function $5c76aa7c2c53dcdc$export$5a9cfbedf736c6fa(geojson) {
+    var coords = [];
+    $5c76aa7c2c53dcdc$export$cccf52902b81b0d9(geojson, function(coord) {
+        coords.push(coord);
+    });
+    return coords;
+}
+/**
+ * Callback for geomEach
+ *
+ * @callback geomEachCallback
+ * @param {Geometry} currentGeometry The current Geometry being processed.
+ * @param {number} featureIndex The current index of the Feature being processed.
+ * @param {Object} featureProperties The current Feature Properties being processed.
+ * @param {Array<number>} featureBBox The current Feature BBox being processed.
+ * @param {number|string} featureId The current Feature Id being processed.
+ */ /**
+ * Iterate over each geometry in any GeoJSON object, similar to Array.forEach()
+ *
+ * @name geomEach
+ * @param {FeatureCollection|Feature|Geometry} geojson any GeoJSON object
+ * @param {Function} callback a method that takes (currentGeometry, featureIndex, featureProperties, featureBBox, featureId)
+ * @returns {void}
+ * @example
+ * var features = turf.featureCollection([
+ *     turf.point([26, 37], {foo: 'bar'}),
+ *     turf.point([36, 53], {hello: 'world'})
+ * ]);
+ *
+ * turf.geomEach(features, function (currentGeometry, featureIndex, featureProperties, featureBBox, featureId) {
+ *   //=currentGeometry
+ *   //=featureIndex
+ *   //=featureProperties
+ *   //=featureBBox
+ *   //=featureId
+ * });
+ */ function $5c76aa7c2c53dcdc$export$110a902f786846fe(geojson, callback) {
+    var i, j, g, geometry, stopG, geometryMaybeCollection, isGeometryCollection, featureProperties, featureBBox, featureId, featureIndex = 0, isFeatureCollection = geojson.type === "FeatureCollection", isFeature = geojson.type === "Feature", stop = isFeatureCollection ? geojson.features.length : 1;
+    // This logic may look a little weird. The reason why it is that way
+    // is because it's trying to be fast. GeoJSON supports multiple kinds
+    // of objects at its root: FeatureCollection, Features, Geometries.
+    // This function has the responsibility of handling all of them, and that
+    // means that some of the `for` loops you see below actually just don't apply
+    // to certain inputs. For instance, if you give this just a
+    // Point geometry, then both loops are short-circuited and all we do
+    // is gradually rename the input until it's called 'geometry'.
+    //
+    // This also aims to allocate as few resources as possible: just a
+    // few numbers and booleans, rather than any temporary arrays as would
+    // be required with the normalization approach.
+    for(i = 0; i < stop; i++){
+        geometryMaybeCollection = isFeatureCollection ? geojson.features[i].geometry : isFeature ? geojson.geometry : geojson;
+        featureProperties = isFeatureCollection ? geojson.features[i].properties : isFeature ? geojson.properties : {
+        };
+        featureBBox = isFeatureCollection ? geojson.features[i].bbox : isFeature ? geojson.bbox : undefined;
+        featureId = isFeatureCollection ? geojson.features[i].id : isFeature ? geojson.id : undefined;
+        isGeometryCollection = geometryMaybeCollection ? geometryMaybeCollection.type === "GeometryCollection" : false;
+        stopG = isGeometryCollection ? geometryMaybeCollection.geometries.length : 1;
+        for(g = 0; g < stopG; g++){
+            geometry = isGeometryCollection ? geometryMaybeCollection.geometries[g] : geometryMaybeCollection;
+            // Handle null Geometry
+            if (geometry === null) {
+                if (callback(null, featureIndex, featureProperties, featureBBox, featureId) === false) return false;
+                continue;
+            }
+            switch(geometry.type){
+                case "Point":
+                case "LineString":
+                case "MultiPoint":
+                case "Polygon":
+                case "MultiLineString":
+                case "MultiPolygon":
+                    if (callback(geometry, featureIndex, featureProperties, featureBBox, featureId) === false) return false;
+                    break;
+                case "GeometryCollection":
+                    for(j = 0; j < geometry.geometries.length; j++){
+                        if (callback(geometry.geometries[j], featureIndex, featureProperties, featureBBox, featureId) === false) return false;
+                    }
+                    break;
+                default:
+                    throw new Error("Unknown Geometry Type");
+            }
+        }
+        // Only increase `featureIndex` per each feature
+        featureIndex++;
+    }
+}
+/**
+ * Callback for geomReduce
+ *
+ * The first time the callback function is called, the values provided as arguments depend
+ * on whether the reduce method has an initialValue argument.
+ *
+ * If an initialValue is provided to the reduce method:
+ *  - The previousValue argument is initialValue.
+ *  - The currentValue argument is the value of the first element present in the array.
+ *
+ * If an initialValue is not provided:
+ *  - The previousValue argument is the value of the first element present in the array.
+ *  - The currentValue argument is the value of the second element present in the array.
+ *
+ * @callback geomReduceCallback
+ * @param {*} previousValue The accumulated value previously returned in the last invocation
+ * of the callback, or initialValue, if supplied.
+ * @param {Geometry} currentGeometry The current Geometry being processed.
+ * @param {number} featureIndex The current index of the Feature being processed.
+ * @param {Object} featureProperties The current Feature Properties being processed.
+ * @param {Array<number>} featureBBox The current Feature BBox being processed.
+ * @param {number|string} featureId The current Feature Id being processed.
+ */ /**
+ * Reduce geometry in any GeoJSON object, similar to Array.reduce().
+ *
+ * @name geomReduce
+ * @param {FeatureCollection|Feature|Geometry} geojson any GeoJSON object
+ * @param {Function} callback a method that takes (previousValue, currentGeometry, featureIndex, featureProperties, featureBBox, featureId)
+ * @param {*} [initialValue] Value to use as the first argument to the first call of the callback.
+ * @returns {*} The value that results from the reduction.
+ * @example
+ * var features = turf.featureCollection([
+ *     turf.point([26, 37], {foo: 'bar'}),
+ *     turf.point([36, 53], {hello: 'world'})
+ * ]);
+ *
+ * turf.geomReduce(features, function (previousValue, currentGeometry, featureIndex, featureProperties, featureBBox, featureId) {
+ *   //=previousValue
+ *   //=currentGeometry
+ *   //=featureIndex
+ *   //=featureProperties
+ *   //=featureBBox
+ *   //=featureId
+ *   return currentGeometry
+ * });
+ */ function $5c76aa7c2c53dcdc$export$f844129661727632(geojson, callback, initialValue) {
+    var previousValue = initialValue;
+    $5c76aa7c2c53dcdc$export$110a902f786846fe(geojson, function(currentGeometry, featureIndex, featureProperties, featureBBox, featureId) {
+        if (featureIndex === 0 && initialValue === undefined) previousValue = currentGeometry;
+        else previousValue = callback(previousValue, currentGeometry, featureIndex, featureProperties, featureBBox, featureId);
+    });
+    return previousValue;
+}
+/**
+ * Callback for flattenEach
+ *
+ * @callback flattenEachCallback
+ * @param {Feature} currentFeature The current flattened feature being processed.
+ * @param {number} featureIndex The current index of the Feature being processed.
+ * @param {number} multiFeatureIndex The current index of the Multi-Feature being processed.
+ */ /**
+ * Iterate over flattened features in any GeoJSON object, similar to
+ * Array.forEach.
+ *
+ * @name flattenEach
+ * @param {FeatureCollection|Feature|Geometry} geojson any GeoJSON object
+ * @param {Function} callback a method that takes (currentFeature, featureIndex, multiFeatureIndex)
+ * @example
+ * var features = turf.featureCollection([
+ *     turf.point([26, 37], {foo: 'bar'}),
+ *     turf.multiPoint([[40, 30], [36, 53]], {hello: 'world'})
+ * ]);
+ *
+ * turf.flattenEach(features, function (currentFeature, featureIndex, multiFeatureIndex) {
+ *   //=currentFeature
+ *   //=featureIndex
+ *   //=multiFeatureIndex
+ * });
+ */ function $5c76aa7c2c53dcdc$export$72bcd18d498276a5(geojson, callback) {
+    $5c76aa7c2c53dcdc$export$110a902f786846fe(geojson, function(geometry, featureIndex, properties, bbox, id) {
+        // Callback for single geometry
+        var type = geometry === null ? null : geometry.type;
+        switch(type){
+            case null:
+            case "Point":
+            case "LineString":
+            case "Polygon":
+                if (callback($06fd7bba89ea2716$export$afb26b2da2b9ec90(geometry, properties, {
+                    bbox: bbox,
+                    id: id
+                }), featureIndex, 0) === false) return false;
+                return;
+        }
+        var geomType;
+        // Callback for multi-geometry
+        switch(type){
+            case "MultiPoint":
+                geomType = "Point";
+                break;
+            case "MultiLineString":
+                geomType = "LineString";
+                break;
+            case "MultiPolygon":
+                geomType = "Polygon";
+                break;
+        }
+        for(var multiFeatureIndex = 0; multiFeatureIndex < geometry.coordinates.length; multiFeatureIndex++){
+            var coordinate = geometry.coordinates[multiFeatureIndex];
+            var geom = {
+                type: geomType,
+                coordinates: coordinate
+            };
+            if (callback($06fd7bba89ea2716$export$afb26b2da2b9ec90(geom, properties), featureIndex, multiFeatureIndex) === false) return false;
+        }
+    });
+}
+/**
+ * Callback for flattenReduce
+ *
+ * The first time the callback function is called, the values provided as arguments depend
+ * on whether the reduce method has an initialValue argument.
+ *
+ * If an initialValue is provided to the reduce method:
+ *  - The previousValue argument is initialValue.
+ *  - The currentValue argument is the value of the first element present in the array.
+ *
+ * If an initialValue is not provided:
+ *  - The previousValue argument is the value of the first element present in the array.
+ *  - The currentValue argument is the value of the second element present in the array.
+ *
+ * @callback flattenReduceCallback
+ * @param {*} previousValue The accumulated value previously returned in the last invocation
+ * of the callback, or initialValue, if supplied.
+ * @param {Feature} currentFeature The current Feature being processed.
+ * @param {number} featureIndex The current index of the Feature being processed.
+ * @param {number} multiFeatureIndex The current index of the Multi-Feature being processed.
+ */ /**
+ * Reduce flattened features in any GeoJSON object, similar to Array.reduce().
+ *
+ * @name flattenReduce
+ * @param {FeatureCollection|Feature|Geometry} geojson any GeoJSON object
+ * @param {Function} callback a method that takes (previousValue, currentFeature, featureIndex, multiFeatureIndex)
+ * @param {*} [initialValue] Value to use as the first argument to the first call of the callback.
+ * @returns {*} The value that results from the reduction.
+ * @example
+ * var features = turf.featureCollection([
+ *     turf.point([26, 37], {foo: 'bar'}),
+ *     turf.multiPoint([[40, 30], [36, 53]], {hello: 'world'})
+ * ]);
+ *
+ * turf.flattenReduce(features, function (previousValue, currentFeature, featureIndex, multiFeatureIndex) {
+ *   //=previousValue
+ *   //=currentFeature
+ *   //=featureIndex
+ *   //=multiFeatureIndex
+ *   return currentFeature
+ * });
+ */ function $5c76aa7c2c53dcdc$export$ae6c13ef556a8a6d(geojson, callback, initialValue) {
+    var previousValue = initialValue;
+    $5c76aa7c2c53dcdc$export$72bcd18d498276a5(geojson, function(currentFeature, featureIndex, multiFeatureIndex) {
+        if (featureIndex === 0 && multiFeatureIndex === 0 && initialValue === undefined) previousValue = currentFeature;
+        else previousValue = callback(previousValue, currentFeature, featureIndex, multiFeatureIndex);
+    });
+    return previousValue;
+}
+/**
+ * Callback for segmentEach
+ *
+ * @callback segmentEachCallback
+ * @param {Feature<LineString>} currentSegment The current Segment being processed.
+ * @param {number} featureIndex The current index of the Feature being processed.
+ * @param {number} multiFeatureIndex The current index of the Multi-Feature being processed.
+ * @param {number} geometryIndex The current index of the Geometry being processed.
+ * @param {number} segmentIndex The current index of the Segment being processed.
+ * @returns {void}
+ */ /**
+ * Iterate over 2-vertex line segment in any GeoJSON object, similar to Array.forEach()
+ * (Multi)Point geometries do not contain segments therefore they are ignored during this operation.
+ *
+ * @param {FeatureCollection|Feature|Geometry} geojson any GeoJSON
+ * @param {Function} callback a method that takes (currentSegment, featureIndex, multiFeatureIndex, geometryIndex, segmentIndex)
+ * @returns {void}
+ * @example
+ * var polygon = turf.polygon([[[-50, 5], [-40, -10], [-50, -10], [-40, 5], [-50, 5]]]);
+ *
+ * // Iterate over GeoJSON by 2-vertex segments
+ * turf.segmentEach(polygon, function (currentSegment, featureIndex, multiFeatureIndex, geometryIndex, segmentIndex) {
+ *   //=currentSegment
+ *   //=featureIndex
+ *   //=multiFeatureIndex
+ *   //=geometryIndex
+ *   //=segmentIndex
+ * });
+ *
+ * // Calculate the total number of segments
+ * var total = 0;
+ * turf.segmentEach(polygon, function () {
+ *     total++;
+ * });
+ */ function $5c76aa7c2c53dcdc$export$3116792cf8372e55(geojson, callback) {
+    $5c76aa7c2c53dcdc$export$72bcd18d498276a5(geojson, function(feature, featureIndex, multiFeatureIndex) {
+        var segmentIndex = 0;
+        // Exclude null Geometries
+        if (!feature.geometry) return;
+        // (Multi)Point geometries do not contain segments therefore they are ignored during this operation.
+        var type = feature.geometry.type;
+        if (type === "Point" || type === "MultiPoint") return;
+        // Generate 2-vertex line segments
+        var previousCoords;
+        var previousFeatureIndex = 0;
+        var previousMultiIndex = 0;
+        var prevGeomIndex = 0;
+        if ($5c76aa7c2c53dcdc$export$cccf52902b81b0d9(feature, function(currentCoord, coordIndex, featureIndexCoord, multiPartIndexCoord, geometryIndex) {
+            // Simulating a meta.coordReduce() since `reduce` operations cannot be stopped by returning `false`
+            if (previousCoords === undefined || featureIndex > previousFeatureIndex || multiPartIndexCoord > previousMultiIndex || geometryIndex > prevGeomIndex) {
+                previousCoords = currentCoord;
+                previousFeatureIndex = featureIndex;
+                previousMultiIndex = multiPartIndexCoord;
+                prevGeomIndex = geometryIndex;
+                segmentIndex = 0;
+                return;
+            }
+            var currentSegment = $06fd7bba89ea2716$export$aca513e25ac14bc1([
+                previousCoords,
+                currentCoord
+            ], feature.properties);
+            if (callback(currentSegment, featureIndex, multiFeatureIndex, geometryIndex, segmentIndex) === false) return false;
+            segmentIndex++;
+            previousCoords = currentCoord;
+        }) === false) return false;
+    });
+}
+/**
+ * Callback for segmentReduce
+ *
+ * The first time the callback function is called, the values provided as arguments depend
+ * on whether the reduce method has an initialValue argument.
+ *
+ * If an initialValue is provided to the reduce method:
+ *  - The previousValue argument is initialValue.
+ *  - The currentValue argument is the value of the first element present in the array.
+ *
+ * If an initialValue is not provided:
+ *  - The previousValue argument is the value of the first element present in the array.
+ *  - The currentValue argument is the value of the second element present in the array.
+ *
+ * @callback segmentReduceCallback
+ * @param {*} previousValue The accumulated value previously returned in the last invocation
+ * of the callback, or initialValue, if supplied.
+ * @param {Feature<LineString>} currentSegment The current Segment being processed.
+ * @param {number} featureIndex The current index of the Feature being processed.
+ * @param {number} multiFeatureIndex The current index of the Multi-Feature being processed.
+ * @param {number} geometryIndex The current index of the Geometry being processed.
+ * @param {number} segmentIndex The current index of the Segment being processed.
+ */ /**
+ * Reduce 2-vertex line segment in any GeoJSON object, similar to Array.reduce()
+ * (Multi)Point geometries do not contain segments therefore they are ignored during this operation.
+ *
+ * @param {FeatureCollection|Feature|Geometry} geojson any GeoJSON
+ * @param {Function} callback a method that takes (previousValue, currentSegment, currentIndex)
+ * @param {*} [initialValue] Value to use as the first argument to the first call of the callback.
+ * @returns {void}
+ * @example
+ * var polygon = turf.polygon([[[-50, 5], [-40, -10], [-50, -10], [-40, 5], [-50, 5]]]);
+ *
+ * // Iterate over GeoJSON by 2-vertex segments
+ * turf.segmentReduce(polygon, function (previousSegment, currentSegment, featureIndex, multiFeatureIndex, geometryIndex, segmentIndex) {
+ *   //= previousSegment
+ *   //= currentSegment
+ *   //= featureIndex
+ *   //= multiFeatureIndex
+ *   //= geometryIndex
+ *   //= segmentIndex
+ *   return currentSegment
+ * });
+ *
+ * // Calculate the total number of segments
+ * var initialValue = 0
+ * var total = turf.segmentReduce(polygon, function (previousValue) {
+ *     previousValue++;
+ *     return previousValue;
+ * }, initialValue);
+ */ function $5c76aa7c2c53dcdc$export$6811769a60e09409(geojson, callback, initialValue) {
+    var previousValue = initialValue;
+    var started = false;
+    $5c76aa7c2c53dcdc$export$3116792cf8372e55(geojson, function(currentSegment, featureIndex, multiFeatureIndex, geometryIndex, segmentIndex) {
+        if (started === false && initialValue === undefined) previousValue = currentSegment;
+        else previousValue = callback(previousValue, currentSegment, featureIndex, multiFeatureIndex, geometryIndex, segmentIndex);
+        started = true;
+    });
+    return previousValue;
+}
+/**
+ * Callback for lineEach
+ *
+ * @callback lineEachCallback
+ * @param {Feature<LineString>} currentLine The current LineString|LinearRing being processed
+ * @param {number} featureIndex The current index of the Feature being processed
+ * @param {number} multiFeatureIndex The current index of the Multi-Feature being processed
+ * @param {number} geometryIndex The current index of the Geometry being processed
+ */ /**
+ * Iterate over line or ring coordinates in LineString, Polygon, MultiLineString, MultiPolygon Features or Geometries,
+ * similar to Array.forEach.
+ *
+ * @name lineEach
+ * @param {Geometry|Feature<LineString|Polygon|MultiLineString|MultiPolygon>} geojson object
+ * @param {Function} callback a method that takes (currentLine, featureIndex, multiFeatureIndex, geometryIndex)
+ * @example
+ * var multiLine = turf.multiLineString([
+ *   [[26, 37], [35, 45]],
+ *   [[36, 53], [38, 50], [41, 55]]
+ * ]);
+ *
+ * turf.lineEach(multiLine, function (currentLine, featureIndex, multiFeatureIndex, geometryIndex) {
+ *   //=currentLine
+ *   //=featureIndex
+ *   //=multiFeatureIndex
+ *   //=geometryIndex
+ * });
+ */ function $5c76aa7c2c53dcdc$export$52c668f16718d7ce(geojson, callback) {
+    // validation
+    if (!geojson) throw new Error("geojson is required");
+    $5c76aa7c2c53dcdc$export$72bcd18d498276a5(geojson, function(feature, featureIndex, multiFeatureIndex) {
+        if (feature.geometry === null) return;
+        var type = feature.geometry.type;
+        var coords = feature.geometry.coordinates;
+        switch(type){
+            case "LineString":
+                if (callback(feature, featureIndex, multiFeatureIndex, 0, 0) === false) return false;
+                break;
+            case "Polygon":
+                for(var geometryIndex = 0; geometryIndex < coords.length; geometryIndex++){
+                    if (callback($06fd7bba89ea2716$export$aca513e25ac14bc1(coords[geometryIndex], feature.properties), featureIndex, multiFeatureIndex, geometryIndex) === false) return false;
+                }
+                break;
+        }
+    });
+}
+/**
+ * Callback for lineReduce
+ *
+ * The first time the callback function is called, the values provided as arguments depend
+ * on whether the reduce method has an initialValue argument.
+ *
+ * If an initialValue is provided to the reduce method:
+ *  - The previousValue argument is initialValue.
+ *  - The currentValue argument is the value of the first element present in the array.
+ *
+ * If an initialValue is not provided:
+ *  - The previousValue argument is the value of the first element present in the array.
+ *  - The currentValue argument is the value of the second element present in the array.
+ *
+ * @callback lineReduceCallback
+ * @param {*} previousValue The accumulated value previously returned in the last invocation
+ * of the callback, or initialValue, if supplied.
+ * @param {Feature<LineString>} currentLine The current LineString|LinearRing being processed.
+ * @param {number} featureIndex The current index of the Feature being processed
+ * @param {number} multiFeatureIndex The current index of the Multi-Feature being processed
+ * @param {number} geometryIndex The current index of the Geometry being processed
+ */ /**
+ * Reduce features in any GeoJSON object, similar to Array.reduce().
+ *
+ * @name lineReduce
+ * @param {Geometry|Feature<LineString|Polygon|MultiLineString|MultiPolygon>} geojson object
+ * @param {Function} callback a method that takes (previousValue, currentLine, featureIndex, multiFeatureIndex, geometryIndex)
+ * @param {*} [initialValue] Value to use as the first argument to the first call of the callback.
+ * @returns {*} The value that results from the reduction.
+ * @example
+ * var multiPoly = turf.multiPolygon([
+ *   turf.polygon([[[12,48],[2,41],[24,38],[12,48]], [[9,44],[13,41],[13,45],[9,44]]]),
+ *   turf.polygon([[[5, 5], [0, 0], [2, 2], [4, 4], [5, 5]]])
+ * ]);
+ *
+ * turf.lineReduce(multiPoly, function (previousValue, currentLine, featureIndex, multiFeatureIndex, geometryIndex) {
+ *   //=previousValue
+ *   //=currentLine
+ *   //=featureIndex
+ *   //=multiFeatureIndex
+ *   //=geometryIndex
+ *   return currentLine
+ * });
+ */ function $5c76aa7c2c53dcdc$export$319a340e9b60833a(geojson, callback, initialValue) {
+    var previousValue = initialValue;
+    $5c76aa7c2c53dcdc$export$52c668f16718d7ce(geojson, function(currentLine, featureIndex, multiFeatureIndex, geometryIndex) {
+        if (featureIndex === 0 && initialValue === undefined) previousValue = currentLine;
+        else previousValue = callback(previousValue, currentLine, featureIndex, multiFeatureIndex, geometryIndex);
+    });
+    return previousValue;
+}
+/**
+ * Finds a particular 2-vertex LineString Segment from a GeoJSON using `@turf/meta` indexes.
+ *
+ * Negative indexes are permitted.
+ * Point & MultiPoint will always return null.
+ *
+ * @param {FeatureCollection|Feature|Geometry} geojson Any GeoJSON Feature or Geometry
+ * @param {Object} [options={}] Optional parameters
+ * @param {number} [options.featureIndex=0] Feature Index
+ * @param {number} [options.multiFeatureIndex=0] Multi-Feature Index
+ * @param {number} [options.geometryIndex=0] Geometry Index
+ * @param {number} [options.segmentIndex=0] Segment Index
+ * @param {Object} [options.properties={}] Translate Properties to output LineString
+ * @param {BBox} [options.bbox={}] Translate BBox to output LineString
+ * @param {number|string} [options.id={}] Translate Id to output LineString
+ * @returns {Feature<LineString>} 2-vertex GeoJSON Feature LineString
+ * @example
+ * var multiLine = turf.multiLineString([
+ *     [[10, 10], [50, 30], [30, 40]],
+ *     [[-10, -10], [-50, -30], [-30, -40]]
+ * ]);
+ *
+ * // First Segment (defaults are 0)
+ * turf.findSegment(multiLine);
+ * // => Feature<LineString<[[10, 10], [50, 30]]>>
+ *
+ * // First Segment of 2nd Multi Feature
+ * turf.findSegment(multiLine, {multiFeatureIndex: 1});
+ * // => Feature<LineString<[[-10, -10], [-50, -30]]>>
+ *
+ * // Last Segment of Last Multi Feature
+ * turf.findSegment(multiLine, {multiFeatureIndex: -1, segmentIndex: -1});
+ * // => Feature<LineString<[[-50, -30], [-30, -40]]>>
+ */ function $5c76aa7c2c53dcdc$export$fbd55df10107631a(geojson, options) {
+    // Optional Parameters
+    options = options || {
+    };
+    if (!$06fd7bba89ea2716$export$9ee30c9ec6e8e509(options)) throw new Error("options is invalid");
+    var featureIndex = options.featureIndex || 0;
+    var multiFeatureIndex = options.multiFeatureIndex || 0;
+    var geometryIndex = options.geometryIndex || 0;
+    var segmentIndex = options.segmentIndex || 0;
+    // Find FeatureIndex
+    var properties = options.properties;
+    var geometry;
+    switch(geojson.type){
+        case "FeatureCollection":
+            if (featureIndex < 0) featureIndex = geojson.features.length + featureIndex;
+            properties = properties || geojson.features[featureIndex].properties;
+            geometry = geojson.features[featureIndex].geometry;
+            break;
+        case "Feature":
+            properties = properties || geojson.properties;
+            geometry = geojson.geometry;
+            break;
+        case "Point":
+        case "MultiPoint":
+            return null;
+        case "LineString":
+        case "Polygon":
+        case "MultiLineString":
+        case "MultiPolygon":
+            geometry = geojson;
+            break;
+        default:
+            throw new Error("geojson is invalid");
+    }
+    // Find SegmentIndex
+    if (geometry === null) return null;
+    var coords = geometry.coordinates;
+    switch(geometry.type){
+        case "Point":
+        case "MultiPoint":
+            return null;
+        case "LineString":
+            if (segmentIndex < 0) segmentIndex = coords.length + segmentIndex - 1;
+            return $06fd7bba89ea2716$export$aca513e25ac14bc1([
+                coords[segmentIndex],
+                coords[segmentIndex + 1]
+            ], properties, options);
+        case "Polygon":
+            if (geometryIndex < 0) geometryIndex = coords.length + geometryIndex;
+            if (segmentIndex < 0) segmentIndex = coords[geometryIndex].length + segmentIndex - 1;
+            return $06fd7bba89ea2716$export$aca513e25ac14bc1([
+                coords[geometryIndex][segmentIndex],
+                coords[geometryIndex][segmentIndex + 1], 
+            ], properties, options);
+        case "MultiLineString":
+            if (multiFeatureIndex < 0) multiFeatureIndex = coords.length + multiFeatureIndex;
+            if (segmentIndex < 0) segmentIndex = coords[multiFeatureIndex].length + segmentIndex - 1;
+            return $06fd7bba89ea2716$export$aca513e25ac14bc1([
+                coords[multiFeatureIndex][segmentIndex],
+                coords[multiFeatureIndex][segmentIndex + 1], 
+            ], properties, options);
+        case "MultiPolygon":
+            if (multiFeatureIndex < 0) multiFeatureIndex = coords.length + multiFeatureIndex;
+            if (geometryIndex < 0) geometryIndex = coords[multiFeatureIndex].length + geometryIndex;
+            if (segmentIndex < 0) segmentIndex = coords[multiFeatureIndex][geometryIndex].length - segmentIndex - 1;
+            return $06fd7bba89ea2716$export$aca513e25ac14bc1([
+                coords[multiFeatureIndex][geometryIndex][segmentIndex],
+                coords[multiFeatureIndex][geometryIndex][segmentIndex + 1], 
+            ], properties, options);
+    }
+    throw new Error("geojson is invalid");
+}
+/**
+ * Finds a particular Point from a GeoJSON using `@turf/meta` indexes.
+ *
+ * Negative indexes are permitted.
+ *
+ * @param {FeatureCollection|Feature|Geometry} geojson Any GeoJSON Feature or Geometry
+ * @param {Object} [options={}] Optional parameters
+ * @param {number} [options.featureIndex=0] Feature Index
+ * @param {number} [options.multiFeatureIndex=0] Multi-Feature Index
+ * @param {number} [options.geometryIndex=0] Geometry Index
+ * @param {number} [options.coordIndex=0] Coord Index
+ * @param {Object} [options.properties={}] Translate Properties to output Point
+ * @param {BBox} [options.bbox={}] Translate BBox to output Point
+ * @param {number|string} [options.id={}] Translate Id to output Point
+ * @returns {Feature<Point>} 2-vertex GeoJSON Feature Point
+ * @example
+ * var multiLine = turf.multiLineString([
+ *     [[10, 10], [50, 30], [30, 40]],
+ *     [[-10, -10], [-50, -30], [-30, -40]]
+ * ]);
+ *
+ * // First Segment (defaults are 0)
+ * turf.findPoint(multiLine);
+ * // => Feature<Point<[10, 10]>>
+ *
+ * // First Segment of the 2nd Multi-Feature
+ * turf.findPoint(multiLine, {multiFeatureIndex: 1});
+ * // => Feature<Point<[-10, -10]>>
+ *
+ * // Last Segment of last Multi-Feature
+ * turf.findPoint(multiLine, {multiFeatureIndex: -1, coordIndex: -1});
+ * // => Feature<Point<[-30, -40]>>
+ */ function $5c76aa7c2c53dcdc$export$6416d7a33c28eb60(geojson, options) {
+    // Optional Parameters
+    options = options || {
+    };
+    if (!$06fd7bba89ea2716$export$9ee30c9ec6e8e509(options)) throw new Error("options is invalid");
+    var featureIndex = options.featureIndex || 0;
+    var multiFeatureIndex = options.multiFeatureIndex || 0;
+    var geometryIndex = options.geometryIndex || 0;
+    var coordIndex = options.coordIndex || 0;
+    // Find FeatureIndex
+    var properties = options.properties;
+    var geometry;
+    switch(geojson.type){
+        case "FeatureCollection":
+            if (featureIndex < 0) featureIndex = geojson.features.length + featureIndex;
+            properties = properties || geojson.features[featureIndex].properties;
+            geometry = geojson.features[featureIndex].geometry;
+            break;
+        case "Feature":
+            properties = properties || geojson.properties;
+            geometry = geojson.geometry;
+            break;
+        case "Point":
+        case "MultiPoint":
+            return null;
+        case "LineString":
+        case "Polygon":
+        case "MultiLineString":
+        case "MultiPolygon":
+            geometry = geojson;
+            break;
+        default:
+            throw new Error("geojson is invalid");
+    }
+    // Find Coord Index
+    if (geometry === null) return null;
+    var coords = geometry.coordinates;
+    switch(geometry.type){
+        case "Point":
+            return $06fd7bba89ea2716$export$8502864bca7c3201(coords, properties, options);
+        case "MultiPoint":
+            if (multiFeatureIndex < 0) multiFeatureIndex = coords.length + multiFeatureIndex;
+            return $06fd7bba89ea2716$export$8502864bca7c3201(coords[multiFeatureIndex], properties, options);
+        case "LineString":
+            if (coordIndex < 0) coordIndex = coords.length + coordIndex;
+            return $06fd7bba89ea2716$export$8502864bca7c3201(coords[coordIndex], properties, options);
+        case "Polygon":
+            if (geometryIndex < 0) geometryIndex = coords.length + geometryIndex;
+            if (coordIndex < 0) coordIndex = coords[geometryIndex].length + coordIndex;
+            return $06fd7bba89ea2716$export$8502864bca7c3201(coords[geometryIndex][coordIndex], properties, options);
+        case "MultiLineString":
+            if (multiFeatureIndex < 0) multiFeatureIndex = coords.length + multiFeatureIndex;
+            if (coordIndex < 0) coordIndex = coords[multiFeatureIndex].length + coordIndex;
+            return $06fd7bba89ea2716$export$8502864bca7c3201(coords[multiFeatureIndex][coordIndex], properties, options);
+        case "MultiPolygon":
+            if (multiFeatureIndex < 0) multiFeatureIndex = coords.length + multiFeatureIndex;
+            if (geometryIndex < 0) geometryIndex = coords[multiFeatureIndex].length + geometryIndex;
+            if (coordIndex < 0) coordIndex = coords[multiFeatureIndex][geometryIndex].length - coordIndex;
+            return $06fd7bba89ea2716$export$8502864bca7c3201(coords[multiFeatureIndex][geometryIndex][coordIndex], properties, options);
+    }
+    throw new Error("geojson is invalid");
+}
+
+
+var $39679496f24848e9$exports = {};
+"use strict";
+var $f4ce1c29f8386e91$exports = {};
+"use strict";
+$f4ce1c29f8386e91$exports = {
+    /**
+  * Euclidean distance
+  */ eudist: function eudist(v1, v2, sqrt) {
+        var len = v1.length;
+        var sum = 0;
+        for(var i = 0; i < len; i++){
+            var d = (v1[i] || 0) - (v2[i] || 0);
+            sum += d * d;
+        }
+        // Square root not really needed
+        return sqrt ? Math.sqrt(sum) : sum;
+    },
+    mandist: function mandist(v1, v2, sqrt) {
+        var len = v1.length;
+        var sum = 0;
+        for(var i = 0; i < len; i++)sum += Math.abs((v1[i] || 0) - (v2[i] || 0));
+        // Square root not really needed
+        return sqrt ? Math.sqrt(sum) : sum;
+    },
+    /**
+  * Unidimensional distance
+  */ dist: function dist(v1, v2, sqrt) {
+        var d = Math.abs(v1 - v2);
+        return sqrt ? d : d * d;
+    }
+};
+
+
+var $7706bc4af0dbceec$exports = {};
+"use strict";
+
+var $7706bc4af0dbceec$var$eudist = $f4ce1c29f8386e91$exports.eudist, $7706bc4af0dbceec$var$dist = $f4ce1c29f8386e91$exports.dist;
+$7706bc4af0dbceec$exports = {
+    kmrand: function kmrand(data, k) {
+        var map = {
+        }, ks = [], t = k << 2;
+        var len = data.length;
+        var multi = data[0].length > 0;
+        while(ks.length < k && (t--) > 0){
+            var d = data[Math.floor(Math.random() * len)];
+            var key = multi ? d.join("_") : "" + d;
+            if (!map[key]) {
+                map[key] = true;
+                ks.push(d);
+            }
+        }
+        if (ks.length < k) throw new Error("Error initializating clusters");
+        else return ks;
+    },
+    /**
+  * K-means++ initial centroid selection
+  */ kmpp: function kmpp(data, k) {
+        var distance = data[0].length ? $7706bc4af0dbceec$var$eudist : $7706bc4af0dbceec$var$dist;
+        var ks = [], len = data.length;
+        var multi = data[0].length > 0;
+        var map = {
+        };
+        // First random centroid
+        var c = data[Math.floor(Math.random() * len)];
+        var key = multi ? c.join("_") : "" + c;
+        ks.push(c);
+        map[key] = true;
+        // Retrieve next centroids
+        while(ks.length < k){
+            // Min Distances between current centroids and data points
+            var dists = [], lk = ks.length;
+            var dsum = 0, prs = [];
+            for(var i = 0; i < len; i++){
+                var min = Infinity;
+                for(var j = 0; j < lk; j++){
+                    var _dist = distance(data[i], ks[j]);
+                    if (_dist <= min) min = _dist;
+                }
+                dists[i] = min;
+            }
+            // Sum all min distances
+            for(var _i = 0; _i < len; _i++)dsum += dists[_i];
+            // Probabilities and cummulative prob (cumsum)
+            for(var _i2 = 0; _i2 < len; _i2++)prs[_i2] = {
+                i: _i2,
+                v: data[_i2],
+                pr: dists[_i2] / dsum,
+                cs: 0
+            };
+            // Sort Probabilities
+            prs.sort(function(a, b) {
+                return a.pr - b.pr;
+            });
+            // Cummulative Probabilities
+            prs[0].cs = prs[0].pr;
+            for(var _i3 = 1; _i3 < len; _i3++)prs[_i3].cs = prs[_i3 - 1].cs + prs[_i3].pr;
+            // Randomize
+            var rnd = Math.random();
+            // Gets only the items whose cumsum >= rnd
+            var idx = 0;
+            while(idx < len - 1 && prs[idx++].cs < rnd);
+            ks.push(prs[idx - 1].v);
+        /*
+   let done = false;
+   while(!done) {
+   	// this is our new centroid
+   	c = prs[idx-1].v
+   	key = multi? c.join("_") : `${c}`;
+   	if(!map[key]) {
+   		map[key] = true;
+   		ks.push(c);
+   		done = true;
+   	}
+   	else {
+   		idx++;
+   	}
+   }
+   */ }
+        return ks;
+    }
+};
+
+
+/*jshint esversion: 6 */ var $39679496f24848e9$var$eudist = $f4ce1c29f8386e91$exports.eudist, $39679496f24848e9$var$mandist = $f4ce1c29f8386e91$exports.mandist, $39679496f24848e9$var$dist = $f4ce1c29f8386e91$exports.dist, $39679496f24848e9$var$kmrand = $7706bc4af0dbceec$exports.kmrand, $39679496f24848e9$var$kmpp = $7706bc4af0dbceec$exports.kmpp;
+var $39679496f24848e9$var$MAX = 10000;
+/**
+ * Inits an array with values
+ */ function $39679496f24848e9$var$init(len, val, v) {
+    v = v || [];
+    for(var i = 0; i < len; i++)v[i] = val;
+    return v;
+}
+function $39679496f24848e9$var$skmeans(data, k, initial, maxit) {
+    var ks = [], old = [], idxs = [], dist = [];
+    var conv = false, it = maxit || $39679496f24848e9$var$MAX;
+    var len = data.length, vlen = data[0].length, multi = vlen > 0;
+    var count = [];
+    if (!initial) {
+        var _idxs = {
+        };
+        while(ks.length < k){
+            var idx = Math.floor(Math.random() * len);
+            if (!_idxs[idx]) {
+                _idxs[idx] = true;
+                ks.push(data[idx]);
+            }
+        }
+    } else if (initial == "kmrand") ks = $39679496f24848e9$var$kmrand(data, k);
+    else if (initial == "kmpp") ks = $39679496f24848e9$var$kmpp(data, k);
+    else ks = initial;
+    do {
+        // Reset k count
+        $39679496f24848e9$var$init(k, 0, count);
+        // For each value in data, find the nearest centroid
+        for(var i = 0; i < len; i++){
+            var min = Infinity, _idx = 0;
+            for(var j = 0; j < k; j++){
+                // Multidimensional or unidimensional
+                var dist = multi ? $39679496f24848e9$var$eudist(data[i], ks[j]) : Math.abs(data[i] - ks[j]);
+                if (dist <= min) {
+                    min = dist;
+                    _idx = j;
+                }
+            }
+            idxs[i] = _idx; // Index of the selected centroid for that value
+            count[_idx]++; // Number of values for this centroid
+        }
+        // Recalculate centroids
+        var sum = [], old = [], dif = 0;
+        for(var _j = 0; _j < k; _j++){
+            // Multidimensional or unidimensional
+            sum[_j] = multi ? $39679496f24848e9$var$init(vlen, 0, sum[_j]) : 0;
+            old[_j] = ks[_j];
+        }
+        // If multidimensional
+        if (multi) {
+            for(var _j2 = 0; _j2 < k; _j2++)ks[_j2] = [];
+             // Sum values and count for each centroid
+            for(var _i = 0; _i < len; _i++){
+                var _idx2 = idxs[_i], // Centroid for that item
+                vsum = sum[_idx2], // Sum values for this centroid
+                vect = data[_i]; // Current vector
+                // Accumulate value on the centroid for current vector
+                for(var h = 0; h < vlen; h++)vsum[h] += vect[h];
+            }
+            // Calculate the average for each centroid
+            conv = true;
+            for(var _j3 = 0; _j3 < k; _j3++){
+                var ksj = ks[_j3], // Current centroid
+                sumj = sum[_j3], // Accumulated centroid values
+                oldj = old[_j3], // Old centroid value
+                cj = count[_j3]; // Number of elements for this centroid
+                // New average
+                for(var _h = 0; _h < vlen; _h++)ksj[_h] = sumj[_h] / cj || 0; // New centroid
+                // Find if centroids have moved
+                if (conv) {
+                    for(var _h2 = 0; _h2 < vlen; _h2++)if (oldj[_h2] != ksj[_h2]) {
+                        conv = false;
+                        break;
+                    }
+                }
+            }
+        } else {
+            // Sum values and count for each centroid
+            for(var _i2 = 0; _i2 < len; _i2++){
+                var _idx3 = idxs[_i2];
+                sum[_idx3] += data[_i2];
+            }
+            // Calculate the average for each centroid
+            for(var _j4 = 0; _j4 < k; _j4++)ks[_j4] = sum[_j4] / count[_j4] || 0; // New centroid
+            // Find if centroids have moved
+            conv = true;
+            for(var _j5 = 0; _j5 < k; _j5++)if (old[_j5] != ks[_j5]) {
+                conv = false;
+                break;
+            }
+        }
+        conv = conv || (--it) <= 0;
+    }while (!conv)
+    return {
+        it: $39679496f24848e9$var$MAX - it,
+        k: k,
+        idxs: idxs,
+        centroids: ks
+    };
+}
+$39679496f24848e9$exports = $39679496f24848e9$var$skmeans;
+
+
+/**
+ * Takes a set of {@link Point|points} and partition them into clusters using the k-mean .
+ * It uses the [k-means algorithm](https://en.wikipedia.org/wiki/K-means_clustering)
+ *
+ * @name clustersKmeans
+ * @param {FeatureCollection<Point>} points to be clustered
+ * @param {Object} [options={}] Optional parameters
+ * @param {number} [options.numberOfClusters=Math.sqrt(numberOfPoints/2)] numberOfClusters that will be generated
+ * @param {boolean} [options.mutate=false] allows GeoJSON input to be mutated (significant performance increase if true)
+ * @returns {FeatureCollection<Point>} Clustered Points with an additional two properties associated to each Feature:
+ * - {number} cluster - the associated clusterId
+ * - {[number, number]} centroid - Centroid of the cluster [Longitude, Latitude]
+ * @example
+ * // create random points with random z-values in their properties
+ * var points = turf.randomPoint(100, {bbox: [0, 30, 20, 50]});
+ * var options = {numberOfClusters: 7};
+ * var clustered = turf.clustersKmeans(points, options);
+ *
+ * //addToMap
+ * var addToMap = [clustered];
+ */ function $afde46b62500dbb0$var$clustersKmeans(points, options) {
+    if (options === void 0) options = {
+    };
+    // Default Params
+    var count = points.features.length;
+    options.numberOfClusters = options.numberOfClusters || Math.round(Math.sqrt(count / 2));
+    // numberOfClusters can't be greater than the number of points
+    // fallbacks to count
+    if (options.numberOfClusters > count) options.numberOfClusters = count;
+    // Clone points to prevent any mutations (enabled by default)
+    if (options.mutate !== true) points = $3cfd6d70d7301277$export$9099ad97b570f7c(points);
+    // collect points coordinates
+    var data = $5c76aa7c2c53dcdc$export$5a9cfbedf736c6fa(points);
+    // create seed to avoid skmeans to drift
+    var initialCentroids = data.slice(0, options.numberOfClusters);
+    // create skmeans clusters
+    var skmeansResult = (/*@__PURE__*/$parcel$interopDefault($39679496f24848e9$exports))(data, options.numberOfClusters, initialCentroids);
+    // store centroids {clusterId: [number, number]}
+    var centroids = {
+    };
+    skmeansResult.centroids.forEach(function(coord, idx) {
+        centroids[idx] = coord;
+    });
+    // add associated cluster number
+    $5c76aa7c2c53dcdc$export$4ec429a16a391dd0(points, function(point, index) {
+        var clusterId = skmeansResult.idxs[index];
+        point.properties.cluster = clusterId;
+        point.properties.centroid = centroids[clusterId];
+    });
+    return points;
+}
+var $afde46b62500dbb0$export$9099ad97b570f7c = $afde46b62500dbb0$var$clustersKmeans;
+
+
+
+
+function $8a3e3dfc4b41d9ff$export$f838ef719c965add(coord) {
+    if (!coord) throw new Error("coord is required");
+    if (!Array.isArray(coord)) {
+        if (coord.type === "Feature" && coord.geometry !== null && coord.geometry.type === "Point") return coord.geometry.coordinates;
+        if (coord.type === "Point") return coord.coordinates;
+    }
+    if (Array.isArray(coord) && coord.length >= 2 && !Array.isArray(coord[0]) && !Array.isArray(coord[1])) return coord;
+    throw new Error("coord must be GeoJSON Point or an Array of numbers");
+}
+function $8a3e3dfc4b41d9ff$export$46fc27be15a5ee5(coords) {
+    if (Array.isArray(coords)) return coords;
+    // Feature
+    if (coords.type === "Feature") {
+        if (coords.geometry !== null) return coords.geometry.coordinates;
+    } else {
+        // Geometry
+        if (coords.coordinates) return coords.coordinates;
+    }
+    throw new Error("coords must be GeoJSON Feature, Geometry Object or an Array");
+}
+function $8a3e3dfc4b41d9ff$export$3aa59f2d5d9a200d(coordinates) {
+    if (coordinates.length > 1 && $06fd7bba89ea2716$export$1b423f7fa395bc1f(coordinates[0]) && $06fd7bba89ea2716$export$1b423f7fa395bc1f(coordinates[1])) return true;
+    if (Array.isArray(coordinates[0]) && coordinates[0].length) return $8a3e3dfc4b41d9ff$export$3aa59f2d5d9a200d(coordinates[0]);
+    throw new Error("coordinates must only contain numbers");
+}
+function $8a3e3dfc4b41d9ff$export$4ed88b37a51256dc(value, type, name) {
+    if (!type || !name) throw new Error("type and name required");
+    if (!value || value.type !== type) throw new Error("Invalid input to " + name + ": must be a " + type + ", given " + value.type);
+}
+function $8a3e3dfc4b41d9ff$export$febdaeaf68aa8370(feature, type, name) {
+    if (!feature) throw new Error("No feature passed");
+    if (!name) throw new Error(".featureOf() requires a name");
+    if (!feature || feature.type !== "Feature" || !feature.geometry) throw new Error("Invalid input to " + name + ", Feature with geometry required");
+    if (!feature.geometry || feature.geometry.type !== type) throw new Error("Invalid input to " + name + ": must be a " + type + ", given " + feature.geometry.type);
+}
+function $8a3e3dfc4b41d9ff$export$66d9083292e6f231(featureCollection, type, name) {
+    if (!featureCollection) throw new Error("No featureCollection passed");
+    if (!name) throw new Error(".collectionOf() requires a name");
+    if (!featureCollection || featureCollection.type !== "FeatureCollection") throw new Error("Invalid input to " + name + ", FeatureCollection required");
+    for(var _i = 0, _a = featureCollection.features; _i < _a.length; _i++){
+        var feature = _a[_i];
+        if (!feature || feature.type !== "Feature" || !feature.geometry) throw new Error("Invalid input to " + name + ", Feature with geometry required");
+        if (!feature.geometry || feature.geometry.type !== type) throw new Error("Invalid input to " + name + ": must be a " + type + ", given " + feature.geometry.type);
+    }
+}
+function $8a3e3dfc4b41d9ff$export$85c1ed911ae13e35(geojson) {
+    if (geojson.type === "Feature") return geojson.geometry;
+    return geojson;
+}
+function $8a3e3dfc4b41d9ff$export$7b6695599253d7ba(geojson, _name) {
+    if (geojson.type === "FeatureCollection") return "FeatureCollection";
+    if (geojson.type === "GeometryCollection") return "GeometryCollection";
+    if (geojson.type === "Feature" && geojson.geometry !== null) return geojson.geometry.type;
+    return geojson.type;
+}
+
+
+
+//http://en.wikipedia.org/wiki/Haversine_formula
+//http://www.movable-type.co.uk/scripts/latlong.html
+/**
+ * Calculates the distance between two {@link Point|points} in degrees, radians, miles, or kilometers.
+ * This uses the [Haversine formula](http://en.wikipedia.org/wiki/Haversine_formula) to account for global curvature.
+ *
+ * @name distance
+ * @param {Coord | Point} from origin point or coordinate
+ * @param {Coord | Point} to destination point or coordinate
+ * @param {Object} [options={}] Optional parameters
+ * @param {string} [options.units='kilometers'] can be degrees, radians, miles, or kilometers
+ * @returns {number} distance between the two points
+ * @example
+ * var from = turf.point([-75.343, 39.984]);
+ * var to = turf.point([-75.534, 39.123]);
+ * var options = {units: 'miles'};
+ *
+ * var distance = turf.distance(from, to, options);
+ *
+ * //addToMap
+ * var addToMap = [from, to];
+ * from.properties.distance = distance;
+ * to.properties.distance = distance;
+ */ function $bdb7acebc872ae62$var$distance(from, to, options) {
+    if (options === void 0) options = {
+    };
+    var coordinates1 = $8a3e3dfc4b41d9ff$export$f838ef719c965add(from);
+    var coordinates2 = $8a3e3dfc4b41d9ff$export$f838ef719c965add(to);
+    var dLat = $06fd7bba89ea2716$export$3df9f87a6fcd617d(coordinates2[1] - coordinates1[1]);
+    var dLon = $06fd7bba89ea2716$export$3df9f87a6fcd617d(coordinates2[0] - coordinates1[0]);
+    var lat1 = $06fd7bba89ea2716$export$3df9f87a6fcd617d(coordinates1[1]);
+    var lat2 = $06fd7bba89ea2716$export$3df9f87a6fcd617d(coordinates2[1]);
+    var a = Math.pow(Math.sin(dLat / 2), 2) + Math.pow(Math.sin(dLon / 2), 2) * Math.cos(lat1) * Math.cos(lat2);
+    return $06fd7bba89ea2716$export$a7371587dd3e0f79(2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)), options.units);
+}
+var $bdb7acebc872ae62$export$9099ad97b570f7c = $bdb7acebc872ae62$var$distance;
+
+
+
+
+var $ea628a101b201b4b$exports = {};
+parcelRequire.register("hlFcf", function(module, exports) {
+/**
+ * DBSCAN - Density based clustering
+ *
+ * @author Lukasz Krawczyk <contact@lukaszkrawczyk.eu>
+ * @copyright MIT
+ */ /**
+ * DBSCAN class construcotr
+ * @constructor
+ *
+ * @param {Array} dataset
+ * @param {number} epsilon
+ * @param {number} minPts
+ * @param {function} distanceFunction
+ * @returns {DBSCAN}
+ */ function $ca145a95ea91c3d9$var$DBSCAN(dataset, epsilon, minPts, distanceFunction) {
+    /** @type {Array} */ this.dataset = [];
+    /** @type {number} */ this.epsilon = 1;
+    /** @type {number} */ this.minPts = 2;
+    /** @type {function} */ this.distance = this._euclideanDistance;
+    /** @type {Array} */ this.clusters = [];
+    /** @type {Array} */ this.noise = [];
+    // temporary variables used during computation
+    /** @type {Array} */ this._visited = [];
+    /** @type {Array} */ this._assigned = [];
+    /** @type {number} */ this._datasetLength = 0;
+    this._init(dataset, epsilon, minPts, distanceFunction);
+}
+/******************************************************************************/ // public functions
+/**
+ * Start clustering
+ *
+ * @param {Array} dataset
+ * @param {number} epsilon
+ * @param {number} minPts
+ * @param {function} distanceFunction
+ * @returns {undefined}
+ * @access public
+ */ $ca145a95ea91c3d9$var$DBSCAN.prototype.run = function(dataset, epsilon, minPts, distanceFunction) {
+    this._init(dataset, epsilon, minPts, distanceFunction);
+    for(var pointId = 0; pointId < this._datasetLength; pointId++)// if point is not visited, check if it forms a cluster
+    if (this._visited[pointId] !== 1) {
+        this._visited[pointId] = 1;
+        // if closest neighborhood is too small to form a cluster, mark as noise
+        var neighbors = this._regionQuery(pointId);
+        if (neighbors.length < this.minPts) this.noise.push(pointId);
+        else {
+            // create new cluster and add point
+            var clusterId = this.clusters.length;
+            this.clusters.push([]);
+            this._addToCluster(pointId, clusterId);
+            this._expandCluster(clusterId, neighbors);
+        }
+    }
+    return this.clusters;
+};
+/******************************************************************************/ // protected functions
+/**
+ * Set object properties
+ *
+ * @param {Array} dataset
+ * @param {number} epsilon
+ * @param {number} minPts
+ * @param {function} distance
+ * @returns {undefined}
+ * @access protected
+ */ $ca145a95ea91c3d9$var$DBSCAN.prototype._init = function(dataset, epsilon, minPts, distance) {
+    if (dataset) {
+        if (!(dataset instanceof Array)) throw Error('Dataset must be of type array, ' + typeof dataset + ' given');
+        this.dataset = dataset;
+        this.clusters = [];
+        this.noise = [];
+        this._datasetLength = dataset.length;
+        this._visited = new Array(this._datasetLength);
+        this._assigned = new Array(this._datasetLength);
+    }
+    if (epsilon) this.epsilon = epsilon;
+    if (minPts) this.minPts = minPts;
+    if (distance) this.distance = distance;
+};
+/**
+ * Expand cluster to closest points of given neighborhood
+ *
+ * @param {number} clusterId
+ * @param {Array} neighbors
+ * @returns {undefined}
+ * @access protected
+ */ $ca145a95ea91c3d9$var$DBSCAN.prototype._expandCluster = function(clusterId, neighbors) {
+    /**
+   * It's very important to calculate length of neighbors array each time,
+   * as the number of elements changes over time
+   */ for(var i = 0; i < neighbors.length; i++){
+        var pointId2 = neighbors[i];
+        if (this._visited[pointId2] !== 1) {
+            this._visited[pointId2] = 1;
+            var neighbors2 = this._regionQuery(pointId2);
+            if (neighbors2.length >= this.minPts) neighbors = this._mergeArrays(neighbors, neighbors2);
+        }
+        // add to cluster
+        if (this._assigned[pointId2] !== 1) this._addToCluster(pointId2, clusterId);
+    }
+};
+/**
+ * Add new point to cluster
+ *
+ * @param {number} pointId
+ * @param {number} clusterId
+ */ $ca145a95ea91c3d9$var$DBSCAN.prototype._addToCluster = function(pointId, clusterId) {
+    this.clusters[clusterId].push(pointId);
+    this._assigned[pointId] = 1;
+};
+/**
+ * Find all neighbors around given point
+ *
+ * @param {number} pointId,
+ * @param {number} epsilon
+ * @returns {Array}
+ * @access protected
+ */ $ca145a95ea91c3d9$var$DBSCAN.prototype._regionQuery = function(pointId) {
+    var neighbors = [];
+    for(var id = 0; id < this._datasetLength; id++){
+        var dist = this.distance(this.dataset[pointId], this.dataset[id]);
+        if (dist < this.epsilon) neighbors.push(id);
+    }
+    return neighbors;
+};
+/******************************************************************************/ // helpers
+/**
+ * @param {Array} a
+ * @param {Array} b
+ * @returns {Array}
+ * @access protected
+ */ $ca145a95ea91c3d9$var$DBSCAN.prototype._mergeArrays = function(a, b) {
+    var len = b.length;
+    for(var i = 0; i < len; i++){
+        var P = b[i];
+        if (a.indexOf(P) < 0) a.push(P);
+    }
+    return a;
+};
+/**
+ * Calculate euclidean distance in multidimensional space
+ *
+ * @param {Array} p
+ * @param {Array} q
+ * @returns {number}
+ * @access protected
+ */ $ca145a95ea91c3d9$var$DBSCAN.prototype._euclideanDistance = function(p, q) {
+    var sum = 0;
+    var i = Math.min(p.length, q.length);
+    while(i--)sum += (p[i] - q[i]) * (p[i] - q[i]);
+    return Math.sqrt(sum);
+};
+if ("object" !== 'undefined' && module.exports) module.exports = $ca145a95ea91c3d9$var$DBSCAN;
+
+});
+
+
+parcelRequire.register("X5WN7", function(module, exports) {
+/**
+ * KMEANS clustering
+ *
+ * @author Lukasz Krawczyk <contact@lukaszkrawczyk.eu>
+ * @copyright MIT
+ */ /**
+ * KMEANS class constructor
+ * @constructor
+ *
+ * @param {Array} dataset
+ * @param {number} k - number of clusters
+ * @param {function} distance - distance function
+ * @returns {KMEANS}
+ */ function $0b1a1fcd46318e59$var$KMEANS(dataset, k, distance) {
+    this.k = 3; // number of clusters
+    this.dataset = []; // set of feature vectors
+    this.assignments = []; // set of associated clusters for each feature vector
+    this.centroids = []; // vectors for our clusters
+    this.init(dataset, k, distance);
+}
+/**
+ * @returns {undefined}
+ */ $0b1a1fcd46318e59$var$KMEANS.prototype.init = function(dataset, k, distance) {
+    this.assignments = [];
+    this.centroids = [];
+    if (typeof dataset !== 'undefined') this.dataset = dataset;
+    if (typeof k !== 'undefined') this.k = k;
+    if (typeof distance !== 'undefined') this.distance = distance;
+};
+/**
+ * @returns {undefined}
+ */ $0b1a1fcd46318e59$var$KMEANS.prototype.run = function(dataset, k) {
+    this.init(dataset, k);
+    var len = this.dataset.length;
+    // initialize centroids
+    for(var i = 0; i < this.k; i++)this.centroids[i] = this.randomCentroid();
+    var change = true;
+    while(change){
+        // assign feature vectors to clusters
+        change = this.assign();
+        // adjust location of centroids
+        for(var centroidId = 0; centroidId < this.k; centroidId++){
+            var mean = new Array(maxDim);
+            var count = 0;
+            // init mean vector
+            for(var dim = 0; dim < maxDim; dim++)mean[dim] = 0;
+            for(var j = 0; j < len; j++){
+                var maxDim = this.dataset[j].length;
+                // if current cluster id is assigned to point
+                if (centroidId === this.assignments[j]) {
+                    for(var dim = 0; dim < maxDim; dim++)mean[dim] += this.dataset[j][dim];
+                    count++;
+                }
+            }
+            if (count > 0) {
+                // if cluster contain points, adjust centroid position
+                for(var dim = 0; dim < maxDim; dim++)mean[dim] /= count;
+                this.centroids[centroidId] = mean;
+            } else {
+                // if cluster is empty, generate new random centroid
+                this.centroids[centroidId] = this.randomCentroid();
+                change = true;
+            }
+        }
+    }
+    return this.getClusters();
+};
+/**
+ * Generate random centroid
+ *
+ * @returns {Array}
+ */ $0b1a1fcd46318e59$var$KMEANS.prototype.randomCentroid = function() {
+    var maxId = this.dataset.length - 1;
+    var centroid;
+    var id;
+    do {
+        id = Math.round(Math.random() * maxId);
+        centroid = this.dataset[id];
+    }while (this.centroids.indexOf(centroid) >= 0)
+    return centroid;
+};
+/**
+ * Assign points to clusters
+ *
+ * @returns {boolean}
+ */ $0b1a1fcd46318e59$var$KMEANS.prototype.assign = function() {
+    var change = false;
+    var len = this.dataset.length;
+    var closestCentroid;
+    for(var i = 0; i < len; i++){
+        closestCentroid = this.argmin(this.dataset[i], this.centroids, this.distance);
+        if (closestCentroid != this.assignments[i]) {
+            this.assignments[i] = closestCentroid;
+            change = true;
+        }
+    }
+    return change;
+};
+/**
+ * Extract information about clusters
+ *
+ * @returns {undefined}
+ */ $0b1a1fcd46318e59$var$KMEANS.prototype.getClusters = function() {
+    var clusters = new Array(this.k);
+    var centroidId;
+    for(var pointId = 0; pointId < this.assignments.length; pointId++){
+        centroidId = this.assignments[pointId];
+        // init empty cluster
+        if (typeof clusters[centroidId] === 'undefined') clusters[centroidId] = [];
+        clusters[centroidId].push(pointId);
+    }
+    return clusters;
+};
+// utils
+/**
+ * @params {Array} point
+ * @params {Array.<Array>} set
+ * @params {Function} f
+ * @returns {number}
+ */ $0b1a1fcd46318e59$var$KMEANS.prototype.argmin = function(point, set, f) {
+    var min = Number.MAX_VALUE;
+    var arg = 0;
+    var len = set.length;
+    var d;
+    for(var i = 0; i < len; i++){
+        d = f(point, set[i]);
+        if (d < min) {
+            min = d;
+            arg = i;
+        }
+    }
+    return arg;
+};
+/**
+ * Euclidean distance
+ *
+ * @params {number} p
+ * @params {number} q
+ * @returns {number}
+ */ $0b1a1fcd46318e59$var$KMEANS.prototype.distance = function(p, q) {
+    var sum = 0;
+    var i = Math.min(p.length, q.length);
+    while(i--){
+        var diff = p[i] - q[i];
+        sum += diff * diff;
+    }
+    return Math.sqrt(sum);
+};
+if ("object" !== 'undefined' && module.exports) module.exports = $0b1a1fcd46318e59$var$KMEANS;
+
+});
+
+
+parcelRequire.register("jzlHC", function(module, exports) {
+
+/**
+ * @requires ./PriorityQueue.js
+ */ if ("object" !== 'undefined' && module.exports) var $e3f21ee2256f10d2$var$PriorityQueue = (parcelRequire("hfLBG"));
+/**
+ * OPTICS - Ordering points to identify the clustering structure
+ *
+ * @author Lukasz Krawczyk <contact@lukaszkrawczyk.eu>
+ * @copyright MIT
+ */ /**
+ * OPTICS class constructor
+ * @constructor
+ *
+ * @param {Array} dataset
+ * @param {number} epsilon
+ * @param {number} minPts
+ * @param {function} distanceFunction
+ * @returns {OPTICS}
+ */ function $e3f21ee2256f10d2$var$OPTICS(dataset, epsilon, minPts, distanceFunction) {
+    /** @type {number} */ this.epsilon = 1;
+    /** @type {number} */ this.minPts = 1;
+    /** @type {function} */ this.distance = this._euclideanDistance;
+    // temporary variables used during computation
+    /** @type {Array} */ this._reachability = [];
+    /** @type {Array} */ this._processed = [];
+    /** @type {number} */ this._coreDistance = 0;
+    /** @type {Array} */ this._orderedList = [];
+    this._init(dataset, epsilon, minPts, distanceFunction);
+}
+/******************************************************************************/ // pulic functions
+/**
+ * Start clustering
+ *
+ * @param {Array} dataset
+ * @returns {undefined}
+ * @access public
+ */ $e3f21ee2256f10d2$var$OPTICS.prototype.run = function(dataset, epsilon, minPts, distanceFunction) {
+    this._init(dataset, epsilon, minPts, distanceFunction);
+    for(var pointId = 0, l = this.dataset.length; pointId < l; pointId++)if (this._processed[pointId] !== 1) {
+        this._processed[pointId] = 1;
+        this.clusters.push([
+            pointId
+        ]);
+        var clusterId = this.clusters.length - 1;
+        this._orderedList.push(pointId);
+        var priorityQueue = new $e3f21ee2256f10d2$var$PriorityQueue(null, null, 'asc');
+        var neighbors = this._regionQuery(pointId);
+        // using priority queue assign elements to new cluster
+        if (this._distanceToCore(pointId) !== undefined) {
+            this._updateQueue(pointId, neighbors, priorityQueue);
+            this._expandCluster(clusterId, priorityQueue);
+        }
+    }
+    return this.clusters;
+};
+/**
+ * Generate reachability plot for all points
+ *
+ * @returns {array}
+ * @access public
+ */ $e3f21ee2256f10d2$var$OPTICS.prototype.getReachabilityPlot = function() {
+    var reachabilityPlot = [];
+    for(var i = 0, l = this._orderedList.length; i < l; i++){
+        var pointId = this._orderedList[i];
+        var distance = this._reachability[pointId];
+        reachabilityPlot.push([
+            pointId,
+            distance
+        ]);
+    }
+    return reachabilityPlot;
+};
+/******************************************************************************/ // protected functions
+/**
+ * Set object properties
+ *
+ * @param {Array} dataset
+ * @param {number} epsilon
+ * @param {number} minPts
+ * @param {function} distance
+ * @returns {undefined}
+ * @access protected
+ */ $e3f21ee2256f10d2$var$OPTICS.prototype._init = function(dataset, epsilon, minPts, distance) {
+    if (dataset) {
+        if (!(dataset instanceof Array)) throw Error('Dataset must be of type array, ' + typeof dataset + ' given');
+        this.dataset = dataset;
+        this.clusters = [];
+        this._reachability = new Array(this.dataset.length);
+        this._processed = new Array(this.dataset.length);
+        this._coreDistance = 0;
+        this._orderedList = [];
+    }
+    if (epsilon) this.epsilon = epsilon;
+    if (minPts) this.minPts = minPts;
+    if (distance) this.distance = distance;
+};
+/**
+ * Update information in queue
+ *
+ * @param {number} pointId
+ * @param {Array} neighbors
+ * @param {PriorityQueue} queue
+ * @returns {undefined}
+ * @access protected
+ */ $e3f21ee2256f10d2$var$OPTICS.prototype._updateQueue = function(pointId, neighbors, queue) {
+    var self = this;
+    this._coreDistance = this._distanceToCore(pointId);
+    neighbors.forEach(function(pointId2) {
+        if (self._processed[pointId2] === undefined) {
+            var dist = self.distance(self.dataset[pointId], self.dataset[pointId2]);
+            var newReachableDistance = Math.max(self._coreDistance, dist);
+            if (self._reachability[pointId2] === undefined) {
+                self._reachability[pointId2] = newReachableDistance;
+                queue.insert(pointId2, newReachableDistance);
+            } else if (newReachableDistance < self._reachability[pointId2]) {
+                self._reachability[pointId2] = newReachableDistance;
+                queue.remove(pointId2);
+                queue.insert(pointId2, newReachableDistance);
+            }
+        }
+    });
+};
+/**
+ * Expand cluster
+ *
+ * @param {number} clusterId
+ * @param {PriorityQueue} queue
+ * @returns {undefined}
+ * @access protected
+ */ $e3f21ee2256f10d2$var$OPTICS.prototype._expandCluster = function(clusterId, queue) {
+    var queueElements = queue.getElements();
+    for(var p = 0, l = queueElements.length; p < l; p++){
+        var pointId = queueElements[p];
+        if (this._processed[pointId] === undefined) {
+            var neighbors = this._regionQuery(pointId);
+            this._processed[pointId] = 1;
+            this.clusters[clusterId].push(pointId);
+            this._orderedList.push(pointId);
+            if (this._distanceToCore(pointId) !== undefined) {
+                this._updateQueue(pointId, neighbors, queue);
+                this._expandCluster(clusterId, queue);
+            }
+        }
+    }
+};
+/**
+ * Calculating distance to cluster core
+ *
+ * @param {number} pointId
+ * @returns {number}
+ * @access protected
+ */ $e3f21ee2256f10d2$var$OPTICS.prototype._distanceToCore = function(pointId) {
+    var l = this.epsilon;
+    for(var coreDistCand = 0; coreDistCand < l; coreDistCand++){
+        var neighbors = this._regionQuery(pointId, coreDistCand);
+        if (neighbors.length >= this.minPts) return coreDistCand;
+    }
+    return;
+};
+/**
+ * Find all neighbors around given point
+ *
+ * @param {number} pointId
+ * @param {number} epsilon
+ * @returns {Array}
+ * @access protected
+ */ $e3f21ee2256f10d2$var$OPTICS.prototype._regionQuery = function(pointId, epsilon) {
+    epsilon = epsilon || this.epsilon;
+    var neighbors = [];
+    for(var id = 0, l = this.dataset.length; id < l; id++)if (this.distance(this.dataset[pointId], this.dataset[id]) < epsilon) neighbors.push(id);
+    return neighbors;
+};
+/******************************************************************************/ // helpers
+/**
+ * Calculate euclidean distance in multidimensional space
+ *
+ * @param {Array} p
+ * @param {Array} q
+ * @returns {number}
+ * @access protected
+ */ $e3f21ee2256f10d2$var$OPTICS.prototype._euclideanDistance = function(p, q) {
+    var sum = 0;
+    var i = Math.min(p.length, q.length);
+    while(i--)sum += (p[i] - q[i]) * (p[i] - q[i]);
+    return Math.sqrt(sum);
+};
+if ("object" !== 'undefined' && module.exports) module.exports = $e3f21ee2256f10d2$var$OPTICS;
+
+});
+parcelRequire.register("hfLBG", function(module, exports) {
+/**
+ * PriorityQueue
+ * Elements in this queue are sorted according to their value
+ *
+ * @author Lukasz Krawczyk <contact@lukaszkrawczyk.eu>
+ * @copyright MIT
+ */ /**
+ * PriorityQueue class construcotr
+ * @constructor
+ *
+ * @example
+ * queue: [1,2,3,4]
+ * priorities: [4,1,2,3]
+ * > result = [1,4,2,3]
+ *
+ * @param {Array} elements
+ * @param {Array} priorities
+ * @param {string} sorting - asc / desc
+ * @returns {PriorityQueue}
+ */ function $c8f8c41fcf966d64$var$PriorityQueue(elements, priorities, sorting) {
+    /** @type {Array} */ this._queue = [];
+    /** @type {Array} */ this._priorities = [];
+    /** @type {string} */ this._sorting = 'desc';
+    this._init(elements, priorities, sorting);
+}
+/**
+ * Insert element
+ *
+ * @param {Object} ele
+ * @param {Object} priority
+ * @returns {undefined}
+ * @access public
+ */ $c8f8c41fcf966d64$var$PriorityQueue.prototype.insert = function(ele, priority) {
+    var indexToInsert = this._queue.length;
+    var index = indexToInsert;
+    while(index--){
+        var priority2 = this._priorities[index];
+        if (this._sorting === 'desc') {
+            if (priority > priority2) indexToInsert = index;
+        } else if (priority < priority2) indexToInsert = index;
+    }
+    this._insertAt(ele, priority, indexToInsert);
+};
+/**
+ * Remove element
+ *
+ * @param {Object} ele
+ * @returns {undefined}
+ * @access public
+ */ $c8f8c41fcf966d64$var$PriorityQueue.prototype.remove = function(ele) {
+    var index = this._queue.length;
+    while(index--){
+        var ele2 = this._queue[index];
+        if (ele === ele2) {
+            this._queue.splice(index, 1);
+            this._priorities.splice(index, 1);
+            break;
+        }
+    }
+};
+/**
+ * For each loop wrapper
+ *
+ * @param {function} func
+ * @returs {undefined}
+ * @access public
+ */ $c8f8c41fcf966d64$var$PriorityQueue.prototype.forEach = function(func) {
+    this._queue.forEach(func);
+};
+/**
+ * @returns {Array}
+ * @access public
+ */ $c8f8c41fcf966d64$var$PriorityQueue.prototype.getElements = function() {
+    return this._queue;
+};
+/**
+ * @param {number} index
+ * @returns {Object}
+ * @access public
+ */ $c8f8c41fcf966d64$var$PriorityQueue.prototype.getElementPriority = function(index) {
+    return this._priorities[index];
+};
+/**
+ * @returns {Array}
+ * @access public
+ */ $c8f8c41fcf966d64$var$PriorityQueue.prototype.getPriorities = function() {
+    return this._priorities;
+};
+/**
+ * @returns {Array}
+ * @access public
+ */ $c8f8c41fcf966d64$var$PriorityQueue.prototype.getElementsWithPriorities = function() {
+    var result = [];
+    for(var i = 0, l = this._queue.length; i < l; i++)result.push([
+        this._queue[i],
+        this._priorities[i]
+    ]);
+    return result;
+};
+/**
+ * Set object properties
+ *
+ * @param {Array} elements
+ * @param {Array} priorities
+ * @returns {undefined}
+ * @access protected
+ */ $c8f8c41fcf966d64$var$PriorityQueue.prototype._init = function(elements, priorities, sorting) {
+    if (elements && priorities) {
+        this._queue = [];
+        this._priorities = [];
+        if (elements.length !== priorities.length) throw new Error('Arrays must have the same length');
+        for(var i = 0; i < elements.length; i++)this.insert(elements[i], priorities[i]);
+    }
+    if (sorting) this._sorting = sorting;
+};
+/**
+ * Insert element at given position
+ *
+ * @param {Object} ele
+ * @param {number} index
+ * @returns {undefined}
+ * @access protected
+ */ $c8f8c41fcf966d64$var$PriorityQueue.prototype._insertAt = function(ele, priority, index) {
+    if (this._queue.length === index) {
+        this._queue.push(ele);
+        this._priorities.push(priority);
+    } else {
+        this._queue.splice(index, 0, ele);
+        this._priorities.splice(index, 0, priority);
+    }
+};
+if ("object" !== 'undefined' && module.exports) module.exports = $c8f8c41fcf966d64$var$PriorityQueue;
+
+});
+
+
+
+
+if ("object" !== 'undefined' && $ea628a101b201b4b$exports) $ea628a101b201b4b$exports = {
+    DBSCAN: (parcelRequire("hlFcf")),
+    KMEANS: (parcelRequire("X5WN7")),
+    OPTICS: (parcelRequire("jzlHC")),
+    PriorityQueue: (parcelRequire("hfLBG"))
+};
+
+
+/**
+ * Takes a set of {@link Point|points} and partition them into clusters according to {@link DBSCAN's|https://en.wikipedia.org/wiki/DBSCAN} data clustering algorithm.
+ *
+ * @name clustersDbscan
+ * @param {FeatureCollection<Point>} points to be clustered
+ * @param {number} maxDistance Maximum Distance between any point of the cluster to generate the clusters (kilometers only)
+ * @param {Object} [options={}] Optional parameters
+ * @param {string} [options.units="kilometers"] in which `maxDistance` is expressed, can be degrees, radians, miles, or kilometers
+ * @param {boolean} [options.mutate=false] Allows GeoJSON input to be mutated
+ * @param {number} [options.minPoints=3] Minimum number of points to generate a single cluster,
+ * points which do not meet this requirement will be classified as an 'edge' or 'noise'.
+ * @returns {FeatureCollection<Point>} Clustered Points with an additional two properties associated to each Feature:
+ * - {number} cluster - the associated clusterId
+ * - {string} dbscan - type of point it has been classified as ('core'|'edge'|'noise')
+ * @example
+ * // create random points with random z-values in their properties
+ * var points = turf.randomPoint(100, {bbox: [0, 30, 20, 50]});
+ * var maxDistance = 100;
+ * var clustered = turf.clustersDbscan(points, maxDistance);
+ *
+ * //addToMap
+ * var addToMap = [clustered];
+ */ function $af33975ec2b83c02$var$clustersDbscan(points, maxDistance, options) {
+    // Input validation being handled by Typescript
+    // collectionOf(points, 'Point', 'points must consist of a FeatureCollection of only Points');
+    // if (maxDistance === null || maxDistance === undefined) throw new Error('maxDistance is required');
+    // if (!(Math.sign(maxDistance) > 0)) throw new Error('maxDistance is invalid');
+    // if (!(minPoints === undefined || minPoints === null || Math.sign(minPoints) > 0)) throw new Error('options.minPoints is invalid');
+    if (options === void 0) options = {
+    };
+    // Clone points to prevent any mutations
+    if (options.mutate !== true) points = $3cfd6d70d7301277$export$9099ad97b570f7c(points);
+    // Defaults
+    options.minPoints = options.minPoints || 3;
+    // create clustered ids
+    var dbscan = new (/*@__PURE__*/$parcel$interopDefault($ea628a101b201b4b$exports)).DBSCAN();
+    var clusteredIds = dbscan.run($5c76aa7c2c53dcdc$export$5a9cfbedf736c6fa(points), $06fd7bba89ea2716$export$89c2cc3b6c94cff3(maxDistance, options.units), options.minPoints, $bdb7acebc872ae62$export$9099ad97b570f7c);
+    // Tag points to Clusters ID
+    var clusterId = -1;
+    clusteredIds.forEach(function(clusterIds) {
+        clusterId++;
+        // assign cluster ids to input points
+        clusterIds.forEach(function(idx) {
+            var clusterPoint = points.features[idx];
+            if (!clusterPoint.properties) clusterPoint.properties = {
+            };
+            clusterPoint.properties.cluster = clusterId;
+            clusterPoint.properties.dbscan = "core";
+        });
+    });
+    // handle noise points, if any
+    // edges points are tagged by DBSCAN as both 'noise' and 'cluster' as they can "reach" less than 'minPoints' number of points
+    dbscan.noise.forEach(function(noiseId) {
+        var noisePoint = points.features[noiseId];
+        if (!noisePoint.properties) noisePoint.properties = {
+        };
+        if (noisePoint.properties.cluster) noisePoint.properties.dbscan = "edge";
+        else noisePoint.properties.dbscan = "noise";
+    });
+    return points;
+}
+var $af33975ec2b83c02$export$9099ad97b570f7c = $af33975ec2b83c02$var$clustersDbscan;
+
+
+function $c58fcea174b96650$export$9099ad97b570f7c(ids, coords, nodeSize, left, right, depth) {
+    if (right - left <= nodeSize) return;
+    const m = left + right >> 1;
+    $c58fcea174b96650$var$select(ids, coords, m, left, right, depth % 2);
+    $c58fcea174b96650$export$9099ad97b570f7c(ids, coords, nodeSize, left, m - 1, depth + 1);
+    $c58fcea174b96650$export$9099ad97b570f7c(ids, coords, nodeSize, m + 1, right, depth + 1);
+}
+function $c58fcea174b96650$var$select(ids, coords, k, left, right, inc) {
+    while(right > left){
+        if (right - left > 600) {
+            const n = right - left + 1;
+            const m = k - left + 1;
+            const z = Math.log(n);
+            const s = 0.5 * Math.exp(2 * z / 3);
+            const sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
+            const newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
+            const newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
+            $c58fcea174b96650$var$select(ids, coords, k, newLeft, newRight, inc);
+        }
+        const t = coords[2 * k + inc];
+        let i = left;
+        let j = right;
+        $c58fcea174b96650$var$swapItem(ids, coords, left, k);
+        if (coords[2 * right + inc] > t) $c58fcea174b96650$var$swapItem(ids, coords, left, right);
+        while(i < j){
+            $c58fcea174b96650$var$swapItem(ids, coords, i, j);
+            i++;
+            j--;
+            while(coords[2 * i + inc] < t)i++;
+            while(coords[2 * j + inc] > t)j--;
+        }
+        if (coords[2 * left + inc] === t) $c58fcea174b96650$var$swapItem(ids, coords, left, j);
+        else {
+            j++;
+            $c58fcea174b96650$var$swapItem(ids, coords, j, right);
+        }
+        if (j <= k) left = j + 1;
+        if (k <= j) right = j - 1;
+    }
+}
+function $c58fcea174b96650$var$swapItem(ids, coords, i, j) {
+    $c58fcea174b96650$var$swap(ids, i, j);
+    $c58fcea174b96650$var$swap(coords, 2 * i, 2 * j);
+    $c58fcea174b96650$var$swap(coords, 2 * i + 1, 2 * j + 1);
+}
+function $c58fcea174b96650$var$swap(arr, i, j) {
+    const tmp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = tmp;
+}
+
+
+function $59e683003c353186$export$9099ad97b570f7c(ids, coords, minX, minY, maxX, maxY, nodeSize) {
+    const stack = [
+        0,
+        ids.length - 1,
+        0
+    ];
+    const result = [];
+    let x, y;
+    while(stack.length){
+        const axis = stack.pop();
+        const right = stack.pop();
+        const left = stack.pop();
+        if (right - left <= nodeSize) {
+            for(let i = left; i <= right; i++){
+                x = coords[2 * i];
+                y = coords[2 * i + 1];
+                if (x >= minX && x <= maxX && y >= minY && y <= maxY) result.push(ids[i]);
+            }
+            continue;
+        }
+        const m = Math.floor((left + right) / 2);
+        x = coords[2 * m];
+        y = coords[2 * m + 1];
+        if (x >= minX && x <= maxX && y >= minY && y <= maxY) result.push(ids[m]);
+        const nextAxis = (axis + 1) % 2;
+        if (axis === 0 ? minX <= x : minY <= y) {
+            stack.push(left);
+            stack.push(m - 1);
+            stack.push(nextAxis);
+        }
+        if (axis === 0 ? maxX >= x : maxY >= y) {
+            stack.push(m + 1);
+            stack.push(right);
+            stack.push(nextAxis);
+        }
+    }
+    return result;
+}
+
+
+function $c4c4fa1eea446db7$export$9099ad97b570f7c(ids, coords, qx, qy, r, nodeSize) {
+    const stack = [
+        0,
+        ids.length - 1,
+        0
+    ];
+    const result = [];
+    const r2 = r * r;
+    while(stack.length){
+        const axis = stack.pop();
+        const right = stack.pop();
+        const left = stack.pop();
+        if (right - left <= nodeSize) {
+            for(let i = left; i <= right; i++)if ($c4c4fa1eea446db7$var$sqDist(coords[2 * i], coords[2 * i + 1], qx, qy) <= r2) result.push(ids[i]);
+            continue;
+        }
+        const m = Math.floor((left + right) / 2);
+        const x = coords[2 * m];
+        const y = coords[2 * m + 1];
+        if ($c4c4fa1eea446db7$var$sqDist(x, y, qx, qy) <= r2) result.push(ids[m]);
+        const nextAxis = (axis + 1) % 2;
+        if (axis === 0 ? qx - r <= x : qy - r <= y) {
+            stack.push(left);
+            stack.push(m - 1);
+            stack.push(nextAxis);
+        }
+        if (axis === 0 ? qx + r >= x : qy + r >= y) {
+            stack.push(m + 1);
+            stack.push(right);
+            stack.push(nextAxis);
+        }
+    }
+    return result;
+}
+function $c4c4fa1eea446db7$var$sqDist(ax, ay, bx, by) {
+    const dx = ax - bx;
+    const dy = ay - by;
+    return dx * dx + dy * dy;
+}
+
+
+const $1cf2f3289abf70de$var$defaultGetX = (p)=>p[0]
+;
+const $1cf2f3289abf70de$var$defaultGetY = (p)=>p[1]
+;
+class $1cf2f3289abf70de$export$9099ad97b570f7c {
+    constructor(points, getX = $1cf2f3289abf70de$var$defaultGetX, getY = $1cf2f3289abf70de$var$defaultGetY, nodeSize = 64, ArrayType = Float64Array){
+        this.nodeSize = nodeSize;
+        this.points = points;
+        const IndexArrayType = points.length < 65536 ? Uint16Array : Uint32Array;
+        const ids = this.ids = new IndexArrayType(points.length);
+        const coords = this.coords = new ArrayType(points.length * 2);
+        for(let i = 0; i < points.length; i++){
+            ids[i] = i;
+            coords[2 * i] = getX(points[i]);
+            coords[2 * i + 1] = getY(points[i]);
+        }
+        $c58fcea174b96650$export$9099ad97b570f7c(ids, coords, nodeSize, 0, ids.length - 1, 0);
+    }
+    range(minX, minY, maxX, maxY) {
+        return $59e683003c353186$export$9099ad97b570f7c(this.ids, this.coords, minX, minY, maxX, maxY, this.nodeSize);
+    }
+    within(x, y, r) {
+        return $c4c4fa1eea446db7$export$9099ad97b570f7c(this.ids, this.coords, x, y, r, this.nodeSize);
+    }
+}
+
+
+const $4548a3b8e0a2dd0b$var$defaultOptions = {
+    minZoom: 0,
+    maxZoom: 16,
+    minPoints: 2,
+    radius: 40,
+    extent: 512,
+    nodeSize: 64,
+    log: false,
+    // whether to generate numeric ids for input features (in vector tiles)
+    generateId: false,
+    // a reduce function for calculating custom cluster properties
+    reduce: null,
+    // properties to use for individual points when running the reducer
+    map: (props)=>props // props => ({sum: props.my_value})
+};
+const $4548a3b8e0a2dd0b$var$fround = Math.fround || ((tmp)=>(x)=>{
+        tmp[0] = +x;
+        return tmp[0];
+    }
+)(new Float32Array(1));
+class $4548a3b8e0a2dd0b$export$9099ad97b570f7c {
+    constructor(options){
+        this.options = $4548a3b8e0a2dd0b$var$extend(Object.create($4548a3b8e0a2dd0b$var$defaultOptions), options);
+        this.trees = new Array(this.options.maxZoom + 1);
+    }
+    load(points) {
+        const { log: log , minZoom: minZoom , maxZoom: maxZoom , nodeSize: nodeSize  } = this.options;
+        if (log) console.time('total time');
+        const timerId = `prepare ${points.length} points`;
+        if (log) console.time(timerId);
+        this.points = points;
+        // generate a cluster object for each point and index input points into a KD-tree
+        let clusters = [];
+        for(let i = 0; i < points.length; i++){
+            if (!points[i].geometry) continue;
+            clusters.push($4548a3b8e0a2dd0b$var$createPointCluster(points[i], i));
+        }
+        this.trees[maxZoom + 1] = new $1cf2f3289abf70de$export$9099ad97b570f7c(clusters, $4548a3b8e0a2dd0b$var$getX, $4548a3b8e0a2dd0b$var$getY, nodeSize, Float32Array);
+        if (log) console.timeEnd(timerId);
+        // cluster points on max zoom, then cluster the results on previous zoom, etc.;
+        // results in a cluster hierarchy across zoom levels
+        for(let z = maxZoom; z >= minZoom; z--){
+            const now = +Date.now();
+            // create a new set of clusters for the zoom and index them with a KD-tree
+            clusters = this._cluster(clusters, z);
+            this.trees[z] = new $1cf2f3289abf70de$export$9099ad97b570f7c(clusters, $4548a3b8e0a2dd0b$var$getX, $4548a3b8e0a2dd0b$var$getY, nodeSize, Float32Array);
+            if (log) console.log('z%d: %d clusters in %dms', z, clusters.length, +Date.now() - now);
+        }
+        if (log) console.timeEnd('total time');
+        return this;
+    }
+    getClusters(bbox, zoom) {
+        let minLng = ((bbox[0] + 180) % 360 + 360) % 360 - 180;
+        const minLat = Math.max(-90, Math.min(90, bbox[1]));
+        let maxLng = bbox[2] === 180 ? 180 : ((bbox[2] + 180) % 360 + 360) % 360 - 180;
+        const maxLat = Math.max(-90, Math.min(90, bbox[3]));
+        if (bbox[2] - bbox[0] >= 360) {
+            minLng = -180;
+            maxLng = 180;
+        } else if (minLng > maxLng) {
+            const easternHem = this.getClusters([
+                minLng,
+                minLat,
+                180,
+                maxLat
+            ], zoom);
+            const westernHem = this.getClusters([
+                -180,
+                minLat,
+                maxLng,
+                maxLat
+            ], zoom);
+            return easternHem.concat(westernHem);
+        }
+        const tree = this.trees[this._limitZoom(zoom)];
+        const ids = tree.range($4548a3b8e0a2dd0b$var$lngX(minLng), $4548a3b8e0a2dd0b$var$latY(maxLat), $4548a3b8e0a2dd0b$var$lngX(maxLng), $4548a3b8e0a2dd0b$var$latY(minLat));
+        const clusters = [];
+        for (const id of ids){
+            const c = tree.points[id];
+            clusters.push(c.numPoints ? $4548a3b8e0a2dd0b$var$getClusterJSON(c) : this.points[c.index]);
+        }
+        return clusters;
+    }
+    getChildren(clusterId) {
+        const originId = this._getOriginId(clusterId);
+        const originZoom = this._getOriginZoom(clusterId);
+        const errorMsg = 'No cluster with the specified id.';
+        const index = this.trees[originZoom];
+        if (!index) throw new Error(errorMsg);
+        const origin = index.points[originId];
+        if (!origin) throw new Error(errorMsg);
+        const r = this.options.radius / (this.options.extent * Math.pow(2, originZoom - 1));
+        const ids = index.within(origin.x, origin.y, r);
+        const children = [];
+        for (const id of ids){
+            const c = index.points[id];
+            if (c.parentId === clusterId) children.push(c.numPoints ? $4548a3b8e0a2dd0b$var$getClusterJSON(c) : this.points[c.index]);
+        }
+        if (children.length === 0) throw new Error(errorMsg);
+        return children;
+    }
+    getLeaves(clusterId, limit, offset) {
+        limit = limit || 10;
+        offset = offset || 0;
+        const leaves = [];
+        this._appendLeaves(leaves, clusterId, limit, offset, 0);
+        return leaves;
+    }
+    getTile(z, x, y) {
+        const tree = this.trees[this._limitZoom(z)];
+        const z2 = Math.pow(2, z);
+        const { extent: extent , radius: radius  } = this.options;
+        const p = radius / extent;
+        const top = (y - p) / z2;
+        const bottom = (y + 1 + p) / z2;
+        const tile = {
+            features: []
+        };
+        this._addTileFeatures(tree.range((x - p) / z2, top, (x + 1 + p) / z2, bottom), tree.points, x, y, z2, tile);
+        if (x === 0) this._addTileFeatures(tree.range(1 - p / z2, top, 1, bottom), tree.points, z2, y, z2, tile);
+        if (x === z2 - 1) this._addTileFeatures(tree.range(0, top, p / z2, bottom), tree.points, -1, y, z2, tile);
+        return tile.features.length ? tile : null;
+    }
+    getClusterExpansionZoom(clusterId) {
+        let expansionZoom = this._getOriginZoom(clusterId) - 1;
+        while(expansionZoom <= this.options.maxZoom){
+            const children = this.getChildren(clusterId);
+            expansionZoom++;
+            if (children.length !== 1) break;
+            clusterId = children[0].properties.cluster_id;
+        }
+        return expansionZoom;
+    }
+    _appendLeaves(result, clusterId, limit, offset, skipped) {
+        const children = this.getChildren(clusterId);
+        for (const child of children){
+            const props = child.properties;
+            if (props && props.cluster) {
+                if (skipped + props.point_count <= offset) // skip the whole cluster
+                skipped += props.point_count;
+                else // enter the cluster
+                skipped = this._appendLeaves(result, props.cluster_id, limit, offset, skipped);
+            } else if (skipped < offset) // skip a single point
+            skipped++;
+            else // add a single point
+            result.push(child);
+            if (result.length === limit) break;
+        }
+        return skipped;
+    }
+    _addTileFeatures(ids, points, x, y, z2, tile) {
+        for (const i of ids){
+            const c = points[i];
+            const isCluster = c.numPoints;
+            let tags, px, py;
+            if (isCluster) {
+                tags = $4548a3b8e0a2dd0b$var$getClusterProperties(c);
+                px = c.x;
+                py = c.y;
+            } else {
+                const p = this.points[c.index];
+                tags = p.properties;
+                px = $4548a3b8e0a2dd0b$var$lngX(p.geometry.coordinates[0]);
+                py = $4548a3b8e0a2dd0b$var$latY(p.geometry.coordinates[1]);
+            }
+            const f = {
+                type: 1,
+                geometry: [
+                    [
+                        Math.round(this.options.extent * (px * z2 - x)),
+                        Math.round(this.options.extent * (py * z2 - y))
+                    ]
+                ],
+                tags: tags
+            };
+            // assign id
+            let id;
+            if (isCluster) id = c.id;
+            else if (this.options.generateId) // optionally generate id
+            id = c.index;
+            else if (this.points[c.index].id) // keep id if already assigned
+            id = this.points[c.index].id;
+            if (id !== undefined) f.id = id;
+            tile.features.push(f);
+        }
+    }
+    _limitZoom(z) {
+        return Math.max(this.options.minZoom, Math.min(+z, this.options.maxZoom + 1));
+    }
+    _cluster(points, zoom) {
+        const clusters = [];
+        const { radius: radius , extent: extent , reduce: reduce , minPoints: minPoints  } = this.options;
+        const r = radius / (extent * Math.pow(2, zoom));
+        // loop through each point
+        for(let i = 0; i < points.length; i++){
+            const p = points[i];
+            // if we've already visited the point at this zoom level, skip it
+            if (p.zoom <= zoom) continue;
+            p.zoom = zoom;
+            // find all nearby points
+            const tree = this.trees[zoom + 1];
+            const neighborIds = tree.within(p.x, p.y, r);
+            const numPointsOrigin = p.numPoints || 1;
+            let numPoints = numPointsOrigin;
+            // count the number of points in a potential cluster
+            for (const neighborId of neighborIds){
+                const b = tree.points[neighborId];
+                // filter out neighbors that are already processed
+                if (b.zoom > zoom) numPoints += b.numPoints || 1;
+            }
+            // if there were neighbors to merge, and there are enough points to form a cluster
+            if (numPoints > numPointsOrigin && numPoints >= minPoints) {
+                let wx = p.x * numPointsOrigin;
+                let wy = p.y * numPointsOrigin;
+                let clusterProperties = reduce && numPointsOrigin > 1 ? this._map(p, true) : null;
+                // encode both zoom and point index on which the cluster originated -- offset by total length of features
+                const id = (i << 5) + (zoom + 1) + this.points.length;
+                for (const neighborId1 of neighborIds){
+                    const b = tree.points[neighborId1];
+                    if (b.zoom <= zoom) continue;
+                    b.zoom = zoom; // save the zoom (so it doesn't get processed twice)
+                    const numPoints2 = b.numPoints || 1;
+                    wx += b.x * numPoints2; // accumulate coordinates for calculating weighted center
+                    wy += b.y * numPoints2;
+                    b.parentId = id;
+                    if (reduce) {
+                        if (!clusterProperties) clusterProperties = this._map(p, true);
+                        reduce(clusterProperties, this._map(b));
+                    }
+                }
+                p.parentId = id;
+                clusters.push($4548a3b8e0a2dd0b$var$createCluster(wx / numPoints, wy / numPoints, id, numPoints, clusterProperties));
+            } else {
+                clusters.push(p);
+                if (numPoints > 1) for (const neighborId1 of neighborIds){
+                    const b = tree.points[neighborId1];
+                    if (b.zoom <= zoom) continue;
+                    b.zoom = zoom;
+                    clusters.push(b);
+                }
+            }
+        }
+        return clusters;
+    }
+    // get index of the point from which the cluster originated
+    _getOriginId(clusterId) {
+        return clusterId - this.points.length >> 5;
+    }
+    // get zoom of the point from which the cluster originated
+    _getOriginZoom(clusterId) {
+        return (clusterId - this.points.length) % 32;
+    }
+    _map(point, clone) {
+        if (point.numPoints) return clone ? $4548a3b8e0a2dd0b$var$extend({
+        }, point.properties) : point.properties;
+        const original = this.points[point.index].properties;
+        const result = this.options.map(original);
+        return clone && result === original ? $4548a3b8e0a2dd0b$var$extend({
+        }, result) : result;
+    }
+}
+function $4548a3b8e0a2dd0b$var$createCluster(x, y, id, numPoints, properties) {
+    return {
+        x: $4548a3b8e0a2dd0b$var$fround(x),
+        y: $4548a3b8e0a2dd0b$var$fround(y),
+        zoom: Infinity,
+        id: id,
+        parentId: -1,
+        numPoints: numPoints,
+        properties: properties
+    };
+}
+function $4548a3b8e0a2dd0b$var$createPointCluster(p, id) {
+    const [x, y] = p.geometry.coordinates;
+    return {
+        x: $4548a3b8e0a2dd0b$var$fround($4548a3b8e0a2dd0b$var$lngX(x)),
+        y: $4548a3b8e0a2dd0b$var$fround($4548a3b8e0a2dd0b$var$latY(y)),
+        zoom: Infinity,
+        index: id,
+        parentId: -1 // parent cluster id
+    };
+}
+function $4548a3b8e0a2dd0b$var$getClusterJSON(cluster) {
+    return {
+        type: 'Feature',
+        id: cluster.id,
+        properties: $4548a3b8e0a2dd0b$var$getClusterProperties(cluster),
+        geometry: {
+            type: 'Point',
+            coordinates: [
+                $4548a3b8e0a2dd0b$var$xLng(cluster.x),
+                $4548a3b8e0a2dd0b$var$yLat(cluster.y)
+            ]
+        }
+    };
+}
+function $4548a3b8e0a2dd0b$var$getClusterProperties(cluster) {
+    const count = cluster.numPoints;
+    const abbrev = count >= 10000 ? `${Math.round(count / 1000)}k` : count >= 1000 ? `${Math.round(count / 100) / 10}k` : count;
+    return $4548a3b8e0a2dd0b$var$extend($4548a3b8e0a2dd0b$var$extend({
+    }, cluster.properties), {
+        cluster: true,
+        cluster_id: cluster.id,
+        point_count: count,
+        point_count_abbreviated: abbrev
+    });
+}
+// longitude/latitude to spherical mercator in [0..1] range
+function $4548a3b8e0a2dd0b$var$lngX(lng) {
+    return lng / 360 + 0.5;
+}
+function $4548a3b8e0a2dd0b$var$latY(lat) {
+    const sin = Math.sin(lat * Math.PI / 180);
+    const y = 0.5 - 0.25 * Math.log((1 + sin) / (1 - sin)) / Math.PI;
+    return y < 0 ? 0 : y > 1 ? 1 : y;
+}
+// spherical mercator to longitude/latitude
+function $4548a3b8e0a2dd0b$var$xLng(x) {
+    return (x - 0.5) * 360;
+}
+function $4548a3b8e0a2dd0b$var$yLat(y) {
+    const y2 = (180 - y * 360) * Math.PI / 180;
+    return 360 * Math.atan(Math.exp(y2)) / Math.PI - 90;
+}
+function $4548a3b8e0a2dd0b$var$extend(dest, src) {
+    for(const id in src)dest[id] = src[id];
+    return dest;
+}
+function $4548a3b8e0a2dd0b$var$getX(p) {
+    return p.x;
+}
+function $4548a3b8e0a2dd0b$var$getY(p) {
+    return p.y;
+}
+
+
+var $65be1c1f2fe5b535$exports = {};
+'use strict';
+// do not edit .js files directly - edit src/index.jst
+var $65be1c1f2fe5b535$var$envHasBigInt64Array = typeof BigInt64Array !== 'undefined';
+$65be1c1f2fe5b535$exports = function equal(a, b) {
+    if (a === b) return true;
+    if (a && b && typeof a == 'object' && typeof b == 'object') {
+        if (a.constructor !== b.constructor) return false;
+        var length, i, keys;
+        if (Array.isArray(a)) {
+            length = a.length;
+            if (length != b.length) return false;
+            for(i = length; (i--) !== 0;)if (!equal(a[i], b[i])) return false;
+            return true;
+        }
+        if (a instanceof Map && b instanceof Map) {
+            if (a.size !== b.size) return false;
+            for (i of a.entries())if (!b.has(i[0])) return false;
+            for (i of a.entries())if (!equal(i[1], b.get(i[0]))) return false;
+            return true;
+        }
+        if (a instanceof Set && b instanceof Set) {
+            if (a.size !== b.size) return false;
+            for (i of a.entries())if (!b.has(i[0])) return false;
+            return true;
+        }
+        if (ArrayBuffer.isView(a) && ArrayBuffer.isView(b)) {
+            length = a.length;
+            if (length != b.length) return false;
+            for(i = length; (i--) !== 0;)if (a[i] !== b[i]) return false;
+            return true;
+        }
+        if (a.constructor === RegExp) return a.source === b.source && a.flags === b.flags;
+        if (a.valueOf !== Object.prototype.valueOf) return a.valueOf() === b.valueOf();
+        if (a.toString !== Object.prototype.toString) return a.toString() === b.toString();
+        keys = Object.keys(a);
+        length = keys.length;
+        if (length !== Object.keys(b).length) return false;
+        for(i = length; (i--) !== 0;)if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false;
+        for(i = length; (i--) !== 0;){
+            var key = keys[i];
+            if (!equal(a[key], b[key])) return false;
+        }
+        return true;
+    }
+    // true if both NaN, false otherwise
+    return a !== a && b !== b;
+};
+
+
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */ function $abe5479307b3aef5$var$__rest(s, e) {
+    var t = {
+    };
+    for(var p in s)if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function") for(var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++)if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+    return t;
+}
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ class $abe5479307b3aef5$export$4b200d2f979b5b40 {
+    constructor({ markers: markers1 , position: position1  }){
+        this.markers = markers1;
+        if (position1) {
+            if (position1 instanceof google.maps.LatLng) this._position = position1;
+            else this._position = new google.maps.LatLng(position1);
+        }
+    }
+    get bounds() {
+        if (this.markers.length === 0 && !this._position) return undefined;
+        return this.markers.reduce((bounds, marker)=>{
+            return bounds.extend(marker.getPosition());
+        }, new google.maps.LatLngBounds(this._position, this._position));
+    }
+    get position() {
+        return this._position || this.bounds.getCenter();
+    }
+    /**
+     * Get the count of **visible** markers.
+     */ get count() {
+        return this.markers.filter((m)=>m.getVisible()
+        ).length;
+    }
+    /**
+     * Add a marker to the cluster.
+     */ push(marker) {
+        this.markers.push(marker);
+    }
+    /**
+     * Cleanup references and remove marker from map.
+     */ delete() {
+        if (this.marker) {
+            this.marker.setMap(null);
+            delete this.marker;
+        }
+        this.markers.length = 0;
+    }
+}
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ const $abe5479307b3aef5$export$9b4c6f0182d220fc = (map, mapCanvasProjection, markers1, viewportPadding)=>{
+    const extendedMapBounds = $abe5479307b3aef5$export$34b9e5c7ac7df7bb(map.getBounds(), mapCanvasProjection, viewportPadding);
+    return markers1.filter((marker)=>extendedMapBounds.contains(marker.getPosition())
+    );
+};
+/**
+ * Extends a bounds by a number of pixels in each direction.
+ */ const $abe5479307b3aef5$export$34b9e5c7ac7df7bb = (bounds, projection, pixels)=>{
+    const { northEast: northEast , southWest: southWest  } = $abe5479307b3aef5$var$latLngBoundsToPixelBounds(bounds, projection);
+    const extendedPixelBounds = $abe5479307b3aef5$export$13fae14bb855bb55({
+        northEast: northEast,
+        southWest: southWest
+    }, pixels);
+    return $abe5479307b3aef5$export$933460cf3ebd15f3(extendedPixelBounds, projection);
+};
+/**
+ * @hidden
+ */ const $abe5479307b3aef5$export$780307dfca60319a = (p1, p2)=>{
+    const R = 6371; // Radius of the Earth in km
+    const dLat = (p2.lat - p1.lat) * Math.PI / 180;
+    const dLon = (p2.lng - p1.lng) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(p1.lat * Math.PI / 180) * Math.cos(p2.lat * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+};
+/**
+ * @hidden
+ */ const $abe5479307b3aef5$var$latLngBoundsToPixelBounds = (bounds, projection)=>{
+    return {
+        northEast: projection.fromLatLngToDivPixel(bounds.getNorthEast()),
+        southWest: projection.fromLatLngToDivPixel(bounds.getSouthWest())
+    };
+};
+/**
+ * @hidden
+ */ const $abe5479307b3aef5$export$13fae14bb855bb55 = ({ northEast: northEast , southWest: southWest  }, pixels)=>{
+    northEast.x += pixels;
+    northEast.y -= pixels;
+    southWest.x -= pixels;
+    southWest.y += pixels;
+    return {
+        northEast: northEast,
+        southWest: southWest
+    };
+};
+/**
+ * @hidden
+ */ const $abe5479307b3aef5$export$933460cf3ebd15f3 = ({ northEast: northEast , southWest: southWest  }, projection)=>{
+    const bounds = new google.maps.LatLngBounds();
+    bounds.extend(projection.fromDivPixelToLatLng(northEast));
+    bounds.extend(projection.fromDivPixelToLatLng(southWest));
+    return bounds;
+};
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ /**
+ * @hidden
+ */ class $abe5479307b3aef5$export$cc72e4132fdd891 {
+    constructor({ maxZoom: maxZoom = 16  }){
+        this.maxZoom = maxZoom;
+    }
+    /**
+     * Helper function to bypass clustering based upon some map state such as
+     * zoom, number of markers, etc.
+     *
+     * ```typescript
+     *  cluster({markers, map}: AlgorithmInput): Cluster[] {
+     *    if (shouldBypassClustering(map)) {
+     *      return this.noop({markers, map})
+     *    }
+     * }
+     * ```
+     */ noop({ markers: markers  }) {
+        return $abe5479307b3aef5$export$5f8ba94b9c81aa67(markers);
+    }
+}
+/**
+ * Abstract viewport algorithm proves a class to filter markers by a padded
+ * viewport. This is a common optimization.
+ *
+ * @hidden
+ */ class $abe5479307b3aef5$export$9c53a56baa246b22 extends $abe5479307b3aef5$export$cc72e4132fdd891 {
+    constructor(_a){
+        var { viewportPadding: $abe5479307b3aef5$var$viewportPadding = 60  } = _a, options = $abe5479307b3aef5$var$__rest(_a, [
+            "viewportPadding"
+        ]);
+        super(options);
+        this.viewportPadding = 60;
+        this.viewportPadding = $abe5479307b3aef5$var$viewportPadding;
+    }
+    calculate({ markers: markers , map: map , mapCanvasProjection: mapCanvasProjection ,  }) {
+        if (map.getZoom() >= this.maxZoom) return {
+            clusters: this.noop({
+                markers: markers,
+                map: map,
+                mapCanvasProjection: mapCanvasProjection
+            }),
+            changed: false
+        };
+        return {
+            clusters: this.cluster({
+                markers: $abe5479307b3aef5$export$9b4c6f0182d220fc(map, mapCanvasProjection, markers, this.viewportPadding),
+                map: map,
+                mapCanvasProjection: mapCanvasProjection
+            })
+        };
+    }
+}
+/**
+ * @hidden
+ */ const $abe5479307b3aef5$export$5f8ba94b9c81aa67 = (markers2)=>{
+    const clusters = markers2.map((marker)=>new $abe5479307b3aef5$export$4b200d2f979b5b40({
+            position: marker.getPosition(),
+            markers: [
+                marker
+            ]
+        })
+    );
+    return clusters;
+};
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ /**
+ * The default Grid algorithm historically used in Google Maps marker
+ * clustering.
+ *
+ * The Grid algorithm does not implement caching and markers may flash as the
+ * viewport changes. Instead use {@link SuperClusterAlgorithm}.
+ */ class $abe5479307b3aef5$export$d823936fa88b8fbf extends $abe5479307b3aef5$export$9c53a56baa246b22 {
+    constructor(_a1){
+        var { maxDistance: $abe5479307b3aef5$var$maxDistance = 40000 , gridSize: $abe5479307b3aef5$var$gridSize = 40  } = _a1, options1 = $abe5479307b3aef5$var$__rest(_a1, [
+            "maxDistance",
+            "gridSize"
+        ]);
+        super(options1);
+        this.clusters = [];
+        this.maxDistance = $abe5479307b3aef5$var$maxDistance;
+        this.gridSize = $abe5479307b3aef5$var$gridSize;
+    }
+    cluster({ markers: markers , map: map , mapCanvasProjection: mapCanvasProjection ,  }) {
+        this.clusters = [];
+        markers.forEach((marker)=>{
+            this.addToClosestCluster(marker, map, mapCanvasProjection);
+        });
+        return this.clusters;
+    }
+    addToClosestCluster(marker, map, projection) {
+        let maxDistance = this.maxDistance; // Some large number
+        let cluster = null;
+        for(let i = 0; i < this.clusters.length; i++){
+            const candidate = this.clusters[i];
+            const distance = $abe5479307b3aef5$export$780307dfca60319a(candidate.bounds.getCenter().toJSON(), marker.getPosition().toJSON());
+            if (distance < maxDistance) {
+                maxDistance = distance;
+                cluster = candidate;
+            }
+        }
+        if (cluster && $abe5479307b3aef5$export$34b9e5c7ac7df7bb(cluster.bounds, projection, this.gridSize).contains(marker.getPosition())) cluster.push(marker);
+        else {
+            const cluster1 = new $abe5479307b3aef5$export$4b200d2f979b5b40({
+                markers: [
+                    marker
+                ]
+            });
+            this.clusters.push(cluster1);
+        }
+    }
+}
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ /**
+ * Noop algorithm does not generate any clusters or filter markers by the an extended viewport.
+ */ class $abe5479307b3aef5$export$364ff8cea68ab62f extends $abe5479307b3aef5$export$cc72e4132fdd891 {
+    constructor(_a2){
+        var options2 = $abe5479307b3aef5$var$__rest(_a2, []);
+        super(options2);
+    }
+    calculate({ markers: markers , map: map , mapCanvasProjection: mapCanvasProjection ,  }) {
+        return {
+            clusters: this.cluster({
+                markers: markers,
+                map: map,
+                mapCanvasProjection: mapCanvasProjection
+            }),
+            changed: false
+        };
+    }
+    cluster(input) {
+        return this.noop(input);
+    }
+}
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ /**
+ * Experimental algorithm using Kmeans.
+ *
+ * The Grid algorithm does not implement caching and markers may flash as the
+ * viewport changes. Instead use {@link SuperClusterAlgorithm}.
+ *
+ * @see https://www.npmjs.com/package/@turf/clusters-kmeans
+ */ class $abe5479307b3aef5$export$b708ab62db44cc4 extends $abe5479307b3aef5$export$9c53a56baa246b22 {
+    constructor(_a3){
+        var { numberOfClusters: $abe5479307b3aef5$var$numberOfClusters  } = _a3, options3 = $abe5479307b3aef5$var$__rest(_a3, [
+            "numberOfClusters"
+        ]);
+        super(options3);
+        this.numberOfClusters = $abe5479307b3aef5$var$numberOfClusters;
+    }
+    cluster({ markers: markers , map: map  }) {
+        const clusters = [];
+        if (markers.length === 0) return clusters;
+        const points = $06fd7bba89ea2716$export$7c422acbc10e74d2(markers.map((marker)=>{
+            return $06fd7bba89ea2716$export$8502864bca7c3201([
+                marker.getPosition().lng(),
+                marker.getPosition().lat()
+            ]);
+        }));
+        let numberOfClusters;
+        if (this.numberOfClusters instanceof Function) numberOfClusters = this.numberOfClusters(markers.length, map.getZoom());
+        else numberOfClusters = this.numberOfClusters;
+        $afde46b62500dbb0$export$9099ad97b570f7c(points, {
+            numberOfClusters: numberOfClusters
+        }).features.forEach((point, i)=>{
+            if (!clusters[point.properties.cluster]) clusters[point.properties.cluster] = new $abe5479307b3aef5$export$4b200d2f979b5b40({
+                position: {
+                    lng: point.properties.centroid[0],
+                    lat: point.properties.centroid[1]
+                },
+                markers: []
+            });
+            clusters[point.properties.cluster].push(markers[i]);
+        });
+        return clusters;
+    }
+}
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ const $abe5479307b3aef5$var$DEFAULT_INTERNAL_DBSCAN_OPTION = {
+    units: "kilometers",
+    mutate: false,
+    minPoints: 1
+};
+/**
+ *
+ * **This algorithm is not yet ready for use!**
+ *
+ * Experimental algorithm using DBScan.
+ *
+ * The Grid algorithm does not implement caching and markers may flash as the
+ * viewport changes. Instead use {@link SuperClusterAlgorithm}.
+ *
+ * @see https://www.npmjs.com/package/@turf/clusters-dbscan
+ */ class $abe5479307b3aef5$export$ad8e4ddb40f55457 extends $abe5479307b3aef5$export$9c53a56baa246b22 {
+    constructor(_a4){
+        var { maxDistance: $abe5479307b3aef5$var$maxDistance = 200 , minPoints: $abe5479307b3aef5$var$minPoints = $abe5479307b3aef5$var$DEFAULT_INTERNAL_DBSCAN_OPTION.minPoints  } = _a4, options4 = $abe5479307b3aef5$var$__rest(_a4, [
+            "maxDistance",
+            "minPoints"
+        ]);
+        super(options4);
+        this.maxDistance = $abe5479307b3aef5$var$maxDistance;
+        this.options = Object.assign(Object.assign({
+        }, $abe5479307b3aef5$var$DEFAULT_INTERNAL_DBSCAN_OPTION), {
+            minPoints: $abe5479307b3aef5$var$minPoints
+        });
+    }
+    cluster({ markers: markers , mapCanvasProjection: mapCanvasProjection ,  }) {
+        const points = $06fd7bba89ea2716$export$7c422acbc10e74d2(markers.map((marker)=>{
+            const projectedPoint = mapCanvasProjection.fromLatLngToContainerPixel(marker.getPosition());
+            return $06fd7bba89ea2716$export$8502864bca7c3201([
+                projectedPoint.x,
+                projectedPoint.y
+            ]);
+        }));
+        const grouped = [];
+        $af33975ec2b83c02$export$9099ad97b570f7c(points, this.maxDistance, this.options).features.forEach((point, i)=>{
+            if (!grouped[point.properties.cluster]) grouped[point.properties.cluster] = [];
+            grouped[point.properties.cluster].push(markers[i]);
+        });
+        return grouped.map((markers2)=>new $abe5479307b3aef5$export$4b200d2f979b5b40({
+                markers: markers2
+            })
+        );
+    }
+}
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ /**
+ * A very fast JavaScript algorithm for geospatial point clustering using KD trees.
+ *
+ * @see https://www.npmjs.com/package/supercluster for more information on options.
+ */ class $abe5479307b3aef5$export$8a0a8f828f6f237c extends $abe5479307b3aef5$export$cc72e4132fdd891 {
+    constructor(_a5){
+        var { maxZoom: $abe5479307b3aef5$var$maxZoom , radius: $abe5479307b3aef5$var$radius = 60  } = _a5, options5 = $abe5479307b3aef5$var$__rest(_a5, [
+            "maxZoom",
+            "radius"
+        ]);
+        super({
+            maxZoom: $abe5479307b3aef5$var$maxZoom
+        });
+        this.superCluster = new $4548a3b8e0a2dd0b$export$9099ad97b570f7c(Object.assign({
+            maxZoom: this.maxZoom,
+            radius: $abe5479307b3aef5$var$radius
+        }, options5));
+        this.state = {
+            zoom: null
+        };
+    }
+    calculate(input) {
+        let changed = false;
+        if (!(/*@__PURE__*/$parcel$interopDefault($65be1c1f2fe5b535$exports))(input.markers, this.markers)) {
+            changed = true;
+            // TODO use proxy to avoid copy?
+            this.markers = [
+                ...input.markers
+            ];
+            const points = this.markers.map((marker)=>{
+                return {
+                    type: "Feature",
+                    geometry: {
+                        type: "Point",
+                        coordinates: [
+                            marker.getPosition().lng(),
+                            marker.getPosition().lat(), 
+                        ]
+                    },
+                    properties: {
+                        marker: marker
+                    }
+                };
+            });
+            this.superCluster.load(points);
+        }
+        const state = {
+            zoom: input.map.getZoom()
+        };
+        if (!changed) {
+            if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) ;
+            else changed = changed || !(/*@__PURE__*/$parcel$interopDefault($65be1c1f2fe5b535$exports))(this.state, state);
+        }
+        this.state = state;
+        if (changed) this.clusters = this.cluster(input);
+        return {
+            clusters: this.clusters,
+            changed: changed
+        };
+    }
+    cluster({ map: map  }) {
+        return this.superCluster.getClusters([
+            -180,
+            -90,
+            180,
+            90
+        ], map.getZoom()).map(this.transformCluster.bind(this));
+    }
+    transformCluster({ geometry: { coordinates: [lng, lat] ,  } , properties: properties ,  }) {
+        if (properties.cluster) return new $abe5479307b3aef5$export$4b200d2f979b5b40({
+            markers: this.superCluster.getLeaves(properties.cluster_id, Infinity).map((leaf)=>leaf.properties.marker
+            ),
+            position: new google.maps.LatLng({
+                lat: lat,
+                lng: lng
+            })
+        });
+        else {
+            const marker = properties.marker;
+            return new $abe5479307b3aef5$export$4b200d2f979b5b40({
+                markers: [
+                    marker
+                ],
+                position: marker.getPosition()
+            });
+        }
+    }
+}
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ /**
+ * Provides statistics on all clusters in the current render cycle for use in {@link Renderer.render}.
+ */ class $abe5479307b3aef5$export$4a881b7a0aba36e2 {
+    constructor(markers2, clusters){
+        this.markers = {
+            sum: markers2.length
+        };
+        const clusterMarkerCounts = clusters.map((a)=>a.count
+        );
+        const clusterMarkerSum = clusterMarkerCounts.reduce((a, b)=>a + b
+        , 0);
+        this.clusters = {
+            count: clusters.length,
+            markers: {
+                mean: clusterMarkerSum / clusters.length,
+                sum: clusterMarkerSum,
+                min: Math.min(...clusterMarkerCounts),
+                max: Math.max(...clusterMarkerCounts)
+            }
+        };
+    }
+}
+class $abe5479307b3aef5$export$ee0e2b10e0cbe53 {
+    /**
+     * The default render function for the library used by {@link MarkerClusterer}.
+     *
+     * Currently set to use the following:
+     *
+     * ```typescript
+     * // change color if this cluster has more markers than the mean cluster
+     * const color =
+     *   count > Math.max(10, stats.clusters.markers.mean)
+     *     ? "#ff0000"
+     *     : "#0000ff";
+     *
+     * // create svg url with fill color
+     * const svg = window.btoa(`
+     * <svg fill="${color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+     *   <circle cx="120" cy="120" opacity=".6" r="70" />
+     *   <circle cx="120" cy="120" opacity=".3" r="90" />
+     *   <circle cx="120" cy="120" opacity=".2" r="110" />
+     *   <circle cx="120" cy="120" opacity=".1" r="130" />
+     * </svg>`);
+     *
+     * // create marker using svg icon
+     * return new google.maps.Marker({
+     *   position,
+     *   icon: {
+     *     url: `data:image/svg+xml;base64,${svg}`,
+     *     scaledSize: new google.maps.Size(45, 45),
+     *   },
+     *   label: {
+     *     text: String(count),
+     *     color: "rgba(255,255,255,0.9)",
+     *     fontSize: "12px",
+     *   },
+     *   // adjust zIndex to be above other markers
+     *   zIndex: 1000 + count,
+     * });
+     * ```
+     */ render({ count: count , position: position  }, stats) {
+        // change color if this cluster has more markers than the mean cluster
+        const color = count > Math.max(10, stats.clusters.markers.mean) ? "#ff0000" : "#0000ff";
+        // create svg url with fill color
+        const svg = window.btoa(`\n  <svg fill="${color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">\n    <circle cx="120" cy="120" opacity=".6" r="70" />\n    <circle cx="120" cy="120" opacity=".3" r="90" />\n    <circle cx="120" cy="120" opacity=".2" r="110" />\n  </svg>`);
+        // create marker using svg icon
+        return new google.maps.Marker({
+            position: position,
+            icon: {
+                url: `data:image/svg+xml;base64,${svg}`,
+                scaledSize: new google.maps.Size(45, 45)
+            },
+            label: {
+                text: String(count),
+                color: "rgba(255,255,255,0.9)",
+                fontSize: "12px"
+            },
+            // adjust zIndex to be above other markers
+            zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count
+        });
+    }
+}
+/**
+ * Copyright 2019 Google LLC. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ /**
+ * Extends an object's prototype by another's.
+ *
+ * @param type1 The Type to be extended.
+ * @param type2 The Type to extend with.
+ * @ignore
+ */ // eslint-disable-next-line @typescript-eslint/no-explicit-any
+function $abe5479307b3aef5$var$extend(type1, type2) {
+    /* istanbul ignore next */ // eslint-disable-next-line prefer-const
+    for(let property in type2.prototype)type1.prototype[property] = type2.prototype[property];
+}
+/**
+ * @ignore
+ */ class $abe5479307b3aef5$var$OverlayViewSafe {
+    constructor(){
+        // MarkerClusterer implements google.maps.OverlayView interface. We use the
+        // extend function to extend MarkerClusterer with google.maps.OverlayView
+        // because it might not always be available when the code is defined so we
+        // look for it at the last possible moment. If it doesn't exist now then
+        // there is no point going ahead :)
+        $abe5479307b3aef5$var$extend($abe5479307b3aef5$var$OverlayViewSafe, google.maps.OverlayView);
+    }
+}
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */ var $abe5479307b3aef5$export$f0bbe6a8e683fb51;
+(function(MarkerClustererEvents) {
+    MarkerClustererEvents["CLUSTERING_BEGIN"] = "clusteringbegin";
+    MarkerClustererEvents["CLUSTERING_END"] = "clusteringend";
+    MarkerClustererEvents["CLUSTER_CLICK"] = "click";
+})($abe5479307b3aef5$export$f0bbe6a8e683fb51 || ($abe5479307b3aef5$export$f0bbe6a8e683fb51 = {
+}));
+const $abe5479307b3aef5$export$f9d00dffdebb53c = (_, cluster, map)=>{
+    map.fitBounds(cluster.bounds);
+};
+/**
+ * MarkerClusterer creates and manages per-zoom-level clusters for large amounts
+ * of markers. See {@link MarkerClustererOptions} for more details.
+ *
+ * <iframe src="https://googlemaps.github.io/js-three/public/anchor/index.html"></iframe>
+ */ class $abe5479307b3aef5$export$ecdea5c1dab96b8d extends $abe5479307b3aef5$var$OverlayViewSafe {
+    constructor({ map: map , markers: markers3 = [] , algorithm: algorithm = new $abe5479307b3aef5$export$8a0a8f828f6f237c({
+    }) , renderer: renderer = new $abe5479307b3aef5$export$ee0e2b10e0cbe53() , onClusterClick: onClusterClick = $abe5479307b3aef5$export$f9d00dffdebb53c ,  }){
+        super();
+        this.markers = [
+            ...markers3
+        ];
+        this.clusters = [];
+        this.algorithm = algorithm;
+        this.renderer = renderer;
+        this.onClusterClick = onClusterClick;
+        if (map) this.setMap(map);
+    }
+    addMarker(marker, noDraw) {
+        if (this.markers.includes(marker)) return;
+        this.markers.push(marker);
+        if (!noDraw) this.render();
+    }
+    addMarkers(markers, noDraw) {
+        markers.forEach((marker)=>{
+            this.addMarker(marker, true);
+        });
+        if (!noDraw) this.render();
+    }
+    removeMarker(marker, noDraw) {
+        const index = this.markers.indexOf(marker);
+        if (index === -1) // Marker is not in our list of markers, so do nothing:
+        return false;
+        marker.setMap(null);
+        this.markers.splice(index, 1); // Remove the marker from the list of managed markers
+        if (!noDraw) this.render();
+        return true;
+    }
+    removeMarkers(markers, noDraw) {
+        let removed = false;
+        markers.forEach((marker)=>{
+            removed = this.removeMarker(marker, true) || removed;
+        });
+        if (removed && !noDraw) this.render();
+        return removed;
+    }
+    clearMarkers(noDraw) {
+        this.markers.length = 0;
+        if (!noDraw) this.render();
+    }
+    /**
+     * Recalculates and draws all the marker clusters.
+     */ render() {
+        const map1 = this.getMap();
+        if (map1 instanceof google.maps.Map && this.getProjection()) {
+            google.maps.event.trigger(this, $abe5479307b3aef5$export$f0bbe6a8e683fb51.CLUSTERING_BEGIN, this);
+            const { clusters: clusters1 , changed: changed  } = this.algorithm.calculate({
+                markers: this.markers,
+                map: map1,
+                mapCanvasProjection: this.getProjection()
+            });
+            // allow algorithms to return flag on whether the clusters/markers have changed
+            if (changed || changed == undefined) {
+                // reset visibility of markers and clusters
+                this.reset();
+                // store new clusters
+                this.clusters = clusters1;
+                this.renderClusters();
+            }
+            google.maps.event.trigger(this, $abe5479307b3aef5$export$f0bbe6a8e683fb51.CLUSTERING_END, this);
+        }
+    }
+    onAdd() {
+        this.idleListener = this.getMap().addListener("idle", this.render.bind(this));
+        this.render();
+    }
+    onRemove() {
+        google.maps.event.removeListener(this.idleListener);
+        this.reset();
+    }
+    reset() {
+        this.markers.forEach((marker)=>marker.setMap(null)
+        );
+        this.clusters.forEach((cluster)=>cluster.delete()
+        );
+        this.clusters = [];
+    }
+    renderClusters() {
+        // generate stats to pass to renderers
+        const stats = new $abe5479307b3aef5$export$4a881b7a0aba36e2(this.markers, this.clusters);
+        const map1 = this.getMap();
+        this.clusters.forEach((cluster)=>{
+            if (cluster.markers.length === 1) cluster.marker = cluster.markers[0];
+            else {
+                cluster.marker = this.renderer.render(cluster, stats);
+                if (this.onClusterClick) cluster.marker.addListener("click", /* istanbul ignore next */ (event)=>{
+                    google.maps.event.trigger(this, $abe5479307b3aef5$export$f0bbe6a8e683fb51.CLUSTER_CLICK, cluster);
+                    this.onClusterClick(event, cluster, map1);
+                });
+            }
+            cluster.marker.setMap(map1);
+        });
+    }
+}
+
+
 var $5cab7f24a6cc18af$export$b2f13e228c542ebb = window.google;
 
 
@@ -3949,16 +7888,20 @@ var $eec1dd49d0c67d6b$export$a0bd1dffd4b583c = /*#__PURE__*/ function(Renderer) 
         _this.initialZoom = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "initialZoom", 2);
         // initial map type
         _this.mapType = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "mapType", "hybrid");
-        _this.clusterByCount = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "clusterByCount", false);
+        _this.labelFunction = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "labelFunction", false);
+        // should we be using the google maps clustering features
+        _this.cluster = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "cluster", false);
         _this.reQueryOnBoundsChange = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "reQueryOnBoundsChange", false);
         _this.clusterIcons = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "clusterIcons", {
             0: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m1.png"
         });
+        _this.renderCluster = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "renderCluster", false);
         /////////////////////////////////////////////
         // internal state
         _this.namespace = "edges-google-map-view";
         _this.map = false;
         _this.markers = [];
+        _this.markerCluster = false;
         _this.currentZoom = false;
         _this.currentBounds = false;
         return _this;
@@ -4002,16 +7945,28 @@ var $eec1dd49d0c67d6b$export$a0bd1dffd4b583c = /*#__PURE__*/ function(Renderer) 
                     var loc = this.component.locations[i];
                     var myLatlng = new $5cab7f24a6cc18af$export$b2f13e228c542ebb.maps.LatLng(loc.lat, loc.lon);
                     var properties = {
-                        position: myLatlng,
-                        map: this.map
+                        position: myLatlng
                     };
-                    var icon = this._getClusterIcon(loc.count);
-                    if (icon) properties["icon"] = icon;
-                    if (this.clusterByCount) properties["label"] = {
-                        text: loc.count.toString()
-                    };
+                    if (!this.cluster) // otherwise the mapping clusterer will deal with it
+                    properties["map"] = this.map;
+                    if (this.cluster) {
+                        var icon = this._getClusterIcon(loc.count);
+                        if (icon) properties["icon"] = icon;
+                    }
+                    if (this.labelFunction) properties["label"] = {
+                        text: this.labelFunction(loc)
+                    } // e.g. loc.count.toString()
+                    ;
                     var marker = new $5cab7f24a6cc18af$export$b2f13e228c542ebb.maps.Marker(properties);
                     this.markers.push(marker);
+                }
+                if (this.cluster) {
+                    var props = {
+                        map: this.map,
+                        markers: this.markers
+                    };
+                    if (this.renderCluster) props["renderer"] = this.renderCluster;
+                    this.markerCluster = new $abe5479307b3aef5$export$ecdea5c1dab96b8d(props);
                 }
             }
         },
@@ -4582,6 +8537,168 @@ var $135bcb32af9eb45d$export$4b392426dd40333d = /*#__PURE__*/ function(Renderer)
 
 
 
+var $2039d36394fce070$export$d3ad1026b19abbfd = /*#__PURE__*/ function(Renderer) {
+    "use strict";
+    $bca7673885229bfd$export$9099ad97b570f7c($2039d36394fce070$export$d3ad1026b19abbfd, Renderer);
+    function $2039d36394fce070$export$d3ad1026b19abbfd(params) {
+        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $2039d36394fce070$export$d3ad1026b19abbfd);
+        var _this;
+        _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($2039d36394fce070$export$d3ad1026b19abbfd).call(this));
+        _this.title = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "title", "Select");
+        // whether the facet should be open or closed
+        // can be initialised and is then used to track internal state
+        _this.open = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "open", false);
+        _this.togglable = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "togglable", true);
+        // whether the count should be displayed along with the term
+        // defaults to false because count may be confusing to the user in an OR selector
+        _this.showCount = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "showCount", false);
+        _this.countFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "countFormat", false);
+        _this.fixedTerms = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "fixedTerms", []);
+        _this.openIcon = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "openIcon", "glyphicon glyphicon-plus");
+        _this.closeIcon = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "closeIcon", "glyphicon glyphicon-minus");
+        // don't display the facet at all if there is no data to display
+        _this.hideIfNoData = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "hideIfNoData", true);
+        _this.layout = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "layout", "left");
+        // namespace to use in the page
+        _this.namespace = "edges-bs3-fixedselectioncheckboxortermselector";
+        return _this;
+    }
+    $67866ae5f3a26802$export$9099ad97b570f7c($2039d36394fce070$export$d3ad1026b19abbfd, [
+        {
+            key: "draw",
+            value: function draw() {
+                // for convenient short references ...
+                var ts = this.component;
+                var namespace = this.namespace;
+                if (this.hideIfNoData && ts.edge.result && ts.terms.length === 0) {
+                    this.component.context.html("");
+                    return;
+                }
+                // sort out all the classes that we're going to be using
+                var countClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "count", this);
+                var checkboxClass = $d48cc3604bf30e24$export$e516ebba864be69d(namespace, "selector", this);
+                var facetClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "facet", this);
+                var headerClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "header", this);
+                var bodyClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "body", this);
+                var listClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "list", this);
+                var labelClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(namespace, "label", this);
+                var toggleId = $d48cc3604bf30e24$export$bf52b203d82ff901(namespace, "toggle", this);
+                var resultsId = $d48cc3604bf30e24$export$bf52b203d82ff901(namespace, "results", this);
+                var results = "";
+                for(var i = 0; i < this.fixedTerms.length; i++){
+                    var ft = this.fixedTerms[i];
+                    for(var j = 0; j < ts.terms.length; j++){
+                        var val = ts.terms[j];
+                        if (val.term === ft) {
+                            var active = $.inArray(val.term.toString(), ts.selected) > -1;
+                            var checked = "";
+                            if (active) checked = " checked=\"checked\" ";
+                            var count = "";
+                            if (this.showCount) count = ' <span class="' + countClass + '">(' + this._formatCount(val.count) + ')</span>';
+                            var id = $d48cc3604bf30e24$export$63ba8ea1e92c906(val.term);
+                            results += '<li>\
+                        <input class="' + checkboxClass + '" data-key="' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(val.term) + '" id="' + id + '" type="checkbox" name="' + id + '"' + checked + '>\
+                        <label for="' + id + '" class="' + labelClass + '">' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(val.display) + count + '</label>\
+                    </li>';
+                        }
+                    }
+                }
+                // this is what's displayed in the body if there are no results or the page is loading
+                if (results === "") {
+                    if (ts.edge.result) results = "<li>No data to show</li>";
+                    else results = "<li class='loading'>Loading choices...</li>";
+                }
+                var header = this.headerLayout({
+                    toggleId: toggleId
+                });
+                // render the overall facet
+                var frag = "<div class=\"".concat(facetClass, "\">\n                <div class=\"").concat(headerClass, "\"><div class=\"row\">\n                    <div class=\"col-md-12\">\n                        ").concat(header, "\n                    </div>\n                </div></div>\n                <div class=\"").concat(bodyClass, "\">\n                    <div class=\"row\" style=\"display:none\" id=\"").concat(resultsId, "\">\n                        <div class=\"col-md-12\">\n                            <ul class=\"").concat(listClass, "\">{{FILTERS}}</ul>\n                        </div>\
+                    </div>\
+                </div>\
+                </div></div>");
+                // substitute in the component parts
+                frag = frag.replace(/{{FILTERS}}/g, results);
+                // now render it into the page
+                ts.context.html(frag);
+                // trigger all the post-render set-up functions
+                this.setUIOpen();
+                var checkboxSelector = $d48cc3604bf30e24$export$b1157bd4df096bce(namespace, "selector", this);
+                $d48cc3604bf30e24$export$b4cd8de5710bc55c(checkboxSelector, "change", this, "filterToggle");
+                var toggleSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(namespace, "toggle", this);
+                $d48cc3604bf30e24$export$b4cd8de5710bc55c(toggleSelector, "click", this, "toggleOpen");
+            }
+        },
+        {
+            key: "_formatCount",
+            value: function _formatCount(count) {
+                if (this.countFormat) return this.countFormat(count);
+                return count;
+            }
+        },
+        {
+            key: "headerLayout",
+            value: function headerLayout(params) {
+                var toggleId = params.toggleId;
+                var iconClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "icon", this);
+                if (this.layout === "left") {
+                    var tog = this.title;
+                    if (this.togglable) tog = '<a href="#" id="' + toggleId + '"><i class="' + this.openIcon + '"></i>&nbsp;' + tog + "</a>";
+                    return tog;
+                } else if (this.layout === "right") {
+                    var tog = "";
+                    if (this.togglable) tog = '<a href="#" id="' + toggleId + '">' + this.title + '&nbsp;<i class="' + this.openIcon + ' ' + iconClass + '"></i></a>';
+                    else tog = this.title;
+                    return tog;
+                }
+            }
+        },
+        {
+            key: "setUIOpen",
+            value: function setUIOpen() {
+                // the selectors that we're going to use
+                var resultsSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, "results", this);
+                var toggleSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, "toggle", this);
+                var results = this.component.jq(resultsSelector);
+                var toggle = this.component.jq(toggleSelector);
+                var openBits = this.openIcon.split(" ");
+                var closeBits = this.closeIcon.split(" ");
+                if (this.open) {
+                    var i = toggle.find("i");
+                    for(var j = 0; j < openBits.length; j++)i.removeClass(openBits[j]);
+                    for(var j = 0; j < closeBits.length; j++)i.addClass(closeBits[j]);
+                    results.show();
+                } else {
+                    var i = toggle.find("i");
+                    for(var j = 0; j < closeBits.length; j++)i.removeClass(closeBits[j]);
+                    for(var j = 0; j < openBits.length; j++)i.addClass(openBits[j]);
+                    results.hide();
+                }
+            }
+        },
+        {
+            key: "filterToggle",
+            value: function filterToggle(element) {
+                var term = this.component.jq(element).attr("data-key");
+                var checked = this.component.jq(element).is(":checked");
+                if (checked) this.component.selectTerm(term);
+                else this.component.removeFilter(term);
+            }
+        },
+        {
+            key: "toggleOpen",
+            value: function toggleOpen(element) {
+                this.open = !this.open;
+                this.setUIOpen();
+            }
+        }
+    ]);
+    return $2039d36394fce070$export$d3ad1026b19abbfd;
+}($6cf4dc301226cb87$export$a695173e2ecfa9b);
+
+
+
+
+
 
 
 
@@ -4734,9 +8851,11 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
         $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $26b66f4c4ad5f83b$export$dda19d2613327857);
         var _this;
         _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($26b66f4c4ad5f83b$export$dda19d2613327857).call(this));
+        _this.includeHeaderRow = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "includeHeaderRow", true);
         _this.valueFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "valueFormat", false);
         _this.labelFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "labelFormat", false);
         _this.headerFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "headerFormat", false);
+        _this.seriesOrderFunction = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "seriesOrderFunction", false);
         _this.namespace = "edges-bs3-chartdatatable";
         return _this;
     }
@@ -4750,17 +8869,20 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
                 }
                 var tableData = this._dataSeriesToTable();
                 var headFrag = "";
-                for(var i = 0; i < tableData.head.length; i++){
-                    var header = tableData.head[i];
-                    headFrag += "<tr><td>" + header.join("</td><td>") + "</td></tr>";
+                if (this.includeHeaderRow) {
+                    for(var i = 0; i < tableData.head.length; i++){
+                        var header = tableData.head[i];
+                        headFrag += "<tr><td>" + header.join("</td><td>") + "</td></tr>";
+                    }
+                    headFrag = "<thead>".concat(headFrag, "</thead>");
                 }
                 var bodyFrag = "";
-                for(var i1 = 0; i1 < tableData.body.length; i1++){
-                    var row = tableData.body[i1];
+                for(var i = 0; i < tableData.body.length; i++){
+                    var row = tableData.body[i];
                     bodyFrag += "<tr><td>" + row.join("</td><td>") + "</td></tr>";
                 }
                 var tableClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "table", this);
-                var frag = "\n            <table class=\"".concat(tableClass, "\">\n                <thead>").concat(headFrag, "</thead>\n                <tbody>").concat(bodyFrag, "</tbody>\n            </table>\n        ");
+                var frag = "\n            <table class=\"".concat(tableClass, "\">\n                ").concat(headFrag, "\n                <tbody>").concat(bodyFrag, "</tbody>\n            </table>\n        ");
                 this.component.context.html(frag);
             }
         },
@@ -4772,6 +8894,8 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
                     head: [],
                     body: []
                 };
+                if (!ds || ds.length === 0) return table;
+                if (this.seriesOrderFunction) ds = this.seriesOrderFunction(ds);
                 var headers = [
                     ""
                 ];
@@ -4815,6 +8939,511 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
 }($6cf4dc301226cb87$export$a695173e2ecfa9b);
 
 
+function $4002aa3570a5e3f8$export$8e8129eda99077(sheetName) {
+    var palette = {
+        investigation: false,
+        export: false,
+        request: false
+    };
+    for(var i = 0; i < document.styleSheets.length; i++){
+        var sheet = document.styleSheets[i];
+        if (sheet.href && sheet.href.includes(sheetName)) for(var j = 0; j < sheet.rules.length; j++){
+            var rule = sheet.rules[j];
+            if (rule.selectorText === "#palette #investigations") palette.investigation = rule.style.background;
+            else if (rule.selectorText === "#palette #exports") palette.export = rule.style.background;
+            else if (rule.selectorText === "#palette #requests") palette.request = rule.style.background;
+        }
+    }
+    return palette;
+}
+
+
+
+
+
+var $beec1707b43a9eb2$export$2a05ec748c9cb22d = /*#__PURE__*/ function(Renderer) {
+    "use strict";
+    $bca7673885229bfd$export$9099ad97b570f7c($beec1707b43a9eb2$export$2a05ec748c9cb22d, Renderer);
+    function $beec1707b43a9eb2$export$2a05ec748c9cb22d(params) {
+        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $beec1707b43a9eb2$export$2a05ec748c9cb22d);
+        var _this;
+        _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($beec1707b43a9eb2$export$2a05ec748c9cb22d).call(this, params));
+        _this.title = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "title", false);
+        _this.countFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "countFormat", false);
+        _this.noResultsText = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "noResultsText", "No data to display");
+        _this.namespace = "edges-html-relativesizebars";
+        return _this;
+    }
+    $67866ae5f3a26802$export$9099ad97b570f7c($beec1707b43a9eb2$export$2a05ec748c9cb22d, [
+        {
+            key: "draw",
+            value: function draw() {
+                var title = "";
+                if (this.title !== false) {
+                    var titleClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "title", this);
+                    title = "<h4 class=\"".concat(titleClass, "\">").concat(this.title, "</h4>");
+                }
+                var data_series = this.component.dataSeries;
+                if (!data_series || data_series.length === 0) {
+                    this.component.context.html(title + this.noResultsText);
+                    return;
+                }
+                // this renderer will only work on a single data series
+                var ds = data_series[0];
+                if (ds.values.length === 0) {
+                    this.component.context.html(title + this.noResultsText);
+                    return;
+                }
+                // first we need to find the largest value
+                var max = 0;
+                for(var i = 0; i < ds.values.length; i++){
+                    var value = ds.values[i];
+                    if (value.value > max) max = value.value;
+                }
+                var rows = "";
+                for(var i1 = 0; i1 < ds.values.length; i1++){
+                    var value = ds.values[i1];
+                    var prog = this._calculateProgress(value.value, max);
+                    var count = value.value;
+                    if (this.countFormat) count = this.countFormat(count);
+                    var label = "".concat(value.label, " (").concat(count, ")");
+                    rows += "<tr><td>\n                <progress value=\"".concat(prog, "\" max=\"100\">").concat(prog, "</progress><br>\n                ").concat(label, "\n            </td></tr>");
+                }
+                var tableClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "table", this);
+                var frag = "".concat(title, "<br><table class=\"").concat(tableClass, "\">").concat(rows, "</table>");
+                this.component.context.html(frag);
+            }
+        },
+        {
+            key: "_calculateProgress",
+            value: function _calculateProgress(value, max) {
+                if (max === 0) return 100;
+                if (value < 0) return 0;
+                return Math.floor(value / max * 100);
+            }
+        }
+    ]);
+    return $beec1707b43a9eb2$export$2a05ec748c9cb22d;
+}($6cf4dc301226cb87$export$a695173e2ecfa9b);
+
+
+
+
+
+
+var $bcaf9e61a70b299d$export$eac301b83a14e1b7 = /*#__PURE__*/ function(Component) {
+    "use strict";
+    $bca7673885229bfd$export$9099ad97b570f7c($bcaf9e61a70b299d$export$eac301b83a14e1b7, Component);
+    function $bcaf9e61a70b299d$export$eac301b83a14e1b7(params) {
+        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $bcaf9e61a70b299d$export$eac301b83a14e1b7);
+        var _this;
+        _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($bcaf9e61a70b299d$export$eac301b83a14e1b7).call(this, params));
+        ///////////////////////////////////////////////
+        // fields that can be passed in, and their defaults
+        // free text to prefix entry boxes with
+        // this.display = getParam(params, "display", false);
+        // list of field objects, which provide the field itself, and the display name.  e.g.
+        // [{field : "monitor.rioxxterms:publication_date", display: "Publication Date"}]
+        _this.fields = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "fields", []);
+        // map from field name (as in this.field[n].field) to a function which will provide
+        // the earliest allowed date for that field.  e.g.
+        // {"monitor.rioxxterms:publication_date" : earliestDate}
+        _this.earliest = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "earliest", {
+        });
+        // map from field name (as in this.field[n].field) to a function which will provide
+        // the latest allowed date for that field.  e.g.
+        // {"monitor.rioxxterms:publication_date" : latestDate}
+        _this.latest = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "latest", {
+        });
+        _this.autoLookupRange = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "autoLookupRange", false);
+        // category for this component, defaults to "selector"
+        _this.category = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "category", "selector");
+        // default earliest date to use in all cases (defaults to start of the unix epoch)
+        _this.defaultEarliest = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "defaultEarliest", new Date(0));
+        // default latest date to use in all cases (defaults to now)
+        _this.defaultLatest = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "defaultLatest", new Date());
+        ///////////////////////////////////////////////
+        // fields used to track internal state
+        _this.currentField = false;
+        _this.fromDate = false;
+        _this.toDate = false;
+        _this.touched = false;
+        _this.dateOptions = {
+        };
+        return _this;
+    }
+    $67866ae5f3a26802$export$9099ad97b570f7c($bcaf9e61a70b299d$export$eac301b83a14e1b7, [
+        {
+            key: "init",
+            value: function init(edge) {
+                $17c4d4a7c863d924$export$9099ad97b570f7c($da23c25529bb1df4$export$9099ad97b570f7c($bcaf9e61a70b299d$export$eac301b83a14e1b7.prototype), "init", this).call(this, edge);
+                // set the initial field
+                this.currentField = this.fields[0].field;
+                // track the last field, for query building purposes
+                this.lastField = false;
+                // if required, load the dates once at init
+                if (!this.autoLookupRange) this.loadDates();
+                else {
+                    if (edge.secondaryQueries === false) edge.secondaryQueries = {
+                    };
+                    edge.secondaryQueries["multidaterange_" + this.id] = this.getSecondaryQueryFunction();
+                }
+            }
+        },
+        {
+            key: "synchronise",
+            value: function synchronise() {
+                this.currentField = false;
+                this.fromDate = false;
+                this.toDate = false;
+                if (this.autoLookupRange) for(var i = 0; i < this.fields.length; i++){
+                    var field = this.fields[i].field;
+                    var agg = this.edge.secondaryResults["multidaterange_" + this.id].aggregation(field);
+                    var min = this.defaultEarliest;
+                    var max = this.defaultLatest;
+                    if (agg.min !== null) min = new Date(agg.min);
+                    if (agg.max !== null) max = new Date(agg.max);
+                    this.dateOptions[field] = {
+                        earliest: min,
+                        latest: max
+                    };
+                }
+                for(var i = 0; i < this.fields.length; i++){
+                    var field = this.fields[i].field;
+                    var filters = this.edge.currentQuery.listMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.RangeFilter({
+                        field: field
+                    }));
+                    if (filters.length > 0) {
+                        this.currentField = field;
+                        var filter = filters[0];
+                        this.fromDate = filter.gte;
+                        this.toDate = filter.lt;
+                    }
+                }
+                if (!this.currentField && this.fields.length > 0) this.currentField = this.fields[0].field;
+            }
+        },
+        {
+            //////////////////////////////////////////////
+            // functions that can be used to trigger state change
+            key: "currentEarliest",
+            value: function currentEarliest() {
+                if (!this.currentField) return false;
+                if (this.dateOptions[this.currentField]) return this.dateOptions[this.currentField].earliest;
+            }
+        },
+        {
+            key: "currentLatest",
+            value: function currentLatest() {
+                if (!this.currentField) return false;
+                if (this.dateOptions[this.currentField]) return this.dateOptions[this.currentField].latest;
+            }
+        },
+        {
+            key: "changeField",
+            value: function changeField(newField) {
+                this.lastField = this.currentField;
+                if (newField !== this.currentField) {
+                    this.touched = true;
+                    this.currentField = newField;
+                }
+            }
+        },
+        {
+            key: "setFrom",
+            value: function setFrom(from) {
+                if (from !== this.fromDate) {
+                    this.touched = true;
+                    this.fromDate = from;
+                }
+            }
+        },
+        {
+            key: "setTo",
+            value: function setTo(to) {
+                if (to !== this.toDate) {
+                    this.touched = true;
+                    this.toDate = to;
+                }
+            }
+        },
+        {
+            key: "triggerSearch",
+            value: function triggerSearch() {
+                if (this.touched) {
+                    this.touched = false;
+                    var nq = this.edge.cloneQuery();
+                    // remove any old filters managed by this component
+                    var removeCount = 0;
+                    for(var i = 0; i < this.fields.length; i++){
+                        var fieldName = this.fields[i].field;
+                        removeCount += nq.removeMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.RangeFilter({
+                            field: fieldName
+                        }));
+                    }
+                    // in order to avoid unnecessary searching, check the state of the data and determine
+                    // if we need to.
+                    // - we need to add a new filter to the query if there is a current field and one/both of from and to dates
+                    // - we need to do a search if we removed filters before, or are about to add one
+                    var addFilter = this.currentField && (this.toDate || this.fromDate);
+                    var doSearch = removeCount > 0 || addFilter;
+                    // if we're not going to do a search, return
+                    if (!doSearch) return false;
+                    // if there's a filter to be added, do that here
+                    if (addFilter) {
+                        var range = {
+                            field: this.currentField
+                        };
+                        if (this.toDate) range["lte"] = this.formatDateForQuery(this.toDate);
+                        if (this.fromDate) range["gte"] = this.formatDateForQuery(this.fromDate);
+                        nq.addMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.RangeFilter(range));
+                    }
+                    // push the new query and trigger the search
+                    this.edge.pushQuery(nq);
+                    this.edge.cycle();
+                    return true;
+                }
+            }
+        },
+        {
+            key: "formatDateForQuery",
+            value: function formatDateForQuery(date) {
+                var zeroPadder = $d48cc3604bf30e24$export$48334dba1de70fbe({
+                    zeroPadding: 2
+                });
+                return date.getUTCFullYear() + "-" + zeroPadder(date.getUTCMonth() + 1) + "-" + zeroPadder(date.getUTCDate());
+            }
+        },
+        {
+            key: "loadDates",
+            value: function loadDates() {
+                for(var i = 0; i < this.fields.length; i++){
+                    var field = this.fields[i].field;
+                    // start with the default earliest and latest
+                    var early = this.defaultEarliest;
+                    var late = this.defaultLatest;
+                    // if specific functions are provided for getting the dates, run them
+                    var earlyFn = this.earliest[field];
+                    var lateFn = this.latest[field];
+                    if (earlyFn) early = earlyFn();
+                    if (lateFn) late = lateFn();
+                    this.dateOptions[field] = {
+                        earliest: early,
+                        latest: late
+                    };
+                }
+            }
+        },
+        {
+            key: "getSecondaryQueryFunction",
+            value: function getSecondaryQueryFunction() {
+                var that = this;
+                return function(edge) {
+                    // clone the current query, which will be the basis for the averages query
+                    var query = edge.cloneQuery();
+                    // remove any range constraints
+                    for(var i = 0; i < that.fields.length; i++){
+                        var field = that.fields[i];
+                        query.removeMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.RangeFilter({
+                            field: field.field
+                        }));
+                    }
+                    // remove any existing aggregations, we don't need them
+                    query.clearAggregations();
+                    // add the new aggregation(s) which will actually get the data
+                    for(var i = 0; i < that.fields.length; i++){
+                        var field = that.fields[i].field;
+                        query.addAggregation(new $8d94b5f2509b6cf5$export$8b446892c82de644.StatsAggregation({
+                            name: field,
+                            field: field
+                        }));
+                    }
+                    // finally set the size and from parameters
+                    query.size = 0;
+                    query.from = 0;
+                    // return the secondary query
+                    return query;
+                };
+            }
+        }
+    ]);
+    return $bcaf9e61a70b299d$export$eac301b83a14e1b7;
+}($6cf4dc301226cb87$export$ea71c44d9cb0d048);
+
+
+
+
+
+
+var $d626902615431ef9$export$4d567bc36d967c12 = /*#__PURE__*/ function(Renderer) {
+    "use strict";
+    $bca7673885229bfd$export$9099ad97b570f7c($d626902615431ef9$export$4d567bc36d967c12, Renderer);
+    function $d626902615431ef9$export$4d567bc36d967c12(params) {
+        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $d626902615431ef9$export$4d567bc36d967c12);
+        var _this;
+        _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($d626902615431ef9$export$4d567bc36d967c12).call(this, params));
+        ///////////////////////////////////////////////////
+        // parameters that can be passed in
+        _this.dateFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "dateFormat", "MMMM D, YYYY");
+        _this.useSelect2 = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "useSelect2", false);
+        _this.ranges = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "ranges", false);
+        ///////////////////////////////////////////////////
+        // parameters for tracking internal state
+        _this.dre = false;
+        _this.selectId = false;
+        _this.rangeId = false;
+        _this.selectJq = false;
+        _this.rangeJq = false;
+        _this.drp = false;
+        _this.namespace = "edges-bs3-multidaterangecombineselector";
+        return _this;
+    }
+    $67866ae5f3a26802$export$9099ad97b570f7c($d626902615431ef9$export$4d567bc36d967c12, [
+        {
+            key: "draw",
+            value: function draw() {
+                var dre = this.component;
+                var selectClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "select", this);
+                var inputClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "input", this);
+                var prefixClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "prefix", this);
+                this.selectId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, dre.id + "_date-type", this);
+                this.rangeId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, dre.id + "_range", this);
+                var pluginId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, dre.id + "_plugin", this);
+                var options = "";
+                for(var i = 0; i < dre.fields.length; i++){
+                    var field = dre.fields[i];
+                    var selected = dre.currentField === field.field ? ' selected="selected" ' : "";
+                    options += '<option value="' + field.field + '"' + selected + '>' + field.display + '</option>';
+                }
+                var frag = '<div class="form-inline">';
+                if (dre.display) frag += '<span class="' + prefixClass + '">' + dre.display + '</span>';
+                frag += '<div class="form-group"><select class="' + selectClass + ' form-control" name="' + this.selectId + '" id="' + this.selectId + '">' + options + '</select></div>';
+                frag += '<div id="' + this.rangeId + '" class="' + inputClass + ' form-control">\
+            <i class="glyphicon glyphicon-calendar"></i>&nbsp;\
+            <span></span> <b class="caret"></b>\
+        </div>';
+                frag += "</div>";
+                dre.context.html(frag);
+                var selectIdSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, dre.id + "_date-type", this);
+                var rangeIdSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, dre.id + "_range", this);
+                this.selectJq = dre.jq(selectIdSelector);
+                this.rangeJq = dre.jq(rangeIdSelector);
+                var cb = $d48cc3604bf30e24$export$367047a567f2342b(this, "updateDateRange", [
+                    "start",
+                    "end"
+                ]);
+                var props = {
+                    locale: {
+                        format: "DD/MM/YYYY"
+                    },
+                    opens: "left"
+                };
+                if (this.ranges) props["ranges"] = this.ranges;
+                // clear out any old version of the plugin, as these are appended to the document
+                // and not kept within the div controlled by this renderer
+                var pluginSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, dre.id + "_plugin", this);
+                $(pluginSelector).remove();
+                this.rangeJq.daterangepicker(props, cb);
+                this.drp = this.rangeJq.data("daterangepicker");
+                this.drp.container.attr("id", pluginId).addClass("show-calendar");
+                this.prepDates();
+                if (this.useSelect2) this.selectJq.select2();
+                $d48cc3604bf30e24$export$b4cd8de5710bc55c(selectIdSelector, "change", this, "typeChanged");
+            }
+        },
+        {
+            key: "dateRangeDisplay",
+            value: function dateRangeDisplay(params) {
+                var start = params.start;
+                var end = params.end;
+                this.rangeJq.find("span").html(start.utc().format(this.dateFormat) + ' - ' + end.utc().format(this.dateFormat));
+            }
+        },
+        {
+            key: "updateDateRange",
+            value: function updateDateRange(params) {
+                var start = params.start;
+                var end = params.end;
+                // a date or type has been changed, so set up the parent object
+                // ensure that the correct field is set (it may initially be not set)
+                var date_type = null;
+                if (this.useSelect2) date_type = this.selectJq.select2("val");
+                else date_type = this.selectJq.val();
+                this.component.changeField(date_type);
+                this.component.setFrom(start.toDate());
+                this.component.setTo(end.toDate());
+                this.dateRangeDisplay(params);
+                // this action should trigger a search (the parent object will
+                // decide if that's required)
+                var triggered = this.component.triggerSearch();
+                // if a search didn't get triggered, we still may need to modify the min/max specified dates
+                if (!triggered) this.prepDates();
+            }
+        },
+        {
+            key: "typeChanged",
+            value: function typeChanged(element) {
+                // ensure that the correct field is set (it may initially be not set)
+                var date_type = null;
+                if (this.useSelect2) date_type = this.selectJq.select2("val");
+                else date_type = this.selectJq.val();
+                this.component.changeField(date_type);
+                // unset the range
+                this.component.setFrom(false);
+                this.component.setTo(false);
+                // this action should trigger a search (the parent object will
+                // decide if that's required)
+                var triggered = this.component.triggerSearch();
+                // if a search didn't get triggered, we still may need to modify the min/max specified dates
+                if (!triggered) this.prepDates();
+            }
+        },
+        {
+            key: "prepDates",
+            value: function prepDates() {
+                var min = this.component.currentEarliest();
+                var max = this.component.currentLatest();
+                var fr = this.component.fromDate;
+                var to = this.component.toDate;
+                if (min) {
+                    this.drp.minDate = $bccd1ba82d89ceaa$export$137cea99ac96085(min);
+                    this.drp.setStartDate($bccd1ba82d89ceaa$export$137cea99ac96085(min));
+                } else {
+                    this.drp.minDate = $bccd1ba82d89ceaa$export$137cea99ac96085(this.component.defaultEarliest);
+                    this.drp.setStartDate($bccd1ba82d89ceaa$export$137cea99ac96085(this.component.defaultEarliest));
+                }
+                if (max) {
+                    this.drp.maxDate = $bccd1ba82d89ceaa$export$137cea99ac96085(max);
+                    this.drp.setEndDate($bccd1ba82d89ceaa$export$137cea99ac96085(max));
+                } else {
+                    this.drp.maxDate = $bccd1ba82d89ceaa$export$137cea99ac96085(this.component.defaultLatest);
+                    this.drp.setEndDate($bccd1ba82d89ceaa$export$137cea99ac96085(this.component.defaultLatest));
+                }
+                if (fr) {
+                    // if from lies before the min date, extend the min range
+                    if (fr < this.drp.minDate) this.drp.minDate = $bccd1ba82d89ceaa$export$137cea99ac96085(fr);
+                    // if from lies after the max date, extend the max range
+                    if (fr > this.drp.maxDate) this.drp.maxDate = $bccd1ba82d89ceaa$export$137cea99ac96085(fr);
+                    this.drp.setStartDate($bccd1ba82d89ceaa$export$137cea99ac96085(fr));
+                }
+                if (to) {
+                    // if to lies before the min date, extend the min range
+                    if (to < this.drp.minDate) this.drp.minDate = $bccd1ba82d89ceaa$export$137cea99ac96085(to);
+                    // if to lies after the max date, extend the max range
+                    if (to > this.drp.maxDate) this.drp.maxDate = $bccd1ba82d89ceaa$export$137cea99ac96085(to);
+                    this.drp.setEndDate($bccd1ba82d89ceaa$export$137cea99ac96085(to));
+                }
+                this.dateRangeDisplay({
+                    start: this.drp.startDate,
+                    end: this.drp.endDate
+                });
+            }
+        }
+    ]);
+    return $d626902615431ef9$export$4d567bc36d967c12;
+}($6cf4dc301226cb87$export$a695173e2ecfa9b);
+
+
 $parcel$global.nglp = {
 };
 nglp.g001 = {
@@ -4829,12 +9458,18 @@ nglp.g001.init = function(params) {
     var countFormat = $d48cc3604bf30e24$export$48334dba1de70fbe({
         thousandsSeparator: ","
     });
-    var palette = nglp.g001.extractPalette();
+    var palette = $4002aa3570a5e3f8$export$8e8129eda99077("g001.css");
     var interactionValueMap = {
         "investigation": "VIEWS",
         "export": "EXPORTS",
         "request": "DOWNLOADS"
     };
+    var presentationOrder = [
+        "investigation",
+        "export",
+        "request"
+    ];
+    var initialDateRange = $9aa3b42083a3eab8$var$getInitialDateRange();
     nglp.g001.active[selector] = new $6cf4dc301226cb87$export$22ad9a5707a07e9c({
         selector: selector,
         template: new nglp.g001.G001Template(),
@@ -4859,9 +9494,9 @@ nglp.g001.init = function(params) {
                 }),
                 new $8d94b5f2509b6cf5$export$8b446892c82de644.RangeFilter({
                     field: "occurred_at",
-                    gte: "2020-05-01",
-                    lte: "2021-07-01"
-                }) // FIXME: these will need to be wired up to a date selector
+                    gte: initialDateRange.gte,
+                    lte: initialDateRange.lte
+                })
             ],
             size: 0,
             aggs: [
@@ -4895,12 +9530,33 @@ nglp.g001.init = function(params) {
             ]
         }),
         components: [
+            new $bcaf9e61a70b299d$export$eac301b83a14e1b7({
+                id: "g001-date-range",
+                display: "REPORT PERIOD:<br>",
+                fields: [
+                    {
+                        field: "occurred_at",
+                        display: "Event Date"
+                    }
+                ],
+                autoLookupRange: true,
+                renderer: new $d626902615431ef9$export$4d567bc36d967c12({
+                })
+            }),
             new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
                 id: "g001-interactions-chart",
                 dataFunction: $ae46249d8a2a7b6d$export$d99c821b0fb86668({
                     histogramAgg: "occurred_at",
                     termsAgg: "events"
                 }),
+                rectangulate: true,
+                seriesSort: function seriesSort(values) {
+                    return values.sort(function(a, b) {
+                        if (a.label < b.label) return -1;
+                        if (a.label > b.label) return 1;
+                        return 0;
+                    });
+                },
                 renderer: new $f29180d7a0e96438$export$1b75c0a6cacf635c({
                     xTickFormat: function xTickFormat(d) {
                         return d3.time.format('%b %y')(new Date(d));
@@ -4923,6 +9579,14 @@ nglp.g001.init = function(params) {
                     histogramAgg: "occurred_at",
                     termsAgg: "events"
                 }),
+                rectangulate: true,
+                seriesSort: function seriesSort(values) {
+                    return values.sort(function(a, b) {
+                        if (a.label < b.label) return -1;
+                        if (a.label > b.label) return 1;
+                        return 0;
+                    });
+                },
                 renderer: new $26b66f4c4ad5f83b$export$dda19d2613327857({
                     labelFormat: function labelFormat(d) {
                         return d3.time.format('%b %y')(new Date(d));
@@ -4930,21 +9594,36 @@ nglp.g001.init = function(params) {
                     valueFormat: countFormat,
                     headerFormat: function headerFormat(d) {
                         return interactionValueMap[d] || d;
+                    },
+                    seriesOrderFunction: function seriesOrderFunction(dataSeries) {
+                        var ordered = [];
+                        for(var j = 0; j < presentationOrder.length; j++)for(var i = 0; i < dataSeries.length; i++){
+                            var series = dataSeries[i];
+                            if (series.key === presentationOrder[j]) ordered.push(series);
+                        }
+                        return ordered;
                     }
                 })
             }),
             new $7ac4d4ec044faea2$export$c57445924c23547b({
                 id: "g001-interactions-map",
                 geoHashAggregation: "geo",
+                zoomToPrecisionMap: {
+                    0: 5,
+                    3: 7,
+                    5: 9
+                },
                 renderer: new $eec1dd49d0c67d6b$export$a0bd1dffd4b583c({
-                    clusterByCount: true,
+                    cluster: true,
+                    labelFunction: function(loc) {
+                        // be very careful changing this, the MapPointRenderer relies on this as the way
+                        // to find out what the count of the nested cluster is
+                        return loc.count.toString();
+                    },
+                    renderCluster: new $9aa3b42083a3eab8$var$MapPointRenderer(),
                     reQueryOnBoundsChange: true,
                     clusterIcons: {
-                        0: "/static/img/m1.png",
-                        2: "/static/img/m2.png",
-                        20: "/static/img/m3.png",
-                        50: "/static/img/m4.png",
-                        100: "/static/img/m5.png"
+                        0: "/static/img/m1.png"
                     }
                 })
             }),
@@ -4957,12 +9636,13 @@ nglp.g001.init = function(params) {
                 orderBy: "term",
                 orderDir: "asc",
                 valueMap: interactionValueMap,
-                renderer: new $135bcb32af9eb45d$export$4b392426dd40333d({
+                renderer: new $2039d36394fce070$export$d3ad1026b19abbfd({
                     title: "Interactions",
                     open: true,
                     togglable: false,
                     showCount: true,
-                    countFormat: countFormat
+                    countFormat: countFormat,
+                    fixedTerms: presentationOrder
                 })
             }),
             new $2c48e414d79136ba$export$845e14b82c9a4f95({
@@ -4984,19 +9664,6 @@ nglp.g001.init = function(params) {
                     countFormat: countFormat
                 })
             }),
-            // this doesn't work - there isn't format information associated with investigations
-            // new Chart({
-            //     id: "g001-top-investigations",
-            //     dataFunction: nestedTerms({
-            //         aggs: [
-            //             {events: {keys : ["investigation"], aggs: ["formats"]}}
-            //         ]
-            //     }),
-            //     renderer: new HorizontalMultibarRenderer({
-            //         title: "Investigations",
-            //         legend: false
-            //     })
-            // }),
             new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
                 id: "g001-top-downloads",
                 dataFunction: $ae46249d8a2a7b6d$export$4c2a251a86bb620b({
@@ -5014,29 +9681,33 @@ nglp.g001.init = function(params) {
                     ],
                     seriesName: "request"
                 }),
-                renderer: new $8ff5b3d2c2ab6201$export$6d5fb309d07d7299({
+                // renderer: new HorizontalMultibarRenderer({
+                //     title: "Downloads",
+                //     legend: false,
+                //     valueFormat: countFormat,
+                //     color: function(d, i) {
+                //         return palette[d.key]
+                //     },
+                //     showXAxis: true,
+                //     showYAxis: false,
+                //     marginLeft: 0,
+                //     marginRight: 0,
+                //     marginTop: 0,
+                //     marginBottom: 0,
+                //     groupSpacing: 0.7,
+                //     onUpdate: () => {
+                //         let ticks = $("#g001-top-downloads .tick text");
+                //         for (let i = 0; i < ticks.length; i++) {
+                //             let tick = $(ticks[i]);
+                //             tick.attr("x", 0);
+                //             tick.attr("y", 20);
+                //             tick.css("text-anchor", "start");
+                //         }
+                //     }
+                // })
+                renderer: new $beec1707b43a9eb2$export$2a05ec748c9cb22d({
                     title: "Downloads",
-                    legend: false,
-                    valueFormat: countFormat,
-                    color: function color(d, i) {
-                        return palette[d.key];
-                    },
-                    showXAxis: true,
-                    showYAxis: false,
-                    marginLeft: 0,
-                    marginRight: 0,
-                    marginTop: 0,
-                    marginBottom: 0,
-                    groupSpacing: 0.7,
-                    onUpdate: function() {
-                        var ticks = $99b6183ba65dae12$export$4048ae5fe51d81b7("#g001-top-downloads .tick text");
-                        for(var i = 0; i < ticks.length; i++){
-                            var tick = $99b6183ba65dae12$export$4048ae5fe51d81b7(ticks[i]);
-                            tick.attr("x", 0);
-                            tick.attr("y", 20);
-                            tick.css("text-anchor", "start");
-                        }
-                    }
+                    countFormat: countFormat
                 })
             }),
             new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
@@ -5056,50 +9727,13 @@ nglp.g001.init = function(params) {
                     ],
                     seriesName: "export"
                 }),
-                renderer: new $8ff5b3d2c2ab6201$export$6d5fb309d07d7299({
+                renderer: new $beec1707b43a9eb2$export$2a05ec748c9cb22d({
                     title: "Exports",
-                    legend: false,
-                    valueFormat: countFormat,
-                    color: function color(d, i) {
-                        return palette[d.key];
-                    },
-                    showXAxis: true,
-                    showYAxis: false,
-                    marginLeft: 0,
-                    marginRight: 0,
-                    marginTop: 0,
-                    marginBottom: 0,
-                    groupSpacing: 0.7,
-                    onUpdate: function() {
-                        var ticks = $99b6183ba65dae12$export$4048ae5fe51d81b7("#g001-top-exports .tick text");
-                        for(var i = 0; i < ticks.length; i++){
-                            var tick = $99b6183ba65dae12$export$4048ae5fe51d81b7(ticks[i]);
-                            tick.attr("x", 0);
-                            tick.attr("y", 20);
-                            tick.css("text-anchor", "start");
-                        }
-                    }
+                    countFormat: countFormat
                 })
             })
         ]
     });
-};
-nglp.g001.extractPalette = function() {
-    var palette = {
-        investigation: false,
-        export: false,
-        request: false
-    };
-    for(var i = 0; i < document.styleSheets.length; i++){
-        var sheet = document.styleSheets[i];
-        if (sheet.href && sheet.href.includes("g001.css")) for(var j = 0; j < sheet.rules.length; j++){
-            var rule = sheet.rules[j];
-            if (rule.selectorText === "#palette #investigations") palette.investigation = rule.style.background;
-            else if (rule.selectorText === "#palette #exports") palette.export = rule.style.background;
-            else if (rule.selectorText === "#palette #requests") palette.request = rule.style.background;
-        }
-    }
-    return palette;
 };
 nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
     "use strict";
@@ -5110,6 +9744,8 @@ nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
         _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c(_class).call(this));
         _this.edge = false;
         _this.showing = "chart";
+        _this.hidden = {
+        };
         _this.namespace = "g001-template";
         return _this;
     }
@@ -5119,7 +9755,7 @@ nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
             value: function draw(edge) {
                 this.edge = edge;
                 var checkboxId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, "show-as-table");
-                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G001: Article  Downloads for  Unit Administrators</h1>\n                <h2>Article downloads by format, including landing page and metadata exports in aggregate, with information about users who downloaded them</h2> \n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g001-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-md-3\">\n                <div id=\"g001-interactions\"></div>\n                <div id=\"g001-format\"></div>\n            </div>\n            <div class=\"col-md-9\">\n                <p><input type=\"checkbox\" name=\"".concat(checkboxId, "\" id=\"").concat(checkboxId, "\"> Show as table</p>\n                <div id=\"g001-interactions-chart\"></div>\n                <div id=\"g001-interactions-table\" style=\"display:none\">TABLE HERE</div>\n                <div id=\"g001-interactions-map\"></div>\n                <div class=\"row formats-header\">\n                    <div class=\"col-xs-12\">\n                        <h3>Top 3 Formats</h3>\n                    </div>\n                </div>\n                <div class=\"row\">\n<!--                    <div class=\"col-md-4\">-->\n<!--                        <div id=\"g001-top-investigations\"></div>-->\n<!--                    </div>-->\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-downloads\"></div>\n                    </div>\n                    <div class=\"col-md-4\">\n                        <div id=\"g001-top-exports\"></div>\n                    </div>\n                </div>\n            </div>\n        </div>");
+                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G001: Article  Downloads for  Unit Administrators</h1>\n                <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2> \n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g001-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-md-3\">\n                <div id=\"g001-interactions\"></div>\n                <div id=\"g001-format\"></div>\n            </div>\n            <div class=\"col-md-9\">\n                <p><input type=\"checkbox\" name=\"".concat(checkboxId, "\" id=\"").concat(checkboxId, "\"> Show as table</p>\n                <div id=\"g001-interactions-chart\"></div>\n                <div id=\"g001-interactions-table\" style=\"display:none\">TABLE HERE</div>\n                <div id=\"g001-interactions-map\"></div>\n                <div class=\"row formats-header\">\n                    <div class=\"col-xs-12\">\n                        <h3>Top 3 Formats</h3>\n                    </div>\n                </div>\n                <div class=\"row\">\n                    <div class=\"col-md-6\">\n                        <div id=\"g001-top-downloads\"></div>\n                    </div>\n                    <div class=\"col-md-6\">\n                        <div id=\"g001-top-exports\"></div>\n                    </div>\n                </div>\n            </div>\n        </div>");
                 edge.context.html(frame);
                 var checkboxSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, "show-as-table");
                 $d48cc3604bf30e24$export$b4cd8de5710bc55c(checkboxSelector, "change", this, "toggleTable");
@@ -5138,12 +9774,52 @@ nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
                     table.hide();
                     chart.show();
                     this.showing = "chart";
+                    this.edge.getComponent({
+                        id: "g001-interactions-chart"
+                    }).draw();
                 }
             }
         }
     ]);
     return _class;
 })($6cf4dc301226cb87$export$93af88fe68eea917);
+var $9aa3b42083a3eab8$var$MapPointRenderer = /*#__PURE__*/ function() {
+    "use strict";
+    function $9aa3b42083a3eab8$var$MapPointRenderer(params) {
+        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $9aa3b42083a3eab8$var$MapPointRenderer);
+    }
+    $67866ae5f3a26802$export$9099ad97b570f7c($9aa3b42083a3eab8$var$MapPointRenderer, [
+        {
+            key: "render",
+            value: function render(cluster, stats) {
+                var sum = 0;
+                for(var i = 0; i < cluster.markers.length; i++){
+                    var marker = cluster.markers[i];
+                    sum += parseInt(marker.label.text);
+                }
+                return new google.maps.Marker({
+                    position: cluster.position,
+                    icon: "/static/img/m1.png",
+                    label: {
+                        text: String(sum)
+                    },
+                    // adjust zIndex to be above other markers
+                    zIndex: Number(google.maps.Marker.MAX_ZINDEX) + sum
+                });
+            }
+        }
+    ]);
+    return $9aa3b42083a3eab8$var$MapPointRenderer;
+}();
+function $9aa3b42083a3eab8$var$getInitialDateRange() {
+    var now = $bccd1ba82d89ceaa$export$137cea99ac96085();
+    var lte = now.format("YYYY-MM-DD");
+    var gte = now.subtract(1, "years").format("YYYY-MM-DD");
+    return {
+        gte: gte,
+        lte: lte
+    };
+}
 var $9aa3b42083a3eab8$export$9099ad97b570f7c = nglp;
 
 })();

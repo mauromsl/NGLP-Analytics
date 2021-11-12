@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>G014: Progress of articles through the editorial workflow for Editors</title>
+        {% include "_edges_common_css.html" %}
+        <link rel="stylesheet" href="/static/vendor/edges/vendor/nvd3-1.8.1/nv.d3.css?v={{config.version}}">
+        <link rel="stylesheet" href="/static/vendor/edges/css/google.edges.css?v={{config.version}}"/>
+        <link rel="stylesheet" href="/static/vendor/edges/css/bs3.ORTermSelectorRenderer.css?v={{config.version}}"/>
+        <link rel="stylesheet" href="/static/vendor/edges/css/html5.ImportantNumbersRenderer.css?v={{config.version}}"/>
+        <style type="text/css">
+            .edges-html5-important-numbers-container {
+                width: 20%;
+                height: 200px;
+                float: left;
+            }
+
+            #transition-container .edges-html5-important-numbers-container {
+                width: 25%;
+            }
+
+            .edges-html5-important-numbers-main {
+                transform: translate(-50%,0%);
+                color: #555555;
+            }
+
+            .edges-html5-important-numbers-second {
+                margin-top: 50px;
+            }
+
+            #age_submit, #age_first_decision, #age_review, #age_accept, #age_publish {
+                height: 500px;
+                width: 20%;
+                float: left;
+            }
+
+            #age_submit svg, #age_first_decision svg, #age_review svg, #age_accept svg, #age_publish svg {
+                height: 450px;
+            }
+
+            #workflow-capacity {
+                height: 600px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container-fluid">
+            <h1>G014: Progress of articles through the editorial workflow for Editors</h1>
+            <div id="g014"></div>
+        </div>
+
+        {% include "_edges_common_js.html" %}
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAHSLLjD8UtfNlczVJluIxzTOPGFOLStyQ"></script>
+        <script type="text/javascript" src="/static/vendor/latlon-geohash-2.0.0/latlon-geohash-2.0.0.js?v={{config.version}}"></script>
+        <script type="text/javascript" src="/static/vendor/edges/vendor/d3-3.5.17/d3.js?v={{config.version}}"></script>
+        <script type="text/javascript" src="/static/vendor/edges/vendor/nvd3-1.8.1/nv.d3.js?v={{config.version}}"></script>
+        <script type="text/javascript" src="/static/vendor/edges/src/components/charts.js?v={{config.version}}"></script>
+        <script type="text/javascript" src="/static/vendor/edges/src/components/numbers.js?v={{config.version}}"></script>
+        <script type="text/javascript" src="/static/vendor/edges/src/components/maps.js?v={{config.version}}"></script>
+        <script type="text/javascript" src="/static/vendor/edges/src/templates/html.ComponentList.js?v={{config.version}}"></script>
+        <script type="text/javascript" src="/static/vendor/edges/src/renderers/nvd3.edges.js?v={{config.version}}"></script>
+        <script type="text/javascript" src="/static/vendor/edges/src/renderers/google.edges.js?v={{config.version}}"></script>
+        <script type="text/javascript" src="/static/vendor/edges/src/renderers/bs3.ORTermSelectorRenderer.js?v={{config.version}}"></script>
+        <script type="text/javascript" src="/static/vendor/edges/src/renderers/html5.ImportantNumbersRenderer.js?v={{config.version}}"></script>
+
+        <script type="text/javascript" src="/static/js/g014.edges.js?v={{config.version}}"></script>
+
+        <script type="text/javascript">
+        jQuery (document).ready (function($) {
+            nglp.g014.init({
+                searchUrl : '{{ url_for("query", path="public/event") }}'
+            });
+        });
+        </script>
+    </body>
+</html>
