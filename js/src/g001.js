@@ -1,5 +1,6 @@
 import {$} from "../vendor/edges2/dependencies/jquery"
 import {es} from "../vendor/edges2/dependencies/es"
+import {moment} from "../vendor/edges2/dependencies/moment";    // FIXME: note that we want to replace moment with something newer, just using it for now as it's here and a requirement anyway
 
 import {Edge, Template} from "../vendor/edges2/src/core"
 import {Chart, termSplitDateHistogram, nestedTerms} from "../vendor/edges2/src/components/Chart";
@@ -15,6 +16,8 @@ import {ChartDataTable} from "../vendor/edges2/src/renderers/bs3/ChartDataTable"
 
 import {extractPalette} from "./nglpcommon";
 import {RelativeSizeBars} from "../vendor/edges2/src/renderers/html/RelativeSizeBars";
+import {MultiDateRangeEntry} from "../vendor/edges2/src/components/MultiDateRangeEntry";
+import {MultiDateRangeCombineSelector} from "../vendor/edges2/src/renderers/bs3/MultiDateRangeCombineSelector";
 
 global.nglp = {}
 nglp.g001 = {
@@ -45,6 +48,8 @@ nglp.g001.init = function (params) {
         "request"
     ];
 
+    let initialDateRange = getInitialDateRange();
+
     nglp.g001.active[selector] = new Edge({
         selector: selector,
         template: new nglp.g001.G001Template(),
@@ -54,7 +59,7 @@ nglp.g001.init = function (params) {
             must : [
                 new es.TermsFilter({field: "event.exact", values: ["request", "investigation", "export"]}),
                 new es.TermsFilter({field: "object_type.exact", values: ["article", "file"]}),
-                new es.RangeFilter({field : "occurred_at", gte: "2020-05-01", lte: "2021-07-01"})    // FIXME: these will need to be wired up to a date selector
+                new es.RangeFilter({field : "occurred_at", gte: initialDateRange.gte, lte: initialDateRange.lte})
             ],
             size: 0,
             aggs: [
@@ -88,6 +93,15 @@ nglp.g001.init = function (params) {
             ]
         }),
         components : [
+            new MultiDateRangeEntry({
+                id : "g001-date-range",
+                display: "REPORT PERIOD:<br>",
+                fields : [
+                    {field : "occurred_at", display: "Event Date"}
+                ],
+                autoLookupRange: true,
+                renderer : new MultiDateRangeCombineSelector({})
+            }),
             new Chart({
                 id: "g001-interactions-chart",
                 dataFunction: termSplitDateHistogram({
@@ -396,6 +410,13 @@ class MapPointRenderer {
             zIndex: Number(google.maps.Marker.MAX_ZINDEX) + sum,
         });
     }
+}
+
+function getInitialDateRange() {
+    let now = moment();
+    let lte = now.format("YYYY-MM-DD");
+    let gte = now.subtract(1, "years").format("YYYY-MM-DD");
+    return {gte: gte, lte: lte}
 }
 
 export default nglp;

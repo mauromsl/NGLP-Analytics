@@ -2061,6 +2061,9 @@ function $8d94b5f2509b6cf5$var$_classExtends(clazz, ref) {
 
 
 
+var $bccd1ba82d89ceaa$export$137cea99ac96085 = window.moment;
+
+
 
 
 
@@ -9024,6 +9027,423 @@ var $beec1707b43a9eb2$export$2a05ec748c9cb22d = /*#__PURE__*/ function(Renderer)
 }($6cf4dc301226cb87$export$a695173e2ecfa9b);
 
 
+
+
+
+
+var $bcaf9e61a70b299d$export$eac301b83a14e1b7 = /*#__PURE__*/ function(Component) {
+    "use strict";
+    $bca7673885229bfd$export$9099ad97b570f7c($bcaf9e61a70b299d$export$eac301b83a14e1b7, Component);
+    function $bcaf9e61a70b299d$export$eac301b83a14e1b7(params) {
+        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $bcaf9e61a70b299d$export$eac301b83a14e1b7);
+        var _this;
+        _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($bcaf9e61a70b299d$export$eac301b83a14e1b7).call(this, params));
+        ///////////////////////////////////////////////
+        // fields that can be passed in, and their defaults
+        // free text to prefix entry boxes with
+        // this.display = getParam(params, "display", false);
+        // list of field objects, which provide the field itself, and the display name.  e.g.
+        // [{field : "monitor.rioxxterms:publication_date", display: "Publication Date"}]
+        _this.fields = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "fields", []);
+        // map from field name (as in this.field[n].field) to a function which will provide
+        // the earliest allowed date for that field.  e.g.
+        // {"monitor.rioxxterms:publication_date" : earliestDate}
+        _this.earliest = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "earliest", {
+        });
+        // map from field name (as in this.field[n].field) to a function which will provide
+        // the latest allowed date for that field.  e.g.
+        // {"monitor.rioxxterms:publication_date" : latestDate}
+        _this.latest = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "latest", {
+        });
+        _this.autoLookupRange = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "autoLookupRange", false);
+        // category for this component, defaults to "selector"
+        _this.category = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "category", "selector");
+        // default earliest date to use in all cases (defaults to start of the unix epoch)
+        _this.defaultEarliest = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "defaultEarliest", new Date(0));
+        // default latest date to use in all cases (defaults to now)
+        _this.defaultLatest = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "defaultLatest", new Date());
+        ///////////////////////////////////////////////
+        // fields used to track internal state
+        _this.currentField = false;
+        _this.fromDate = false;
+        _this.toDate = false;
+        _this.touched = false;
+        _this.dateOptions = {
+        };
+        return _this;
+    }
+    $67866ae5f3a26802$export$9099ad97b570f7c($bcaf9e61a70b299d$export$eac301b83a14e1b7, [
+        {
+            key: "init",
+            value: function init(edge) {
+                $17c4d4a7c863d924$export$9099ad97b570f7c($da23c25529bb1df4$export$9099ad97b570f7c($bcaf9e61a70b299d$export$eac301b83a14e1b7.prototype), "init", this).call(this, edge);
+                // set the initial field
+                this.currentField = this.fields[0].field;
+                // track the last field, for query building purposes
+                this.lastField = false;
+                // if required, load the dates once at init
+                if (!this.autoLookupRange) this.loadDates();
+                else {
+                    if (edge.secondaryQueries === false) edge.secondaryQueries = {
+                    };
+                    edge.secondaryQueries["multidaterange_" + this.id] = this.getSecondaryQueryFunction();
+                }
+            }
+        },
+        {
+            key: "synchronise",
+            value: function synchronise() {
+                this.currentField = false;
+                this.fromDate = false;
+                this.toDate = false;
+                if (this.autoLookupRange) for(var i = 0; i < this.fields.length; i++){
+                    var field = this.fields[i].field;
+                    var agg = this.edge.secondaryResults["multidaterange_" + this.id].aggregation(field);
+                    var min = this.defaultEarliest;
+                    var max = this.defaultLatest;
+                    if (agg.min !== null) min = new Date(agg.min);
+                    if (agg.max !== null) max = new Date(agg.max);
+                    this.dateOptions[field] = {
+                        earliest: min,
+                        latest: max
+                    };
+                }
+                for(var i = 0; i < this.fields.length; i++){
+                    var field = this.fields[i].field;
+                    var filters = this.edge.currentQuery.listMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.RangeFilter({
+                        field: field
+                    }));
+                    if (filters.length > 0) {
+                        this.currentField = field;
+                        var filter = filters[0];
+                        this.fromDate = filter.gte;
+                        this.toDate = filter.lt;
+                    }
+                }
+                if (!this.currentField && this.fields.length > 0) this.currentField = this.fields[0].field;
+            }
+        },
+        {
+            //////////////////////////////////////////////
+            // functions that can be used to trigger state change
+            key: "currentEarliest",
+            value: function currentEarliest() {
+                if (!this.currentField) return false;
+                if (this.dateOptions[this.currentField]) return this.dateOptions[this.currentField].earliest;
+            }
+        },
+        {
+            key: "currentLatest",
+            value: function currentLatest() {
+                if (!this.currentField) return false;
+                if (this.dateOptions[this.currentField]) return this.dateOptions[this.currentField].latest;
+            }
+        },
+        {
+            key: "changeField",
+            value: function changeField(newField) {
+                this.lastField = this.currentField;
+                if (newField !== this.currentField) {
+                    this.touched = true;
+                    this.currentField = newField;
+                }
+            }
+        },
+        {
+            key: "setFrom",
+            value: function setFrom(from) {
+                if (from !== this.fromDate) {
+                    this.touched = true;
+                    this.fromDate = from;
+                }
+            }
+        },
+        {
+            key: "setTo",
+            value: function setTo(to) {
+                if (to !== this.toDate) {
+                    this.touched = true;
+                    this.toDate = to;
+                }
+            }
+        },
+        {
+            key: "triggerSearch",
+            value: function triggerSearch() {
+                if (this.touched) {
+                    this.touched = false;
+                    var nq = this.edge.cloneQuery();
+                    // remove any old filters managed by this component
+                    var removeCount = 0;
+                    for(var i = 0; i < this.fields.length; i++){
+                        var fieldName = this.fields[i].field;
+                        removeCount += nq.removeMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.RangeFilter({
+                            field: fieldName
+                        }));
+                    }
+                    // in order to avoid unnecessary searching, check the state of the data and determine
+                    // if we need to.
+                    // - we need to add a new filter to the query if there is a current field and one/both of from and to dates
+                    // - we need to do a search if we removed filters before, or are about to add one
+                    var addFilter = this.currentField && (this.toDate || this.fromDate);
+                    var doSearch = removeCount > 0 || addFilter;
+                    // if we're not going to do a search, return
+                    if (!doSearch) return false;
+                    // if there's a filter to be added, do that here
+                    if (addFilter) {
+                        var range = {
+                            field: this.currentField
+                        };
+                        if (this.toDate) range["lte"] = this.formatDateForQuery(this.toDate);
+                        if (this.fromDate) range["gte"] = this.formatDateForQuery(this.fromDate);
+                        nq.addMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.RangeFilter(range));
+                    }
+                    // push the new query and trigger the search
+                    this.edge.pushQuery(nq);
+                    this.edge.cycle();
+                    return true;
+                }
+            }
+        },
+        {
+            key: "formatDateForQuery",
+            value: function formatDateForQuery(date) {
+                var zeroPadder = $d48cc3604bf30e24$export$48334dba1de70fbe({
+                    zeroPadding: 2
+                });
+                return date.getUTCFullYear() + "-" + zeroPadder(date.getUTCMonth() + 1) + "-" + zeroPadder(date.getUTCDate());
+            }
+        },
+        {
+            key: "loadDates",
+            value: function loadDates() {
+                for(var i = 0; i < this.fields.length; i++){
+                    var field = this.fields[i].field;
+                    // start with the default earliest and latest
+                    var early = this.defaultEarliest;
+                    var late = this.defaultLatest;
+                    // if specific functions are provided for getting the dates, run them
+                    var earlyFn = this.earliest[field];
+                    var lateFn = this.latest[field];
+                    if (earlyFn) early = earlyFn();
+                    if (lateFn) late = lateFn();
+                    this.dateOptions[field] = {
+                        earliest: early,
+                        latest: late
+                    };
+                }
+            }
+        },
+        {
+            key: "getSecondaryQueryFunction",
+            value: function getSecondaryQueryFunction() {
+                var that = this;
+                return function(edge) {
+                    // clone the current query, which will be the basis for the averages query
+                    var query = edge.cloneQuery();
+                    // remove any range constraints
+                    for(var i = 0; i < that.fields.length; i++){
+                        var field = that.fields[i];
+                        query.removeMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.RangeFilter({
+                            field: field.field
+                        }));
+                    }
+                    // remove any existing aggregations, we don't need them
+                    query.clearAggregations();
+                    // add the new aggregation(s) which will actually get the data
+                    for(var i = 0; i < that.fields.length; i++){
+                        var field = that.fields[i].field;
+                        query.addAggregation(new $8d94b5f2509b6cf5$export$8b446892c82de644.StatsAggregation({
+                            name: field,
+                            field: field
+                        }));
+                    }
+                    // finally set the size and from parameters
+                    query.size = 0;
+                    query.from = 0;
+                    // return the secondary query
+                    return query;
+                };
+            }
+        }
+    ]);
+    return $bcaf9e61a70b299d$export$eac301b83a14e1b7;
+}($6cf4dc301226cb87$export$ea71c44d9cb0d048);
+
+
+
+
+
+
+var $d626902615431ef9$export$4d567bc36d967c12 = /*#__PURE__*/ function(Renderer) {
+    "use strict";
+    $bca7673885229bfd$export$9099ad97b570f7c($d626902615431ef9$export$4d567bc36d967c12, Renderer);
+    function $d626902615431ef9$export$4d567bc36d967c12(params) {
+        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $d626902615431ef9$export$4d567bc36d967c12);
+        var _this;
+        _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($d626902615431ef9$export$4d567bc36d967c12).call(this, params));
+        ///////////////////////////////////////////////////
+        // parameters that can be passed in
+        _this.dateFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "dateFormat", "MMMM D, YYYY");
+        _this.useSelect2 = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "useSelect2", false);
+        _this.ranges = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "ranges", false);
+        ///////////////////////////////////////////////////
+        // parameters for tracking internal state
+        _this.dre = false;
+        _this.selectId = false;
+        _this.rangeId = false;
+        _this.selectJq = false;
+        _this.rangeJq = false;
+        _this.drp = false;
+        _this.namespace = "edges-bs3-multidaterangecombineselector";
+        return _this;
+    }
+    $67866ae5f3a26802$export$9099ad97b570f7c($d626902615431ef9$export$4d567bc36d967c12, [
+        {
+            key: "draw",
+            value: function draw() {
+                var dre = this.component;
+                var selectClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "select", this);
+                var inputClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "input", this);
+                var prefixClass = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "prefix", this);
+                this.selectId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, dre.id + "_date-type", this);
+                this.rangeId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, dre.id + "_range", this);
+                var pluginId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, dre.id + "_plugin", this);
+                var options = "";
+                for(var i = 0; i < dre.fields.length; i++){
+                    var field = dre.fields[i];
+                    var selected = dre.currentField === field.field ? ' selected="selected" ' : "";
+                    options += '<option value="' + field.field + '"' + selected + '>' + field.display + '</option>';
+                }
+                var frag = '<div class="form-inline">';
+                if (dre.display) frag += '<span class="' + prefixClass + '">' + dre.display + '</span>';
+                frag += '<div class="form-group"><select class="' + selectClass + ' form-control" name="' + this.selectId + '" id="' + this.selectId + '">' + options + '</select></div>';
+                frag += '<div id="' + this.rangeId + '" class="' + inputClass + ' form-control">\
+            <i class="glyphicon glyphicon-calendar"></i>&nbsp;\
+            <span></span> <b class="caret"></b>\
+        </div>';
+                frag += "</div>";
+                dre.context.html(frag);
+                var selectIdSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, dre.id + "_date-type", this);
+                var rangeIdSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, dre.id + "_range", this);
+                this.selectJq = dre.jq(selectIdSelector);
+                this.rangeJq = dre.jq(rangeIdSelector);
+                var cb = $d48cc3604bf30e24$export$367047a567f2342b(this, "updateDateRange", [
+                    "start",
+                    "end"
+                ]);
+                var props = {
+                    locale: {
+                        format: "DD/MM/YYYY"
+                    },
+                    opens: "left"
+                };
+                if (this.ranges) props["ranges"] = this.ranges;
+                // clear out any old version of the plugin, as these are appended to the document
+                // and not kept within the div controlled by this renderer
+                var pluginSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, dre.id + "_plugin", this);
+                $(pluginSelector).remove();
+                this.rangeJq.daterangepicker(props, cb);
+                this.drp = this.rangeJq.data("daterangepicker");
+                this.drp.container.attr("id", pluginId).addClass("show-calendar");
+                this.prepDates();
+                if (this.useSelect2) this.selectJq.select2();
+                $d48cc3604bf30e24$export$b4cd8de5710bc55c(selectIdSelector, "change", this, "typeChanged");
+            }
+        },
+        {
+            key: "dateRangeDisplay",
+            value: function dateRangeDisplay(params) {
+                var start = params.start;
+                var end = params.end;
+                this.rangeJq.find("span").html(start.utc().format(this.dateFormat) + ' - ' + end.utc().format(this.dateFormat));
+            }
+        },
+        {
+            key: "updateDateRange",
+            value: function updateDateRange(params) {
+                var start = params.start;
+                var end = params.end;
+                // a date or type has been changed, so set up the parent object
+                // ensure that the correct field is set (it may initially be not set)
+                var date_type = null;
+                if (this.useSelect2) date_type = this.selectJq.select2("val");
+                else date_type = this.selectJq.val();
+                this.component.changeField(date_type);
+                this.component.setFrom(start.toDate());
+                this.component.setTo(end.toDate());
+                this.dateRangeDisplay(params);
+                // this action should trigger a search (the parent object will
+                // decide if that's required)
+                var triggered = this.component.triggerSearch();
+                // if a search didn't get triggered, we still may need to modify the min/max specified dates
+                if (!triggered) this.prepDates();
+            }
+        },
+        {
+            key: "typeChanged",
+            value: function typeChanged(element) {
+                // ensure that the correct field is set (it may initially be not set)
+                var date_type = null;
+                if (this.useSelect2) date_type = this.selectJq.select2("val");
+                else date_type = this.selectJq.val();
+                this.component.changeField(date_type);
+                // unset the range
+                this.component.setFrom(false);
+                this.component.setTo(false);
+                // this action should trigger a search (the parent object will
+                // decide if that's required)
+                var triggered = this.component.triggerSearch();
+                // if a search didn't get triggered, we still may need to modify the min/max specified dates
+                if (!triggered) this.prepDates();
+            }
+        },
+        {
+            key: "prepDates",
+            value: function prepDates() {
+                var min = this.component.currentEarliest();
+                var max = this.component.currentLatest();
+                var fr = this.component.fromDate;
+                var to = this.component.toDate;
+                if (min) {
+                    this.drp.minDate = $bccd1ba82d89ceaa$export$137cea99ac96085(min);
+                    this.drp.setStartDate($bccd1ba82d89ceaa$export$137cea99ac96085(min));
+                } else {
+                    this.drp.minDate = $bccd1ba82d89ceaa$export$137cea99ac96085(this.component.defaultEarliest);
+                    this.drp.setStartDate($bccd1ba82d89ceaa$export$137cea99ac96085(this.component.defaultEarliest));
+                }
+                if (max) {
+                    this.drp.maxDate = $bccd1ba82d89ceaa$export$137cea99ac96085(max);
+                    this.drp.setEndDate($bccd1ba82d89ceaa$export$137cea99ac96085(max));
+                } else {
+                    this.drp.maxDate = $bccd1ba82d89ceaa$export$137cea99ac96085(this.component.defaultLatest);
+                    this.drp.setEndDate($bccd1ba82d89ceaa$export$137cea99ac96085(this.component.defaultLatest));
+                }
+                if (fr) {
+                    // if from lies before the min date, extend the min range
+                    if (fr < this.drp.minDate) this.drp.minDate = $bccd1ba82d89ceaa$export$137cea99ac96085(fr);
+                    // if from lies after the max date, extend the max range
+                    if (fr > this.drp.maxDate) this.drp.maxDate = $bccd1ba82d89ceaa$export$137cea99ac96085(fr);
+                    this.drp.setStartDate($bccd1ba82d89ceaa$export$137cea99ac96085(fr));
+                }
+                if (to) {
+                    // if to lies before the min date, extend the min range
+                    if (to < this.drp.minDate) this.drp.minDate = $bccd1ba82d89ceaa$export$137cea99ac96085(to);
+                    // if to lies after the max date, extend the max range
+                    if (to > this.drp.maxDate) this.drp.maxDate = $bccd1ba82d89ceaa$export$137cea99ac96085(to);
+                    this.drp.setEndDate($bccd1ba82d89ceaa$export$137cea99ac96085(to));
+                }
+                this.dateRangeDisplay({
+                    start: this.drp.startDate,
+                    end: this.drp.endDate
+                });
+            }
+        }
+    ]);
+    return $d626902615431ef9$export$4d567bc36d967c12;
+}($6cf4dc301226cb87$export$a695173e2ecfa9b);
+
+
 $parcel$global.nglp = {
 };
 nglp.g001 = {
@@ -9049,6 +9469,7 @@ nglp.g001.init = function(params) {
         "export",
         "request"
     ];
+    var initialDateRange = $9aa3b42083a3eab8$var$getInitialDateRange();
     nglp.g001.active[selector] = new $6cf4dc301226cb87$export$22ad9a5707a07e9c({
         selector: selector,
         template: new nglp.g001.G001Template(),
@@ -9073,9 +9494,9 @@ nglp.g001.init = function(params) {
                 }),
                 new $8d94b5f2509b6cf5$export$8b446892c82de644.RangeFilter({
                     field: "occurred_at",
-                    gte: "2020-05-01",
-                    lte: "2021-07-01"
-                }) // FIXME: these will need to be wired up to a date selector
+                    gte: initialDateRange.gte,
+                    lte: initialDateRange.lte
+                })
             ],
             size: 0,
             aggs: [
@@ -9109,6 +9530,19 @@ nglp.g001.init = function(params) {
             ]
         }),
         components: [
+            new $bcaf9e61a70b299d$export$eac301b83a14e1b7({
+                id: "g001-date-range",
+                display: "REPORT PERIOD:<br>",
+                fields: [
+                    {
+                        field: "occurred_at",
+                        display: "Event Date"
+                    }
+                ],
+                autoLookupRange: true,
+                renderer: new $d626902615431ef9$export$4d567bc36d967c12({
+                })
+            }),
             new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
                 id: "g001-interactions-chart",
                 dataFunction: $ae46249d8a2a7b6d$export$d99c821b0fb86668({
@@ -9377,6 +9811,15 @@ var $9aa3b42083a3eab8$var$MapPointRenderer = /*#__PURE__*/ function() {
     ]);
     return $9aa3b42083a3eab8$var$MapPointRenderer;
 }();
+function $9aa3b42083a3eab8$var$getInitialDateRange() {
+    var now = $bccd1ba82d89ceaa$export$137cea99ac96085();
+    var lte = now.format("YYYY-MM-DD");
+    var gte = now.subtract(1, "years").format("YYYY-MM-DD");
+    return {
+        gte: gte,
+        lte: lte
+    };
+}
 var $9aa3b42083a3eab8$export$9099ad97b570f7c = nglp;
 
 })();
