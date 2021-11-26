@@ -5,17 +5,51 @@
 
 // export the key bits of the palette as stylesheet rules, to be read by the JS
 // for injection into visualisation components
-#palette {
-    #investigations {
-        background: $investigations;
+#workflowpalette {
+    #a {
+        color: $wf-first;
     }
 
-    #requests {
-        background: $requests;
+    #b {
+        color: $wf-second;
     }
 
-    #exports {
-        background: $exports;
+    #c {
+        color: $wf-third;
+    }
+
+    #d {
+        color: $wf-fourth;
+    }
+
+    #e {
+        color: $wf-fifth;
+    }
+}
+
+#agepalette {
+    #a {
+        color: $age-1m;
+    }
+
+    #b {
+        color: $age-2m;
+    }
+
+    #c {
+        color: $age-3m;
+    }
+
+    #d {
+        color: $age-4m;
+    }
+
+    #e {
+        color: $age-5m;
+    }
+
+    #f {
+        color: $age-more;
     }
 }
 
