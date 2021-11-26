@@ -337,23 +337,36 @@ nglp.g001.G001Template = class extends Template {
         this.edge = edge;
         let checkboxId = htmlID(this.namespace, "show-as-table");
 
-        let frame = `<div class="row header">
-            <div class="col-xs-12">
-                <h1>G001: Article  Downloads for  Unit Administrators</h1>
-                <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2> 
-            </div>
+        let frame = `
+<div class="header header--main">
+    <div class="container">   
+        <div class="row">
+            <h1>G001: Article  Downloads for  Unit Administrators</h1>
+            <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2>
         </div>
-        <div class="row controls">
-            <div class="col-md-6">
-                <ul class="nav">
-                    <li><a href="#">Go back to Dashboard</a></li>
-                    <li><a href="#">Print this view to PDF</a></li>
+    </div>
+</div>
+<div class="header header--secondary">
+    <div class="container">
+        <nav class="navbar navbar-expand-md">
+            <div class="navbar">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Go back to Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Print this view to PDF</a>
+                    </li>
                 </ul>
+                <form class="form-inline my-2 my-lg-0">
+                    <div id="g001-date-range"></div>
+                </form>
             </div>
-            <div class="col-md-6">
-                <div id="g001-date-range"></div>
-            </div>
-        </div>
+        </nav>
+    </div>
+</div>
+
+<div class="container">
         <div class="row report-area">
             <div class="col-md-3">
                 <div id="g001-interactions"></div>
@@ -378,7 +391,8 @@ nglp.g001.G001Template = class extends Template {
                     </div>
                 </div>
             </div>
-        </div>`;
+        </div>
+</div>`;
 
         edge.context.html(frame);
 

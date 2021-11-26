@@ -1,0 +1,35 @@
+body {
+  font-family: 'Karla', sans-serif;
+  padding-top: 5rem;
+  background-color: $white;
+  color: $black;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
+
+  h1 {
+    line-height: inherit;
+    margin: revert;
+    font-weight: 700;
+    font-size: 30px;
+    color: $white;
+  }
+
+  h2 {
+    line-height: inherit;
+    margin: revert;
+    font-weight: 700;
+    font-size: 22px;
+    color: $white;
+  }
+}
+
+.header {
+  &--main {
+    background-color: $brand-blue-0;
+  }
+  &--secondary {
+    background-color: $brand-blue-1;
+  }
+
+}

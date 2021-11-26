@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "latlon-geohash": "^2.0.0",
+    "parcel": "^2.0.1"
+  }
+}
