@@ -3846,7 +3846,7 @@ var $e2db652327571723$export$aee0d0b293b2739 = /*#__PURE__*/ function(Renderer) 
         var _this;
         _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($e2db652327571723$export$aee0d0b293b2739).call(this, params));
         _this.title = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "title", false);
-        _this.interactiveGuideline = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "interactiveGuideline", true);
+        _this.useInteractiveGuideline = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "useInteractiveGuideline", true);
         _this.xTickFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "xTickFormat", false);
         _this.yTickFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "yTickFormat", false);
         _this.transitionDuration = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "transitionDuration", 500);
@@ -3973,7 +3973,7 @@ nglp.g014.init = function(params) {
     // distribute the palette cyclically over the state progressions
     for(var i = 0; i < stateProgression.length; i++){
         var state = stateProgression[i];
-        state.push(wfPalette[wfPaletteKeys[i % wfPaletteKeys.length - 1]]);
+        state.push(wfPalette[wfPaletteKeys[i % wfPaletteKeys.length]]);
     }
     var agePalette = $4002aa3570a5e3f8$export$8e8129eda99077("g014.css", "#agepalette");
     var agePaletteKeys = Object.keys(agePalette);
@@ -4074,6 +4074,7 @@ nglp.g014.init = function(params) {
                     return d3.time.format('%B %Y')(new Date(d));
                 },
                 controls: false,
+                showLegend: false,
                 color: function color(d, i5) {
                     for(var j = 0; j < stateProgression.length; j++){
                         var state = stateProgression[j];
@@ -4249,12 +4250,20 @@ nglp.g014.G014Template = /*#__PURE__*/ (function(Template) {
                 var tableClasses = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "stats");
                 var ageChartClasses = $d48cc3604bf30e24$export$e516ebba864be69d(this.namespace, "age-chart");
                 var ageTableClasses = $d48cc3604bf30e24$export$5be7444ab39fbaa3(this.namespace, "age-table");
+                var legendClasses = $d48cc3604bf30e24$export$e516ebba864be69d(this.namespace, "legend");
+                var legendBoxClasses = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "legend-box");
+                var showAsTableClasses = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "sat");
                 var tableRows = "";
                 for(var i = 0; i < this.stateProgression.length; i++){
                     var state = this.stateProgression[i];
                     tableRows += "\n                <tr>\n                    <td>".concat(state[1], "</td>\n                    <td id=\"g014-total-").concat(state[0], "\"></td>\n                    <td id=\"g014-mean-").concat(state[0], "\"></td>\n                    <td>\n                        <div id=\"g014-age-chart-").concat(state[0], "\" class=\"").concat(ageChartClasses, "\"></div>\n                        <div id=\"g014-age-table-").concat(state[0], "\" class=\"").concat(ageTableClasses, "\" style=\"display:none\"></div>\n                    </td>\n                </tr>\n            ");
                 }
-                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G014: Progress of articles through the editorial workflow</h1>\n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g014-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-xs-12\">\n                <h3>Statistics per workflow state</h3>\n                <table class=\"".concat(tableClasses, "\">\n                    <thead>\n                        <tr>\n                            <td></td>\n                            <td>In Total Today</td>\n                            <td>Mean Time to Progress</td>\n                            <td>\n                                Age of Items\n                                <p><input type=\"checkbox\" name=\"").concat(ageId, "\" id=\"").concat(ageId, "\"> Show as table</p>\n                            </td>\n                        </tr>\n                    </thead>\n                    <tbody>\n                        ").concat(tableRows, "\n                    </tbody>\n                </table>\n                \n                <h3>Workflow Capacity</h3>\n                <p><input type=\"checkbox\" name=\"").concat(capacityId, "\" id=\"").concat(capacityId, "\"> Show as table</p>\n                <div id=\"g014-workflow-capacity-chart\"></div>\n                <div id=\"g014-workflow-capacity-table\" style=\"display: none\"></div>\n                \n            </div>\n        </div>");
+                var capacityChartLegend = "";
+                for(var i1 = 0; i1 < this.stateProgression.length; i1++){
+                    var state = this.stateProgression[i1];
+                    capacityChartLegend += "\n                <div class=\"col-md-2 ".concat(legendClasses, "\">\n                    <div class=\"").concat(legendBoxClasses, "\" style=\"color: ").concat(state[2], ";\">&#9632;</div>\n                    ").concat(state[1], "\n                </div>\n            ");
+                }
+                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G014: Progress of articles through the editorial workflow</h1>\n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g014-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-xs-12\">\n                <h3>Statistics per workflow state</h3>\n                <table class=\"".concat(tableClasses, "\">\n                    <thead>\n                        <tr>\n                            <td></td>\n                            <td>In Total Today</td>\n                            <td>Mean Time to Progress</td>\n                            <td>\n                                Age of Items\n                                <p><input type=\"checkbox\" name=\"").concat(ageId, "\" id=\"").concat(ageId, "\"> Show as table</p>\n                            </td>\n                        </tr>\n                    </thead>\n                    <tbody>\n                        ").concat(tableRows, "\n                    </tbody>\n                </table>\n                \n                <h3>Workflow Capacity</h3>\n                <div class=\"row ").concat(showAsTableClasses, "\">\n                    <div class=\"col-md-2\"><input type=\"checkbox\" name=\"").concat(capacityId, "\" id=\"").concat(capacityId, "\"> Show as table</div>\n                    ").concat(capacityChartLegend, "\n                </div>\n                \n                <div id=\"g014-workflow-capacity-chart\"></div>\n                <div id=\"g014-workflow-capacity-table\" style=\"display: none\"></div>\n                \n            </div>\n        </div>");
                 edge.context.html(frame);
                 var ageSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, "age-show-as-table");
                 $d48cc3604bf30e24$export$b4cd8de5710bc55c(ageSelector, "change", this, "toggleAgeTables");
@@ -4265,15 +4274,19 @@ nglp.g014.G014Template = /*#__PURE__*/ (function(Template) {
         {
             key: "toggleCapacityTable",
             value: function toggleCapacityTable() {
+                var legendSelector = $d48cc3604bf30e24$export$b1157bd4df096bce(this.namespace, "legend");
                 var chart = this.edge.jq("#g014-workflow-capacity-chart");
                 var table = this.edge.jq("#g014-workflow-capacity-table");
+                var legend = this.edge.jq(legendSelector);
                 if (this.showingCapacity === "chart") {
                     chart.hide();
                     table.show();
+                    legend.hide();
                     this.showingCapacity = "table";
                 } else {
                     table.hide();
                     chart.show();
+                    legend.show();
                     this.showingCapacity = "chart";
                 }
             }

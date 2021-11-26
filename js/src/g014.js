@@ -44,7 +44,7 @@ nglp.g014.init = function (params) {
     // distribute the palette cyclically over the state progressions
     for (let i = 0; i < stateProgression.length; i++) {
         let state = stateProgression[i];
-        state.push(wfPalette[wfPaletteKeys[i % wfPaletteKeys.length - 1]]);
+        state.push(wfPalette[wfPaletteKeys[i % wfPaletteKeys.length]]);
     }
 
     let agePalette = extractPalette("g014.css", "#agepalette");
@@ -141,6 +141,7 @@ nglp.g014.init = function (params) {
                     return d3.time.format('%B %Y')(new Date(d))
                 },
                 controls: false,
+                showLegend: false,
                 color: function(d, i) {
                     for (let j = 0; j < stateProgression.length; j++) {
                         let state = stateProgression[j];
@@ -274,6 +275,9 @@ nglp.g014.G014Template = class extends Template {
         let tableClasses = styleClasses(this.namespace, "stats");
         let ageChartClasses = allClasses(this.namespace, "age-chart");
         let ageTableClasses = jsClasses(this.namespace, "age-table");
+        let legendClasses = allClasses(this.namespace, "legend");
+        let legendBoxClasses = styleClasses(this.namespace, "legend-box");
+        let showAsTableClasses = styleClasses(this.namespace, "sat");
 
         let tableRows = "";
         for (let i = 0; i < this.stateProgression.length; i++) {
@@ -289,6 +293,17 @@ nglp.g014.G014Template = class extends Template {
                     </td>
                 </tr>
             `;
+        }
+
+        let capacityChartLegend = "";
+        for (let i = 0; i < this.stateProgression.length; i++) {
+            let state = this.stateProgression[i];
+            capacityChartLegend += `
+                <div class="col-md-2 ${legendClasses}">
+                    <div class="${legendBoxClasses}" style="color: ${state[2]};">&#9632;</div>
+                    ${state[1]}
+                </div>
+            `
         }
 
         let frame = `<div class="row header">
@@ -328,7 +343,11 @@ nglp.g014.G014Template = class extends Template {
                 </table>
                 
                 <h3>Workflow Capacity</h3>
-                <p><input type="checkbox" name="${capacityId}" id="${capacityId}"> Show as table</p>
+                <div class="row ${showAsTableClasses}">
+                    <div class="col-md-2"><input type="checkbox" name="${capacityId}" id="${capacityId}"> Show as table</div>
+                    ${capacityChartLegend}
+                </div>
+                
                 <div id="g014-workflow-capacity-chart"></div>
                 <div id="g014-workflow-capacity-table" style="display: none"></div>
                 
@@ -345,15 +364,21 @@ nglp.g014.G014Template = class extends Template {
     }
 
     toggleCapacityTable() {
+        let legendSelector = jsClassSelector(this.namespace, "legend");
+
         let chart = this.edge.jq("#g014-workflow-capacity-chart");
         let table = this.edge.jq("#g014-workflow-capacity-table");
+        let legend = this.edge.jq(legendSelector);
+
         if (this.showingCapacity === "chart") {
             chart.hide();
             table.show();
+            legend.hide();
             this.showingCapacity = "table"
         } else {
             table.hide();
             chart.show();
+            legend.show();
             this.showingCapacity = "chart"
         }
     }

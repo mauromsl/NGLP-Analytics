@@ -113,6 +113,21 @@
         }
     }
 
+    .g014-template_sat {
+        text-transform: uppercase;
+    }
+
+    .g014-template_legend {
+        text-transform: uppercase;
+    }
+
+    .g014-template_legend-box {
+        display: inline-block;
+        font-size: 2em;
+        padding-right: 5px;
+        line-height: 0
+    }
+
     .edges-bs3-chartdatatable_table {
         width: 100%;
 
@@ -133,17 +148,23 @@
                 font-weight: bold;
                 text-transform: uppercase;
                 color: $title-text;
+
+                td {
+                    padding-bottom: 10px;
+                }
             }
 
             tr {
-                border-bottom: 2px solid $table-divider;
+                border-bottom: 1px solid $table-divider;
             }
 
             td {
                 &:first-of-type {
                     font-weight: bold;
                     text-transform: uppercase;
-                    color: $title-text
+                    color: $title-text;
+                    padding-top: 5px;
+                    padding-bottom: 5px;
                 }
             }
         }
