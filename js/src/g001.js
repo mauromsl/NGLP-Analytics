@@ -59,7 +59,18 @@ nglp.g001.init = function (params) {
             must : [
                 new es.TermsFilter({field: "event.exact", values: ["request", "investigation", "export"]}),
                 new es.TermsFilter({field: "object_type.exact", values: ["article", "file"]}),
-                new es.RangeFilter({field : "occurred_at", gte: initialDateRange.gte, lte: initialDateRange.lte})
+                new es.RangeFilter({field : "occurred_at", gte: initialDateRange.gte, lte: initialDateRange.lte}),
+                new es.GeoBoundingBoxFilter({
+                    field: "location",
+                    top_left: {
+                        "lat": 90,
+                        "lon": -180
+                    },
+                    bottom_right: {
+                        "lat": -90,
+                        "lon": 180
+                    }
+                })
             ],
             size: 0,
             aggs: [
@@ -77,7 +88,7 @@ nglp.g001.init = function (params) {
                 new es.GeohashGridAggregation({
                     name: "geo",
                     field: "location",
-                    precision: 1
+                    precision: 5    // NOTE: this needs to tie up with the zoomToPrecisionMap in the component
                 }),
                 new es.TermsAggregation({
                     name: "events",
