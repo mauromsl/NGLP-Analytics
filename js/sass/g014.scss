@@ -113,6 +113,14 @@
         }
     }
 
+    .edges-bs3-chartdatatable_table {
+        width: 100%;
+
+        tr {
+            border-bottom: 1px solid $table-divider;
+        }
+    }
+
     #g014-workflow-capacity-chart {
         height: 600px;
     }
