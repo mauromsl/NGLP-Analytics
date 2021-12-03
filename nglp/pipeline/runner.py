@@ -8,6 +8,7 @@ import os
 from nglp.pipeline.pipeline import UnacceptableEvent
 from nglp.pipeline.categorise import Categorise
 from nglp.pipeline.geolocate import Geolocate
+from nglp.pipeline.normalise import Normalise
 from nglp.models.events import PipelineEvent
 from nglp.config import settings
 from datetime import datetime
@@ -16,7 +17,8 @@ from datetime import datetime
 class Runner:
     pipe = [
         Categorise(),
-        Geolocate()
+        Geolocate(),
+        Normalise()
     ]
 
     def process_event(self, event: PipelineEvent) -> PipelineEvent:
