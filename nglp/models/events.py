@@ -3,7 +3,7 @@ import json
 from typing import List
 
 from nglp.lib.seamless import SeamlessMixin
-from nglp.models import structs
+from nglp.models import event_structs
 from nglp.dao import BaseDAO, MAPPING_OPTS
 from nglp.lib import es_data_mapping
 from nglp.config import settings
@@ -42,11 +42,11 @@ class EventModel(SeamlessMixin):
 class RequestEvent(EventModel):
     """Event which represents a "Request" event, which is a file download"""
     __SEAMLESS_STRUCT__ = [
-        structs.REQUEST_EVENT_STRUCT,
-        structs.SOURCE
+        event_structs.REQUEST_EVENT_STRUCT,
+        event_structs.SOURCE
     ]
 
-    __SEAMLESS_COERCE__ = structs.COERCE
+    __SEAMLESS_COERCE__ = event_structs.COERCE
 
     def __init__(self, raw=None):
         super(RequestEvent, self).__init__(raw=raw)
@@ -55,11 +55,11 @@ class RequestEvent(EventModel):
 class InvestigationEvent(EventModel):
     """Event which represents an "Investigation" event, which is a page view"""
     __SEAMLESS_STRUCT__ =  [
-        structs.INVESTIGATION_EVENT_STRUCT,
-        structs.SOURCE
+        event_structs.INVESTIGATION_EVENT_STRUCT,
+        event_structs.SOURCE
     ]
 
-    __SEAMLESS_COERCE__ = structs.COERCE
+    __SEAMLESS_COERCE__ = event_structs.COERCE
 
     def __init__(self, raw=None):
         super(InvestigationEvent, self).__init__(raw=raw)
@@ -68,11 +68,11 @@ class InvestigationEvent(EventModel):
 class WorkflowTransitionEvent(EventModel):
     """Event which represents one of the range of workflow transition events"""
     __SEAMLESS_STRUCT__ =  [
-        structs.WORKFLOW_TRANSITION_EVENT_STRUCT,
-        structs.SOURCE
+        event_structs.WORKFLOW_TRANSITION_EVENT_STRUCT,
+        event_structs.SOURCE
     ]
 
-    __SEAMLESS_COERCE__ = structs.COERCE
+    __SEAMLESS_COERCE__ = event_structs.COERCE
 
     def __init__(self, raw=None):
         super(WorkflowTransitionEvent, self).__init__(raw=raw)
@@ -81,11 +81,11 @@ class WorkflowTransitionEvent(EventModel):
 class ExportEvent(EventModel):
     """Event which represents a metadata export from an item (e.g. for a reference manager)"""
     __SEAMLESS_STRUCT__ =  [
-        structs.EXPORT_EVENT,
-        structs.SOURCE
+        event_structs.EXPORT_EVENT,
+        event_structs.SOURCE
     ]
 
-    __SEAMLESS_COERCE__ = structs.COERCE
+    __SEAMLESS_COERCE__ = event_structs.COERCE
 
     def __init__(self, raw=None):
         super(ExportEvent, self).__init__(raw=raw)
@@ -94,11 +94,11 @@ class ExportEvent(EventModel):
 class JoinEvent(EventModel):
     """Event which represents a staff member joining the editorial team for a journal"""
     __SEAMLESS_STRUCT__ =  [
-        structs.JOIN_EVENT,
-        structs.SOURCE
+        event_structs.JOIN_EVENT,
+        event_structs.SOURCE
     ]
 
-    __SEAMLESS_COERCE__ = structs.COERCE
+    __SEAMLESS_COERCE__ = event_structs.COERCE
 
     def __init__(self, raw=None):
         super(JoinEvent, self).__init__(raw=raw)
@@ -107,11 +107,11 @@ class JoinEvent(EventModel):
 class LeaveEvent(EventModel):
     """Event which represents a staff member leaving the editorial team for a journal"""
     __SEAMLESS_STRUCT__ =  [
-        structs.LEAVE_EVENT,
-        structs.SOURCE
+        event_structs.LEAVE_EVENT,
+        event_structs.SOURCE
     ]
 
-    __SEAMLESS_COERCE__ = structs.COERCE
+    __SEAMLESS_COERCE__ = event_structs.COERCE
 
     def __init__(self, raw=None):
         super(LeaveEvent, self).__init__(raw=raw)
@@ -140,6 +140,10 @@ class CoreEventInterfaceMixin:
     @property
     def object_ids(self):
         return self.__seamless__.get_list("object_id")
+
+    @object_ids.setter
+    def object_ids(self, val):
+        self.__seamless__.set_with_struct("object_id", val)
 
     @property
     def ip(self):
@@ -203,10 +207,10 @@ class CoreEventInterfaceMixin:
 
 class PipelineEvent(SeamlessMixin, CoreEventInterfaceMixin):
     __SEAMLESS_STRUCT__ = [
-        structs.CORE_EVENT_STRUCTURE
+        event_structs.CORE_EVENT_STRUCTURE
     ]
 
-    __SEAMLESS_COERCE__ = structs.COERCE
+    __SEAMLESS_COERCE__ = event_structs.COERCE
 
     def __init__(self, raw=None):
         super(PipelineEvent, self).__init__(raw=raw)
@@ -219,11 +223,11 @@ class CoreEvent(SeamlessMixin, CoreEventInterfaceMixin, BaseDAO):
     __index_type__ = "event"
 
     __SEAMLESS_STRUCT__ = [
-        structs.CORE_EVENT_STRUCTURE,
-        structs.CORE_EVENT_REQUIRED
+        event_structs.CORE_EVENT_STRUCTURE,
+        event_structs.CORE_EVENT_REQUIRED
     ]
 
-    __SEAMLESS_COERCE__ = structs.COERCE
+    __SEAMLESS_COERCE__ = event_structs.COERCE
 
     def __init__(self, raw=None):
         super(CoreEvent, self).__init__(raw=raw)

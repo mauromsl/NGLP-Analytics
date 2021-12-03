@@ -1,0 +1,16 @@
+{
+	"type" : "author",
+	"source_id" : "http://janeway.com",
+	"identifiers" : [
+		"ORCID:1234-5678-1234-5678"
+	],
+	"contained_by" : [
+		"ror:123456789"
+	],
+	"author" : {
+		"article_ids" : [
+			"doi:10.4321.x",
+			"doi:10.987.y"
+		]
+	}
+}
