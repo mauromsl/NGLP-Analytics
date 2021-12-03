@@ -3177,6 +3177,12 @@ var $ae46249d8a2a7b6d$export$7decb792461ef5a9 = /*#__PURE__*/ function(Component
         // function which will generate the data series, which will be
         // written to this.dataSeries if that is not provided
         _this.dataFunction = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "dataFunction", false);
+        // should we enforce a rectangular shape on the data series for when there is
+        // more than one series to be displayed?
+        _this.rectangulate = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "rectangulate", false);
+        // function which will sort the values of a series, used when rectangulate is
+        // set to true
+        _this.seriesSort = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "seriesSort", false);
         return _this;
     }
     $67866ae5f3a26802$export$9099ad97b570f7c($ae46249d8a2a7b6d$export$7decb792461ef5a9, [
@@ -3184,6 +3190,40 @@ var $ae46249d8a2a7b6d$export$7decb792461ef5a9 = /*#__PURE__*/ function(Component
             key: "synchronise",
             value: function synchronise() {
                 if (this.dataFunction) this.dataSeries = this.dataFunction(this);
+                if (this.rectangulate) this._rectangulate();
+            }
+        },
+        {
+            key: "_rectangulate",
+            value: function _rectangulate() {
+                if (this.dataSeries.length === 1) // if there's only one series, it is rectangular by definition
+                return;
+                // first index all the keys in the data series values for all
+                // data series
+                var allLabels = [];
+                for(var i = 0; i < this.dataSeries.length; i++){
+                    var series = this.dataSeries[i];
+                    for(var j = 0; j < series.values.length; j++){
+                        var point = series.values[j];
+                        if (!allLabels.includes(point.label)) allLabels.push(point.label);
+                    }
+                }
+                // now we have a full list of labels, check they are all present
+                // in each series, and if not set a default value of 0
+                for(var i1 = 0; i1 < this.dataSeries.length; i1++){
+                    var series = this.dataSeries[i1];
+                    var currentLabels = series.values.map(function(x) {
+                        return x.label;
+                    });
+                    for(var j = 0; j < allLabels.length; j++){
+                        var considerLabel = allLabels[j];
+                        if (!currentLabels.includes(considerLabel)) series.values.push({
+                            label: considerLabel,
+                            value: 0
+                        }); // NOTE: there is no sorting here, have to see what impact that has
+                    }
+                    if (this.seriesSort) series.values = this.seriesSort(series.values);
+                }
             }
         }
     ]);
@@ -3545,6 +3585,7 @@ var $8ff5b3d2c2ab6201$export$6d5fb309d07d7299 = /*#__PURE__*/ function(Renderer)
                     bottom: that.marginBottom,
                     left: that.marginLeft
                 }).showValues(that.showValues).tooltips(that.toolTips).showControls(that.controls).showLegend(that.legend).showXAxis(that.showXAxis).showYAxis(that.showYAxis);
+                if (that.barColor) chart.barColor(that.barColor);
                 if (that.stacked) chart.multibar.stacked(that.stacked);
                 if (that.yTickFormat) {
                     var fn = that.yTickFormat;
@@ -3610,6 +3651,7 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
         _this.valueFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "valueFormat", false);
         _this.labelFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "labelFormat", false);
         _this.headerFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "headerFormat", false);
+        _this.seriesOrderFunction = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "seriesOrderFunction", false);
         _this.namespace = "edges-bs3-chartdatatable";
         return _this;
     }
@@ -3648,6 +3690,8 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
                     head: [],
                     body: []
                 };
+                if (!ds || ds.length === 0) return table;
+                if (this.seriesOrderFunction) ds = this.seriesOrderFunction(ds);
                 var headers = [
                     ""
                 ];
@@ -3802,12 +3846,13 @@ var $e2db652327571723$export$aee0d0b293b2739 = /*#__PURE__*/ function(Renderer) 
         var _this;
         _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($e2db652327571723$export$aee0d0b293b2739).call(this, params));
         _this.title = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "title", false);
-        _this.interactiveGuideline = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "interactiveGuideline", true);
+        _this.useInteractiveGuideline = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "useInteractiveGuideline", true);
         _this.xTickFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "xTickFormat", false);
         _this.yTickFormat = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "yTickFormat", false);
         _this.transitionDuration = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "transitionDuration", 500);
         _this.showLegend = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "showLegend", true);
         _this.controls = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "controls", true);
+        _this.color = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "color", false);
         _this.xAxisLabel = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "xAxisLabel", "");
         _this.yAxisLabel = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "yAxisLabel", "");
         _this.yAxisLabelDistance = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "yAxisLabelDistance", 0);
@@ -3843,6 +3888,7 @@ var $e2db652327571723$export$aee0d0b293b2739 = /*#__PURE__*/ function(Renderer) 
                     }).y(function(d) {
                         return d.y;
                     });
+                    if (outer.color) chart.color(outer.color);
                     if (outer.xTickFormat) {
                         var fn = outer.xTickFormat;
                         if (typeof outer.xTickFormat === "string") fn = d3.format(outer.xTickFormat);
@@ -3866,19 +3912,18 @@ var $e2db652327571723$export$aee0d0b293b2739 = /*#__PURE__*/ function(Renderer) 
 }($6cf4dc301226cb87$export$a695173e2ecfa9b);
 
 
-function $4002aa3570a5e3f8$export$8e8129eda99077(sheetName) {
+function $4002aa3570a5e3f8$export$8e8129eda99077(sheetName, paletteSelector) {
+    if (!paletteSelector) paletteSelector = "#palette";
     var palette = {
-        investigation: false,
-        export: false,
-        request: false
     };
     for(var i = 0; i < document.styleSheets.length; i++){
         var sheet = document.styleSheets[i];
         if (sheet.href && sheet.href.includes(sheetName)) for(var j = 0; j < sheet.rules.length; j++){
             var rule = sheet.rules[j];
-            if (rule.selectorText === "#palette #investigations") palette.investigation = rule.style.background;
-            else if (rule.selectorText === "#palette #exports") palette.export = rule.style.background;
-            else if (rule.selectorText === "#palette #requests") palette.request = rule.style.background;
+            if (rule.selectorText.startsWith(paletteSelector + " ")) {
+                var key = rule.selectorText.substring(paletteSelector.length + 2);
+                palette[key] = rule.style.color;
+            }
         }
     }
     return palette;
@@ -3899,7 +3944,7 @@ nglp.g014.init = function(params) {
     var countFormat = $d48cc3604bf30e24$export$48334dba1de70fbe({
         thousandsSeparator: ","
     });
-    var palette = $4002aa3570a5e3f8$export$8e8129eda99077("g014.css");
+    // FIXME: we'll need to draw this stage progression from configuration somewhere along the line
     var stateProgression = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "stateProgression", [
         [
             "submit",
@@ -3922,15 +3967,28 @@ nglp.g014.init = function(params) {
             "Published"
         ]
     ]);
+    var wfPalette = $4002aa3570a5e3f8$export$8e8129eda99077("g014.css", "#workflowpalette");
+    var wfPaletteKeys = Object.keys(wfPalette);
+    wfPaletteKeys = wfPaletteKeys.sort();
+    // distribute the palette cyclically over the state progressions
+    for(var i = 0; i < stateProgression.length; i++){
+        var state = stateProgression[i];
+        state.push(wfPalette[wfPaletteKeys[i % wfPaletteKeys.length]]);
+    }
+    var agePalette = $4002aa3570a5e3f8$export$8e8129eda99077("g014.css", "#agepalette");
+    var agePaletteKeys = Object.keys(agePalette);
+    agePaletteKeys = agePaletteKeys.sort();
+    var ageBarColours = [];
+    for(var i1 = 0; i1 < agePaletteKeys.length; i1++)ageBarColours.push(agePalette[agePaletteKeys[i1]]);
     // Current workflow load
     var currentComponents = [];
-    for(var i = 0; i < stateProgression.length; i++)currentComponents.push(new $9b74310943fd261d$export$f378f3259fa0dca8({
-        id: "g014-total-" + stateProgression[i][0],
+    for(var i2 = 0; i2 < stateProgression.length; i2++)currentComponents.push(new $9b74310943fd261d$export$f378f3259fa0dca8({
+        id: "g014-total-" + stateProgression[i2][0],
         calculate: function(state) {
             return function(component) {
                 var agg = component.edge.result.aggregation("states");
-                for(var i1 = 0; i1 < agg.buckets.length; i1++){
-                    var bucket = agg.buckets[i1];
+                for(var i3 = 0; i3 < agg.buckets.length; i3++){
+                    var bucket = agg.buckets[i3];
                     if (bucket.key === state) return {
                         main: bucket.doc_count,
                         second: false
@@ -3941,20 +3999,20 @@ nglp.g014.init = function(params) {
                     second: false
                 };
             };
-        }(stateProgression[i][0]),
+        }(stateProgression[i2][0]),
         renderer: new $420906a4991ac6e0$export$e26cebb6d948b61a({
             mainNumberFormat: countFormat
         })
     }));
     var transitionComponents = [];
-    for(var i1 = 0; i1 < stateProgression.length - 1; i1++)transitionComponents.push(new $9b74310943fd261d$export$f378f3259fa0dca8({
-        id: "g014-mean-" + stateProgression[i1][0],
+    for(var i3 = 0; i3 < stateProgression.length - 1; i3++)transitionComponents.push(new $9b74310943fd261d$export$f378f3259fa0dca8({
+        id: "g014-mean-" + stateProgression[i3][0],
         calculate: function(state) {
             var secondsPerDay = 86400;
             return function(component) {
                 var agg = component.edge.secondaryResults["transitions"].aggregation("states");
-                for(var i2 = 0; i2 < agg.buckets.length; i2++){
-                    var bucket = agg.buckets[i2];
+                for(var i4 = 0; i4 < agg.buckets.length; i4++){
+                    var bucket = agg.buckets[i4];
                     if (bucket.key === state) return {
                         main: Math.ceil(bucket.time.avg / secondsPerDay),
                         second: false
@@ -3965,7 +4023,7 @@ nglp.g014.init = function(params) {
                     second: false
                 };
             };
-        }(stateProgression[i1][0]),
+        }(stateProgression[i3][0]),
         renderer: new $420906a4991ac6e0$export$e26cebb6d948b61a({
             mainNumberFormat: function mainNumberFormat(num) {
                 return countFormat(num) + " days";
@@ -3974,7 +4032,7 @@ nglp.g014.init = function(params) {
     }));
     // Note: I've moved this out to a separate function, because the parcel compiler
     // was having trouble with it inline (for reasons unknown https://github.com/parcel-bundler/parcel/issues/7252 )
-    var ageComponents = $6ec8c71f816e3f1f$var$getAgeComponents(stateProgression, countFormat);
+    var ageComponents = $6ec8c71f816e3f1f$var$getAgeComponents(stateProgression, countFormat, ageBarColours);
     // workflow capacity
     var yearmillis = 31536000000;
     var ranges = $6ec8c71f816e3f1f$var$rangeGenerator({
@@ -3984,8 +4042,8 @@ nglp.g014.init = function(params) {
     });
     var filters = {
     };
-    for(var i2 = 0; i2 < ranges.length; i2++){
-        var range = ranges[i2];
+    for(var i4 = 0; i4 < ranges.length; i4++){
+        var range = ranges[i4];
         filters[range.start_millis.toString()] = {
             "bool": {
                 "must": [
@@ -4015,7 +4073,14 @@ nglp.g014.init = function(params) {
                 xTickFormat: function xTickFormat(d) {
                     return d3.time.format('%B %Y')(new Date(d));
                 },
-                controls: false
+                controls: false,
+                showLegend: false,
+                color: function color(d, i5) {
+                    for(var j = 0; j < stateProgression.length; j++){
+                        var state = stateProgression[j];
+                        if (state[0] === d.key) return state[2];
+                    }
+                }
             })
         }),
         new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
@@ -4027,8 +4092,8 @@ nglp.g014.init = function(params) {
                 },
                 valueFormat: countFormat,
                 headerFormat: function headerFormat(d) {
-                    for(var i3 = 0; i3 < stateProgression.length; i3++){
-                        var state = stateProgression[i3];
+                    for(var i5 = 0; i5 < stateProgression.length; i5++){
+                        var state = stateProgression[i5];
                         if (state[0] === d) return state[1];
                     }
                     return d;
@@ -4183,14 +4248,22 @@ nglp.g014.G014Template = /*#__PURE__*/ (function(Template) {
                 var ageId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, "age-show-as-table");
                 var capacityId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, "capacity-show-as-table");
                 var tableClasses = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "stats");
-                var ageChartClasses = $d48cc3604bf30e24$export$5be7444ab39fbaa3(this.namespace, "age-chart");
+                var ageChartClasses = $d48cc3604bf30e24$export$e516ebba864be69d(this.namespace, "age-chart");
                 var ageTableClasses = $d48cc3604bf30e24$export$5be7444ab39fbaa3(this.namespace, "age-table");
+                var legendClasses = $d48cc3604bf30e24$export$e516ebba864be69d(this.namespace, "legend");
+                var legendBoxClasses = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "legend-box");
+                var showAsTableClasses = $d48cc3604bf30e24$export$8820e1fbe507f6aa(this.namespace, "sat");
                 var tableRows = "";
                 for(var i = 0; i < this.stateProgression.length; i++){
                     var state = this.stateProgression[i];
                     tableRows += "\n                <tr>\n                    <td>".concat(state[1], "</td>\n                    <td id=\"g014-total-").concat(state[0], "\"></td>\n                    <td id=\"g014-mean-").concat(state[0], "\"></td>\n                    <td>\n                        <div id=\"g014-age-chart-").concat(state[0], "\" class=\"").concat(ageChartClasses, "\"></div>\n                        <div id=\"g014-age-table-").concat(state[0], "\" class=\"").concat(ageTableClasses, "\" style=\"display:none\"></div>\n                    </td>\n                </tr>\n            ");
                 }
-                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G014: Progress of articles through the editorial workflow</h1>\n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g014-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-xs-12\">\n                <h3>Statistics per workflow state</h3>\n                <table class=\"".concat(tableClasses, "\">\n                    <thead>\n                        <tr>\n                            <td></td>\n                            <td>In Total Today</td>\n                            <td>Mean Time to Progress</td>\n                            <td>\n                                Age of Items\n                                <p><input type=\"checkbox\" name=\"").concat(ageId, "\" id=\"").concat(ageId, "\"> Show as table</p>\n                            </td>\n                        </tr>\n                    </thead>\n                    <tbody>\n                        ").concat(tableRows, "\n                    </tbody>\n                </table>\n                \n                <h3>Workflow Capacity</h3>\n                <p><input type=\"checkbox\" name=\"").concat(capacityId, "\" id=\"").concat(capacityId, "\"> Show as table</p>\n                <div id=\"g014-workflow-capacity-chart\"></div>\n                <div id=\"g014-workflow-capacity-table\" style=\"display: none\"></div>\n                \n            </div>\n        </div>");
+                var capacityChartLegend = "";
+                for(var i1 = 0; i1 < this.stateProgression.length; i1++){
+                    var state = this.stateProgression[i1];
+                    capacityChartLegend += "\n                <div class=\"col-md-2 ".concat(legendClasses, "\">\n                    <div class=\"").concat(legendBoxClasses, "\" style=\"color: ").concat(state[2], ";\">&#9632;</div>\n                    ").concat(state[1], "\n                </div>\n            ");
+                }
+                var frame = "<div class=\"row header\">\n            <div class=\"col-xs-12\">\n                <h1>G014: Progress of articles through the editorial workflow</h1>\n            </div>\n        </div>\n        <div class=\"row controls\">\n            <div class=\"col-md-6\">\n                <ul class=\"nav\">\n                    <li><a href=\"#\">Go back to Dashboard</a></li>\n                    <li><a href=\"#\">Print this view to PDF</a></li>\n                </ul>\n            </div>\n            <div class=\"col-md-6\">\n                <div id=\"g014-date-range\"></div>\n            </div>\n        </div>\n        <div class=\"row report-area\">\n            <div class=\"col-xs-12\">\n                <h3>Statistics per workflow state</h3>\n                <table class=\"".concat(tableClasses, "\">\n                    <thead>\n                        <tr>\n                            <td></td>\n                            <td>In Total Today</td>\n                            <td>Mean Time to Progress</td>\n                            <td>\n                                Age of Items\n                                <p><input type=\"checkbox\" name=\"").concat(ageId, "\" id=\"").concat(ageId, "\"> Show as table</p>\n                            </td>\n                        </tr>\n                    </thead>\n                    <tbody>\n                        ").concat(tableRows, "\n                    </tbody>\n                </table>\n                \n                <h3>Workflow Capacity</h3>\n                <div class=\"row ").concat(showAsTableClasses, "\">\n                    <div class=\"col-md-2\"><input type=\"checkbox\" name=\"").concat(capacityId, "\" id=\"").concat(capacityId, "\"> Show as table</div>\n                    ").concat(capacityChartLegend, "\n                </div>\n                \n                <div id=\"g014-workflow-capacity-chart\"></div>\n                <div id=\"g014-workflow-capacity-table\" style=\"display: none\"></div>\n                \n            </div>\n        </div>");
                 edge.context.html(frame);
                 var ageSelector = $d48cc3604bf30e24$export$5d5492dec79280f1(this.namespace, "age-show-as-table");
                 $d48cc3604bf30e24$export$b4cd8de5710bc55c(ageSelector, "change", this, "toggleAgeTables");
@@ -4201,15 +4274,19 @@ nglp.g014.G014Template = /*#__PURE__*/ (function(Template) {
         {
             key: "toggleCapacityTable",
             value: function toggleCapacityTable() {
+                var legendSelector = $d48cc3604bf30e24$export$b1157bd4df096bce(this.namespace, "legend");
                 var chart = this.edge.jq("#g014-workflow-capacity-chart");
                 var table = this.edge.jq("#g014-workflow-capacity-table");
+                var legend = this.edge.jq(legendSelector);
                 if (this.showingCapacity === "chart") {
                     chart.hide();
                     table.show();
+                    legend.hide();
                     this.showingCapacity = "table";
                 } else {
                     table.hide();
                     chart.show();
+                    legend.show();
                     this.showingCapacity = "chart";
                 }
             }
@@ -4280,7 +4357,7 @@ function $6ec8c71f816e3f1f$var$stateDataFunction(state) {
         ];
     };
 }
-function $6ec8c71f816e3f1f$var$getAgeComponents(stateProgression, countFormat) {
+function $6ec8c71f816e3f1f$var$getAgeComponents(stateProgression, countFormat, ageBarColours) {
     // Age distribution
     var ageComponents = [];
     for(var j = 0; j < stateProgression.length; j++){
@@ -4288,11 +4365,14 @@ function $6ec8c71f816e3f1f$var$getAgeComponents(stateProgression, countFormat) {
             id: "g014-age-chart-" + stateProgression[j][0],
             dataFunction: $6ec8c71f816e3f1f$var$stateDataFunction(stateProgression[j][0]),
             renderer: new $8ff5b3d2c2ab6201$export$6d5fb309d07d7299({
-                // barColor: ["#1e9dd8"],
                 legend: false,
                 controls: false,
                 valueFormat: countFormat,
-                marginLeft: 80
+                marginLeft: 80,
+                marginTop: 10,
+                marginBottom: 10,
+                marginRight: 0,
+                barColor: ageBarColours
             })
         }));
         ageComponents.push(new $ae46249d8a2a7b6d$export$7decb792461ef5a9({

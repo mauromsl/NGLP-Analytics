@@ -7904,6 +7904,9 @@ var $eec1dd49d0c67d6b$export$a0bd1dffd4b583c = /*#__PURE__*/ function(Renderer) 
         _this.markerCluster = false;
         _this.currentZoom = false;
         _this.currentBounds = false;
+        // for reasons unknown, on draw the map generates 2 idle events in rapid succession.  This allows us
+        // to squash responding to them
+        _this.skipIdleEvent = 2;
         return _this;
     }
     $67866ae5f3a26802$export$9099ad97b570f7c($eec1dd49d0c67d6b$export$a0bd1dffd4b583c, [
@@ -7917,6 +7920,7 @@ var $eec1dd49d0c67d6b$export$a0bd1dffd4b583c = /*#__PURE__*/ function(Renderer) 
                         return;
                     }
                 }
+                this.skipIdleEvent = 2;
                 var centre = new $5cab7f24a6cc18af$export$b2f13e228c542ebb.maps.LatLng(this.component.centre.lat, this.component.centre.lon);
                 if (!this.map) {
                     var canvasClass = $d48cc3604bf30e24$export$e516ebba864be69d(this.namespace, "canvas", this);
@@ -7933,10 +7937,6 @@ var $eec1dd49d0c67d6b$export$a0bd1dffd4b583c = /*#__PURE__*/ function(Renderer) 
                     this.map = new $5cab7f24a6cc18af$export$b2f13e228c542ebb.maps.Map(element, mapOptions);
                     // make sure we set the centre right
                     this.map.setCenter(centre);
-                }
-                if (this.reQueryOnBoundsChange) {
-                    var onBoundsChanged = $d48cc3604bf30e24$export$367047a567f2342b(this, "boundsChanged");
-                    this.map.addListener("bounds_changed", onBoundsChanged);
                 }
                 // clear any existing markers
                 for(i = 0; i < this.markers.length; i++)this.markers[i].setMap(null);
@@ -7968,11 +7968,21 @@ var $eec1dd49d0c67d6b$export$a0bd1dffd4b583c = /*#__PURE__*/ function(Renderer) 
                     if (this.renderCluster) props["renderer"] = this.renderCluster;
                     this.markerCluster = new $abe5479307b3aef5$export$ecdea5c1dab96b8d(props);
                 }
+                if (this.reQueryOnBoundsChange) {
+                    var onBoundsChanged = $d48cc3604bf30e24$export$367047a567f2342b(this, "boundsChanged");
+                    this.map.addListener("idle", onBoundsChanged);
+                }
             }
         },
         {
             key: "boundsChanged",
             value: function boundsChanged() {
+                // prevent the idle event from triggering a re-query the first time, as it does
+                // this on load
+                if (this.skipIdleEvent > 0) {
+                    this.skipIdleEvent--;
+                    return;
+                }
                 var bounds = this.map.getBounds();
                 var zoom = this.map.getZoom();
                 var ne = bounds.getNorthEast();
@@ -8036,6 +8046,7 @@ var $2c48e414d79136ba$export$845e14b82c9a4f95 = /*#__PURE__*/ function(Component
                 size: _this.size
             };
             bq.addAggregation(new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsAggregation(params1));
+            _this.latestQuery = bq;
             // issue the query to elasticsearch
             _this.edge.queryAdapter.doQuery({
                 edge: _this.edge,
@@ -8067,6 +8078,7 @@ var $2c48e414d79136ba$export$845e14b82c9a4f95 = /*#__PURE__*/ function(Component
                 size: _this.size
             };
             bq.addAggregation(new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsAggregation(params1));
+            _this.latestQuery = bq;
             // issue the query to elasticsearch
             _this.edge.queryAdapter.doQuery({
                 edge: _this.edge,
@@ -8113,6 +8125,9 @@ var $2c48e414d79136ba$export$845e14b82c9a4f95 = /*#__PURE__*/ function(Component
         _this.syncCounts = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "syncCounts", true);
         //////////////////////////////////////////
         // properties used to store internal state
+        // a place to store the raw result from the last query made for data
+        _this.latestQuery = false;
+        _this.latestResult = false;
         // an explicit list of terms to be displayed.  If this is not passed in, then a query
         // will be issues which will populate this with the values
         // of the form
@@ -8207,6 +8222,7 @@ var $2c48e414d79136ba$export$845e14b82c9a4f95 = /*#__PURE__*/ function(Component
             key: "listAllQuerySuccess",
             value: function listAllQuerySuccess(params) {
                 var result = params.result;
+                this.latestResult = result;
                 // get the terms out of the aggregation
                 this.terms = [];
                 var buckets = result.buckets(this.id);
@@ -8243,6 +8259,7 @@ var $2c48e414d79136ba$export$845e14b82c9a4f95 = /*#__PURE__*/ function(Component
             key: "doUpdateQuerySuccess",
             value: function doUpdateQuerySuccess(params) {
                 var result = params.result;
+                this.latestResult = result;
                 this._synchroniseTerms({
                     result: result
                 });
@@ -8939,7 +8956,7 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
 }($6cf4dc301226cb87$export$a695173e2ecfa9b);
 
 
-function $4002aa3570a5e3f8$export$8e8129eda99077(sheetName) {
+function $4002aa3570a5e3f8$export$7cabc94322a2c22(sheetName) {
     var palette = {
         investigation: false,
         export: false,
@@ -8949,9 +8966,25 @@ function $4002aa3570a5e3f8$export$8e8129eda99077(sheetName) {
         var sheet = document.styleSheets[i];
         if (sheet.href && sheet.href.includes(sheetName)) for(var j = 0; j < sheet.rules.length; j++){
             var rule = sheet.rules[j];
-            if (rule.selectorText === "#palette #investigations") palette.investigation = rule.style.background;
-            else if (rule.selectorText === "#palette #exports") palette.export = rule.style.background;
-            else if (rule.selectorText === "#palette #requests") palette.request = rule.style.background;
+            if (rule.selectorText === "#palette #investigations") palette.investigation = rule.style.color;
+            else if (rule.selectorText === "#palette #exports") palette.export = rule.style.color;
+            else if (rule.selectorText === "#palette #requests") palette.request = rule.style.color;
+        }
+    }
+    return palette;
+}
+function $4002aa3570a5e3f8$export$8e8129eda99077(sheetName, paletteSelector) {
+    if (!paletteSelector) paletteSelector = "#palette";
+    var palette = {
+    };
+    for(var i = 0; i < document.styleSheets.length; i++){
+        var sheet = document.styleSheets[i];
+        if (sheet.href && sheet.href.includes(sheetName)) for(var j = 0; j < sheet.rules.length; j++){
+            var rule = sheet.rules[j];
+            if (rule.selectorText.startsWith(paletteSelector + " ")) {
+                var key = rule.selectorText.substring(paletteSelector.length + 2);
+                palette[key] = rule.style.color;
+            }
         }
     }
     return palette;
@@ -9496,6 +9529,17 @@ nglp.g001.init = function(params) {
                     field: "occurred_at",
                     gte: initialDateRange.gte,
                     lte: initialDateRange.lte
+                }),
+                new $8d94b5f2509b6cf5$export$8b446892c82de644.GeoBoundingBoxFilter({
+                    field: "location",
+                    top_left: {
+                        "lat": 90,
+                        "lon": -180
+                    },
+                    bottom_right: {
+                        "lat": -90,
+                        "lon": 180
+                    }
                 })
             ],
             size: 0,
@@ -9514,7 +9558,7 @@ nglp.g001.init = function(params) {
                 new $8d94b5f2509b6cf5$export$8b446892c82de644.GeohashGridAggregation({
                     name: "geo",
                     field: "location",
-                    precision: 1
+                    precision: 5 // NOTE: this needs to tie up with the zoomToPrecisionMap in the component
                 }),
                 new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsAggregation({
                     name: "events",

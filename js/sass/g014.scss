@@ -5,17 +5,51 @@
 
 // export the key bits of the palette as stylesheet rules, to be read by the JS
 // for injection into visualisation components
-#palette {
-    #investigations {
-        background: $investigations;
+#workflowpalette {
+    #a {
+        color: $wf-first;
     }
 
-    #requests {
-        background: $requests;
+    #b {
+        color: $wf-second;
     }
 
-    #exports {
-        background: $exports;
+    #c {
+        color: $wf-third;
+    }
+
+    #d {
+        color: $wf-fourth;
+    }
+
+    #e {
+        color: $wf-fifth;
+    }
+}
+
+#agepalette {
+    #a {
+        color: $age-1m;
+    }
+
+    #b {
+        color: $age-2m;
+    }
+
+    #c {
+        color: $age-3m;
+    }
+
+    #d {
+        color: $age-4m;
+    }
+
+    #e {
+        color: $age-5m;
+    }
+
+    #f {
+        color: $age-more;
     }
 }
 
@@ -79,6 +113,29 @@
         }
     }
 
+    .g014-template_sat {
+        text-transform: uppercase;
+    }
+
+    .g014-template_legend {
+        text-transform: uppercase;
+    }
+
+    .g014-template_legend-box {
+        display: inline-block;
+        font-size: 2em;
+        padding-right: 5px;
+        line-height: 0
+    }
+
+    .edges-bs3-chartdatatable_table {
+        width: 100%;
+
+        tr {
+            border-bottom: 1px solid $table-divider;
+        }
+    }
+
     #g014-workflow-capacity-chart {
         height: 600px;
     }
@@ -91,17 +148,23 @@
                 font-weight: bold;
                 text-transform: uppercase;
                 color: $title-text;
+
+                td {
+                    padding-bottom: 10px;
+                }
             }
 
             tr {
-                border-bottom: 2px solid $table-divider;
+                border-bottom: 1px solid $table-divider;
             }
 
             td {
                 &:first-of-type {
                     font-weight: bold;
                     text-transform: uppercase;
-                    color: $title-text
+                    color: $title-text;
+                    padding-top: 5px;
+                    padding-bottom: 5px;
                 }
             }
         }
