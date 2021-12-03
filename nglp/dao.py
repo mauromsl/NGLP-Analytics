@@ -1,4 +1,4 @@
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, NotFoundError, TransportError
 import uuid
 import time
 import json
@@ -152,8 +152,8 @@ class BaseDAO(object):
             if r.get(idkey) is None:
                 r[idkey] = cls.makeid()
             data += json.dumps({"index" : {"_id": r[idkey]}}) + "\n"
-            data += json.dumps(r) + "\n"
-        return CONNECTION.bulk(body=data, index=cls.index_name())
+            data = json.dumps(r) + "\n"
+        return CONNECTION.bulk(body=data, index=cls.__index_type__)
 
     def save(self):
         self.set_id()
@@ -180,3 +180,7 @@ class BaseDAO(object):
             return None
 
         return cls(out.get("_source"))
+
+    @classmethod
+    def delete_by_query(cls, q):
+        return CONNECTION.delete_by_query(index=cls.__index_type__, body=q)
