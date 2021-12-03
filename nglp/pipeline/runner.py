@@ -11,6 +11,7 @@ from nglp.pipeline.pipeline import UnacceptableEvent
 from nglp.pipeline.categorise import Categorise
 from nglp.pipeline.geolocate import Geolocate
 from nglp.pipeline.normalise import Normalise
+from nglp.pipeline.origins_archive import OriginsArchive
 from nglp.models.events import PipelineEvent, CoreEvent
 from nglp.config import settings
 
@@ -23,6 +24,7 @@ topic_oid = app.topic('oids')
 
 class Runner:
     pipe = [
+        # OriginsArchive(),
         Categorise(),
         Geolocate(),
         Normalise()

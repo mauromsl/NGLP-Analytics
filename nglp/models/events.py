@@ -204,6 +204,14 @@ class CoreEventInterfaceMixin:
             self.__seamless__.get_single("workflow.follows.transition_time")
         )
 
+    @property
+    def archive_id(self):
+        return self.__seamless__.get_single("source.archive_id")
+
+    @archive_id.setter
+    def archive_id(self, val):
+        self.__seamless__.set_with_struct("source.archive_id", val)
+
 
 class PipelineEvent(SeamlessMixin, CoreEventInterfaceMixin):
     __SEAMLESS_STRUCT__ = [
@@ -214,6 +222,14 @@ class PipelineEvent(SeamlessMixin, CoreEventInterfaceMixin):
 
     def __init__(self, raw=None):
         super(PipelineEvent, self).__init__(raw=raw)
+
+    @property
+    def id(self):
+        return self.__seamless__.get_single("id")
+
+    @id.setter
+    def id(self, val):
+        self.__seamless__.set_with_struct("id", val)
 
 
 class CoreEvent(SeamlessMixin, CoreEventInterfaceMixin, BaseDAO):

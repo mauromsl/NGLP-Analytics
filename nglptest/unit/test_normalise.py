@@ -4,6 +4,7 @@ from nglp.pipeline.normalise import Normalise
 from copy import deepcopy
 from nglp.models import events
 
+
 class TestNormalise(TestCase):
 
     # To change tests:

@@ -27,9 +27,28 @@ class Settings(BaseSettings):
 
     ##########################################
     ## File storage
+
     event_log_dir: str = paths.rel2abs(__file__, "..", "store", "logs")
     pipeline_output_dir: str = paths.rel2abs(__file__, "..", "store", "pipeline")
     event_log_max_bytes: int = 1024
+
+    store_impl: str = "nglp.lib.store.StoreLocal"
+    store_impl_tmp: str = "nglp.lib.store.TempStore"
+
+    store_s3_scopes: dict = {
+        "origins_archive" : {
+            "aws_access_key_id" : "put this in your .env",
+            "aws_secret_access_key" : "put this in your .env"
+        }
+    }
+
+    store_local_dir: str = paths.rel2abs(__file__, "..", "store", "local")
+    store_local_write_buffer_size: int = 16777216
+
+    store_tmp_dir: str = paths.rel2abs(__file__, "..", "store", "tmp")
+    store_tmp_write_buffer_size: int = 16777216
+
+    origins_archive_container: str = "origins_archive"
 
     ##########################################
     ## Source systems
