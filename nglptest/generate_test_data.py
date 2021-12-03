@@ -3,10 +3,12 @@ import json
 import datetime
 import click
 import warnings
+from rstr import xeger
 from faker import Faker
 from faker_web import WebProvider
 from nglp.models import events
 from nglp.lib import data_dictionaries
+from nglp.pipeline import regex
 
 EVENTS_SELECTOR = {
     'request': events.RequestEvent,
@@ -51,6 +53,13 @@ WORKFLOW = [
     "accept",
     "publish"
 ]
+
+REGEX = {
+    "DOI": regex.DOI,
+    "HANDLE": regex.HANDLE,
+    "ISSN": regex.ISSN,
+    "HTTP_URL": regex.HTTP_URL,
+}
 
 class DataGenerator:
     """
@@ -108,10 +117,12 @@ class DataGenerator:
             weights = [2**(max_len-i) for i in range(1, max_len+1)]
             length = random.choices(range(1, max_len+1), weights=weights, k=1)[0]
 
+        id_list = [random.choice(list(REGEX.keys())) for num in range(length)]
+
         random_data_by_type = {
             'event': [self.event_type],
             'object_type': random.choices(OBJECT_TYPES[self.event_type], k=length),
-            'object_id': random.choices([self.fake.bothify(text='????-########'), self.fake.uuid4()], k=length),
+            'object_id': random.choices([xeger(REGEX[id_list[num]]) for num in range(length)], k=length),
             'ip': random.choices([self.fake.ipv4(), self.fake.ipv6()], weights=[0.7, 0.3], k=length),
             'source.type': random.choices(data_dictionaries.DATA_SOURCE_TYPES, k=length),
             'container': random.choices([self.fake.hexify(text="^^^^^"), self.fake.hexify(text="^^^^^"), self.fake.hexify(text="^^^^^^^^")], k=length),
@@ -298,15 +309,15 @@ class DataGenerator:
                     output.write(',')
 
                 distance = random.randint(1, len(WORKFLOW))
-                start = self.fake.date_time_between(start_date="-1y")
+                workflow_start = self.fake.date_time_between(start_date="-1y")
                 object_id = None
                 container = None
                 entries = []
                 for j in range(0, distance):
                     workflow_status = WORKFLOW[j]
-                    data = self.data_generator("full")
+                    data = next(self.generate_data())
                     data["event"] = workflow_status
-                    data['occurred_at'] = datetime.datetime.strftime(start, "%Y-%m-%dT%H:%M:%SZ")
+                    data['occurred_at'] = datetime.datetime.strftime(workflow_start, "%Y-%m-%dT%H:%M:%SZ")
 
                     if object_id is not None:
                         data["object_id"] = object_id
@@ -318,7 +329,7 @@ class DataGenerator:
                     else:
                         container = data.get("container")
 
-                    start = self.fake.date_time_between(start_date=start)
+                    workflow_start = self.fake.date_time_between(start_date=workflow_start)
                     entries.append(data)
 
                 if join_events:

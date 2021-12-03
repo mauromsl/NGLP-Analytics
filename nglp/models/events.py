@@ -141,6 +141,10 @@ class CoreEventInterfaceMixin:
     def object_ids(self):
         return self.__seamless__.get_list("object_id")
 
+    @object_ids.setter
+    def object_ids(self, val):
+        self.__seamless__.set_with_struct("object_id", val)
+
     @property
     def ip(self):
         return self.__seamless__.get_single("ip")
