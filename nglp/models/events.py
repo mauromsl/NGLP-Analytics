@@ -30,10 +30,20 @@ class EventModel(SeamlessMixin):
 
         self.__seamless__.set_single("occurred_at", occurred_at)
 
+    @property
+    def source(self):
+        return self.__seamless__.get_single("source")
+
+    @source.setter
+    def source(self, source_record):
+        self.__seamless__.set_with_struct("source", source_record)
+
+
 class RequestEvent(EventModel):
     """Event which represents a "Request" event, which is a file download"""
     __SEAMLESS_STRUCT__ = [
-        event_structs.REQUEST_EVENT_STRUCT
+        event_structs.REQUEST_EVENT_STRUCT,
+        event_structs.SOURCE
     ]
 
     __SEAMLESS_COERCE__ = event_structs.COERCE
@@ -45,7 +55,8 @@ class RequestEvent(EventModel):
 class InvestigationEvent(EventModel):
     """Event which represents an "Investigation" event, which is a page view"""
     __SEAMLESS_STRUCT__ =  [
-        event_structs.INVESTIGATION_EVENT_STRUCT
+        event_structs.INVESTIGATION_EVENT_STRUCT,
+        event_structs.SOURCE
     ]
 
     __SEAMLESS_COERCE__ = event_structs.COERCE
@@ -57,7 +68,8 @@ class InvestigationEvent(EventModel):
 class WorkflowTransitionEvent(EventModel):
     """Event which represents one of the range of workflow transition events"""
     __SEAMLESS_STRUCT__ =  [
-        event_structs.WORKFLOW_TRANSITION_EVENT_STRUCT
+        event_structs.WORKFLOW_TRANSITION_EVENT_STRUCT,
+        event_structs.SOURCE
     ]
 
     __SEAMLESS_COERCE__ = event_structs.COERCE
@@ -69,7 +81,8 @@ class WorkflowTransitionEvent(EventModel):
 class ExportEvent(EventModel):
     """Event which represents a metadata export from an item (e.g. for a reference manager)"""
     __SEAMLESS_STRUCT__ =  [
-        event_structs.EXPORT_EVENT
+        event_structs.EXPORT_EVENT,
+        event_structs.SOURCE
     ]
 
     __SEAMLESS_COERCE__ = event_structs.COERCE
@@ -81,7 +94,8 @@ class ExportEvent(EventModel):
 class JoinEvent(EventModel):
     """Event which represents a staff member joining the editorial team for a journal"""
     __SEAMLESS_STRUCT__ =  [
-        event_structs.JOIN_EVENT
+        event_structs.JOIN_EVENT,
+        event_structs.SOURCE
     ]
 
     __SEAMLESS_COERCE__ = event_structs.COERCE
@@ -93,7 +107,8 @@ class JoinEvent(EventModel):
 class LeaveEvent(EventModel):
     """Event which represents a staff member leaving the editorial team for a journal"""
     __SEAMLESS_STRUCT__ =  [
-        event_structs.LEAVE_EVENT
+        event_structs.LEAVE_EVENT,
+        event_structs.SOURCE
     ]
 
     __SEAMLESS_COERCE__ = event_structs.COERCE
@@ -125,6 +140,10 @@ class CoreEventInterfaceMixin:
     @property
     def object_ids(self):
         return self.__seamless__.get_list("object_id")
+
+    @object_ids.setter
+    def object_ids(self, val):
+        self.__seamless__.set_with_struct("object_id", val)
 
     @property
     def ip(self):
@@ -216,11 +235,39 @@ class CoreEvent(SeamlessMixin, CoreEventInterfaceMixin, BaseDAO):
     def mappings(self):
         return es_data_mapping.create_mapping(self.__seamless_struct__.raw, MAPPING_OPTS)
 
+    @property
+    def data(self):
+        return self.__seamless__.data
+
+    @property
+    def id(self):
+        return self.__seamless__.get_single("id")
+
+    @id.setter
+    def id(self, val):
+        self.__seamless__.set_with_struct("id", val)
+
+    @property
+    def last_updated(self):
+        return self.__seamless__.get_single("record_last_updated")
+
+    @last_updated.setter
+    def last_updated(self, val):
+        self.__seamless__.set_with_struct("record_last_updated", val)
+
+    @property
+    def created_date(self):
+        return self.__seamless__.get_single("record_created")
+
+    @created_date.setter
+    def created_date(self, val):
+        self.__seamless__.set_with_struct("record_created", val)
+
     @classmethod
     def find(cls, object_ids: List[str]=None, source_ids: List[str]=None, categories: List[str]=None, size: int=10):
         q = CoreEventQuery(object_ids, source_ids, categories, size)
         res = cls.query(q.query())
-        return [cls(o) for o in res.get("hits", {}).get("hits", [])]
+        return [cls(o.get("_source")) for o in res.get("hits", {}).get("hits", [])]
 
 
 class EventModelFactory():

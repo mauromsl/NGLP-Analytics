@@ -2,6 +2,7 @@ import uvicorn
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
@@ -36,5 +37,14 @@ async def g014(request: Request):
     return templates.TemplateResponse("g014.html", {"request" : request, "config" : settings})
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+async def icon():
+    return FileResponse('nglp/static/img/favicon.ico')
+
+
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, debug=True)
+    from nglp.initialise import initialise
+    initialise()
+
+    uvicorn.run("main:app", host=settings.host, port=int(settings.port), reload=True, debug=True, proxy_headers=True,
+                forwarded_allow_ips='*')

@@ -13,14 +13,17 @@ class Settings(BaseSettings):
     geo_database: str = None
 
     ##########################################
-    ## Application versioning
+    ## Application
     version: str = "1.0.0"
+    host: str = "0.0.0.0"
+    port: str = "8000"  # This is a string to match when passed in via environment variable
 
     ##########################################
     ## ES Connection
 
     es_hosts: List[str] = ["https://localhost:9200"]
     es_verify_certs: bool = True
+    es_index_namespace: str = ""
 
     ##########################################
     ## File storage
@@ -58,6 +61,13 @@ class Settings(BaseSettings):
             }
         }
     }
+
+    ###########################################
+    ## Kafka Broker configuration
+    kafka_broker = "KAFKA URL"
+
+    # Precompute wait time in seconds
+    precompute_wait_time = 30
 
     class Config:
         env_file = paths.rel2abs(__file__, "..", ".env")

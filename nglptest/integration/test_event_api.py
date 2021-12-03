@@ -2,7 +2,7 @@ import json
 import os
 
 from unittest import TestCase
-from test.fixtures.events import EventFixtureFactory
+from nglptest.fixtures.events import EventFixtureFactory
 from fastapi.testclient import TestClient
 from nglp.main import app
 from nglp.config import settings

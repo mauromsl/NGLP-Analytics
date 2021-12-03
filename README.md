@@ -22,7 +22,7 @@ This will check out the `edges` js library to `nglp/static/edges`
 
 1. Copy the secrets file from `env.template` to `.env` and customise as necessary (todo: hints)
 2. Create and activate virtualenv with e.g. `virtualenv -p python3.8 venv` and `./venv/bin/activate`
-3. Install dependencies with `pip install -e .`
+3. Install dependencies with `pip install -r requirements.txt && pip install -e .`
 
 ### Setup the Geolocation database
 
@@ -40,6 +40,21 @@ In `.env` set:
 
 ```
 geo_database=/path/to/geolite2.mmdb
+```
+
+### Elasticsearch
+
+We are using the OpenDistro release of Elasticsearch, though you should also be able to use the 7.10
+release of the original Elasticsearch.
+
+Install and run Open Distro for Elasticsearch as per their website: https://opendistro.github.io/for-elasticsearch-docs/
+
+You will require a recent version of Java (>=11), which you can set and run with
+
+```bash
+JAVA_HOME=/path/to/java/11
+export JAVA_HOME
+[elasticsearch]/bin/elasticsearch
 ```
 
 ### Generate Test Data
@@ -84,10 +99,9 @@ TODO - make instruction writing more gooder.
 ### Starting app with Docker
 
 Quick and basic docker container to get it running with the same configuration as local dev (i.e. the same `.env` credentials)
+optionally supply `--build-arg PORT=8001` to the build stage to change its port, remember to expose the same port in `docker run`.
 
-```dockerfile
+```shell
 docker build -t nglp-analytics .
-docker run -p 8000:8000 nglp-analytics
+docker run -it -p 8000:8000 --name nglp-analytics nglp-analytics
 ```
-
-TODO - NGLP ansible
