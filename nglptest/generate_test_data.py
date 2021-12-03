@@ -315,11 +315,7 @@ class DataGenerator:
                 entries = []
                 for j in range(0, distance):
                     workflow_status = WORKFLOW[j]
-<<<<<<< HEAD:test/generate_test_data.py
                     data = next(self.generate_data())
-=======
-                    data = self.data_generator("full")
->>>>>>> develop:nglptest/generate_test_data.py
                     data["event"] = workflow_status
                     data['occurred_at'] = datetime.datetime.strftime(workflow_start, "%Y-%m-%dT%H:%M:%SZ")
 

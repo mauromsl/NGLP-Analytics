@@ -13,6 +13,7 @@ ID_MAPPING = {
     "URL": regex.HTTP_URL_COMPILED,
 }
 
+
 class Normalise(PipelineProcessor):
     def run(self, event:PipelineEvent) -> PipelineEvent:
         """

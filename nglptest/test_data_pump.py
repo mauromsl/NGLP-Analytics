@@ -182,13 +182,8 @@ def pump_data(
     count = 0
     pulse = number_of_records // 100 if number_of_records > 100 else 1
     for entry in unpacked_file:
-<<<<<<< HEAD:test/test_data_pump.py
-        requests.post(
-            url="http://localhost:8000/api/", data=json.dumps(entry)
-=======
         resp = requests.post(
             url=api + "?source=" + source, data=json.dumps(entry), verify=False
->>>>>>> develop:nglptest/test_data_pump.py
         )
         if resp.status_code != 201:
             print(resp.text)
