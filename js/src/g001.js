@@ -350,7 +350,7 @@ nglp.g001.G001Template = class extends Template {
     <div class="container">
         <nav class="navbar navbar-expand-md">
             <div class="navbar">
-                <ul class="navbar-nav">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="#">Go back to Dashboard</a>
                     </li>
@@ -358,7 +358,7 @@ nglp.g001.G001Template = class extends Template {
                         <a class="nav-link" href="#">Print this view to PDF</a>
                     </li>
                 </ul>
-                <form class="form-inline my-2 my-lg-0">
+                <form class="form-inline ms-2">
                     <div id="g001-date-range"></div>
                 </form>
             </div>
@@ -367,27 +367,25 @@ nglp.g001.G001Template = class extends Template {
 </div>
 
 <div class="container">
-        <div class="row report-area">
-            <div class="col-md-3">
-                <div id="g001-interactions"></div>
-                <div id="g001-format"></div>
+        <div class="row report-area justify-content-between">
+            <div class="col-md-auto">
+                <div class="facet" id="g001-interactions"></div>
+                <div class="facet" id="g001-format"></div>
             </div>
-            <div class="col-md-9">
-                <p><input type="checkbox" name="${checkboxId}" id="${checkboxId}"> Show as table</p>
-                <div id="g001-interactions-chart"></div>
-                <div id="g001-interactions-table" style="display:none">TABLE HERE</div>
-                <div id="g001-interactions-map"></div>
-                <div class="row formats-header">
-                    <div class="col-xs-12">
-                        <h3>Top 3 Formats</h3>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div id="g001-top-downloads"></div>
-                    </div>
-                    <div class="col-md-6">
-                        <div id="g001-top-exports"></div>
+            <div class="col">
+                <p class="showtable"><input type="checkbox" name="${checkboxId}" id="${checkboxId}"><label for="${checkboxId}">Show as table</label></p>
+                <div class="data-area" id="g001-interactions-chart"></div>
+                <div class="data-area" id="g001-interactions-table" style="display:none">TABLE HERE</div>
+                <div class="data-area" id="g001-interactions-map"></div>
+                <div class="data-area" class="row formats-header">
+                    <h1>Top 3 Formats</h1>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div id="g001-top-downloads"></div>
+                        </div>
+                        <div class="col-md-4 offset-md-1">
+                            <div id="g001-top-exports"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -432,7 +430,7 @@ class MapPointRenderer {
                 text: String(sum)
             },
             // adjust zIndex to be above other markers
-            zIndex: Number(google.maps.Marker.MAX_ZINDEX) + sum,
+            //zIndex: Number(google.maps.Marker.MAX_ZINDEX) + sum,
         });
     }
 }

@@ -1,23 +1,24 @@
 body {
   font-family: 'Karla', sans-serif;
   padding-top: 5rem;
+  padding-bottom: 5rem;
   background-color: $white;
   color: $black;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-weight: 400;
 
-  h1 {
+  .row > h1 {
     line-height: inherit;
-    margin: revert;
+    margin: 2.5rem 0 0;
     font-weight: 700;
     font-size: 30px;
     color: $white;
   }
 
-  h2 {
+  .row > h2 {
     line-height: inherit;
-    margin: revert;
+    margin: 0 0 2.5rem;
     font-weight: 700;
     font-size: 22px;
     color: $white;

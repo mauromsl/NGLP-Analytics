@@ -1,6 +1,5 @@
-Error: Undefined variable: "$component-border".
-        on line 8:25 of ../js/vendor/edges2/sass/renderers/bs3/checkbox-or-term-selector.scss
-        from line 7:9 of ../js/sass/g001.scss
->>   border-top: 1px solid $component-border;
+Error: File to import not found or unreadable: raports/body.
+        on line 10:1 of ../js/sass/g001.scss
+>> @import "base/grid",
 
-   ------------------------^
+   ^

@@ -9320,10 +9320,10 @@ var $0fdc25b451091025$export$4d567bc36d967c12 = /*#__PURE__*/ function(Renderer)
             key: "draw",
             value: function draw() {
                 var dre = this.component;
-                var selectClass = $988cca1a6a01f734$export$8820e1fbe507f6aa(this.namespace, "select", this);
+                var labelClass = $988cca1a6a01f734$export$8820e1fbe507f6aa(this.namespace, "label", this);
                 var inputClass = $988cca1a6a01f734$export$8820e1fbe507f6aa(this.namespace, "input", this);
                 var prefixClass = $988cca1a6a01f734$export$8820e1fbe507f6aa(this.namespace, "prefix", this);
-                this.selectId = $988cca1a6a01f734$export$bf52b203d82ff901(this.namespace, dre.id + "_date-type", this);
+                this.labelId = $988cca1a6a01f734$export$bf52b203d82ff901(this.namespace, dre.id + "_date-type", this);
                 this.rangeId = $988cca1a6a01f734$export$bf52b203d82ff901(this.namespace, dre.id + "_range", this);
                 var pluginId = $988cca1a6a01f734$export$bf52b203d82ff901(this.namespace, dre.id + "_plugin", this);
                 var options = "";
@@ -9334,10 +9334,10 @@ var $0fdc25b451091025$export$4d567bc36d967c12 = /*#__PURE__*/ function(Renderer)
                 }
                 var frag = '<div class="form-inline">';
                 if (dre.display) frag += '<span class="' + prefixClass + '">' + dre.display + '</span>';
-                frag += '<div class="form-group"><select class="' + selectClass + ' form-control" name="' + this.selectId + '" id="' + this.selectId + '">' + options + '</select></div>';
+                frag += '<div><span class="' + labelClass + '" name="' + this.labelId + '" id="' + this.labelId + '">' + field.display + '</span></div>';
                 frag += '<div id="' + this.rangeId + '" class="' + inputClass + ' form-control">\
-            <i class="glyphicon glyphicon-calendar"></i>&nbsp;\
-            <span></span> <b class="caret"></b>\
+            <i class="far fa-calendar"></i>&nbsp;\
+            <span></span>\
         </div>';
                 frag += "</div>";
                 dre.context.html(frag);
@@ -9351,9 +9351,10 @@ var $0fdc25b451091025$export$4d567bc36d967c12 = /*#__PURE__*/ function(Renderer)
                 ]);
                 var props = {
                     locale: {
-                        format: "DD/MM/YYYY"
+                        format: 'DD/MM/YYYY'
                     },
-                    opens: "left"
+                    showDropdowns: true,
+                    opens: "right"
                 };
                 if (this.ranges) props["ranges"] = this.ranges;
                 // clear out any old version of the plugin, as these are appended to the document
@@ -9783,7 +9784,7 @@ nglp.g001.G001Template = /*#__PURE__*/ (function(Template) {
             value: function draw(edge) {
                 this.edge = edge;
                 var checkboxId = $988cca1a6a01f734$export$bf52b203d82ff901(this.namespace, "show-as-table");
-                var frame = "\n<div class=\"header header--main\">\n    <div class=\"container\">   \n        <div class=\"row\">\n            <h1>G001: Article  Downloads for  Unit Administrators</h1>\n            <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2>\n        </div>\n    </div>\n</div>\n<div class=\"header header--secondary\">\n    <div class=\"container\">\n        <nav class=\"navbar navbar-expand-md\">\n            <div class=\"navbar\">\n                <ul class=\"navbar-nav\">\n                    <li class=\"nav-item\">\n                        <a class=\"nav-link\" href=\"#\">Go back to Dashboard</a>\n                    </li>\n                    <li class=\"nav-item\">\n                        <a class=\"nav-link\" href=\"#\">Print this view to PDF</a>\n                    </li>\n                </ul>\n                <form class=\"form-inline my-2 my-lg-0\">\n                    <div id=\"g001-date-range\"></div>\n                </form>\n            </div>\n        </nav>\n    </div>\n</div>\n\n<div class=\"container\">\n        <div class=\"row report-area\">\n            <div class=\"col-md-3\">\n                <div id=\"g001-interactions\"></div>\n                <div id=\"g001-format\"></div>\n            </div>\n            <div class=\"col-md-9\">\n                <p><input type=\"checkbox\" name=\"".concat(checkboxId, "\" id=\"").concat(checkboxId, "\"> Show as table</p>\n                <div id=\"g001-interactions-chart\"></div>\n                <div id=\"g001-interactions-table\" style=\"display:none\">TABLE HERE</div>\n                <div id=\"g001-interactions-map\"></div>\n                <div class=\"row formats-header\">\n                    <div class=\"col-xs-12\">\n                        <h3>Top 3 Formats</h3>\n                    </div>\n                </div>\n                <div class=\"row\">\n                    <div class=\"col-md-6\">\n                        <div id=\"g001-top-downloads\"></div>\n                    </div>\n                    <div class=\"col-md-6\">\n                        <div id=\"g001-top-exports\"></div>\n                    </div>\n                </div>\n            </div>\n        </div>\n</div>");
+                var frame = "\n<div class=\"header header--main\">\n    <div class=\"container\">   \n        <div class=\"row\">\n            <h1>G001: Article  Downloads for  Unit Administrators</h1>\n            <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2>\n        </div>\n    </div>\n</div>\n<div class=\"header header--secondary\">\n    <div class=\"container\">\n        <nav class=\"navbar navbar-expand-md\">\n            <div class=\"navbar\">\n                <ul class=\"navbar-nav me-auto\">\n                    <li class=\"nav-item\">\n                        <a class=\"nav-link\" href=\"#\">Go back to Dashboard</a>\n                    </li>\n                    <li class=\"nav-item\">\n                        <a class=\"nav-link\" href=\"#\">Print this view to PDF</a>\n                    </li>\n                </ul>\n                <form class=\"form-inline ms-2\">\n                    <div id=\"g001-date-range\"></div>\n                </form>\n            </div>\n        </nav>\n    </div>\n</div>\n\n<div class=\"container\">\n        <div class=\"row report-area justify-content-between\">\n            <div class=\"col-md-auto\">\n                <div class=\"facet\" id=\"g001-interactions\"></div>\n                <div class=\"facet\" id=\"g001-format\"></div>\n            </div>\n            <div class=\"col\">\n                <p class=\"showtable\"><input type=\"checkbox\" name=\"".concat(checkboxId, "\" id=\"").concat(checkboxId, "\"><label for=\"").concat(checkboxId, "\">Show as table</label></p>\n                <div class=\"data-area\" id=\"g001-interactions-chart\"></div>\n                <div class=\"data-area\" id=\"g001-interactions-table\" style=\"display:none\">TABLE HERE</div>\n                <div class=\"data-area\" id=\"g001-interactions-map\"></div>\n                <div class=\"data-area\" class=\"row formats-header\">\n                    <h1>Top 3 Formats</h1>\n                    <div class=\"row\">\n                        <div class=\"col-md-4\">\n                            <div id=\"g001-top-downloads\"></div>\n                        </div>\n                        <div class=\"col-md-4 offset-md-1\">\n                            <div id=\"g001-top-exports\"></div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n</div>");
                 edge.context.html(frame);
                 var checkboxSelector = $988cca1a6a01f734$export$5d5492dec79280f1(this.namespace, "show-as-table");
                 $988cca1a6a01f734$export$b4cd8de5710bc55c(checkboxSelector, "change", this, "toggleTable");
@@ -9830,9 +9831,7 @@ var $ad933a42022349ce$var$MapPointRenderer = /*#__PURE__*/ function() {
                     icon: "/static/img/m1.png",
                     label: {
                         text: String(sum)
-                    },
-                    // adjust zIndex to be above other markers
-                    zIndex: Number(google.maps.Marker.MAX_ZINDEX) + sum
+                    }
                 });
             }
         }

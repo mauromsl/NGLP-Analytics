@@ -1,0 +1,34 @@
+.data-area {
+    margin: 7.5rem 0;
+
+    h1 {
+        margin-bottom: 2.5rem;
+        font-size: 30px;
+        font-weight: 700;
+        color: $title-text;
+    }
+
+    h4 {
+        color: $title-text;
+        font-weight: 700;
+        font-size: 14px;
+        text-transform: uppercase;
+    }
+}
+
+.showtable{
+    margin: 5rem 0 -7rem;
+    label {
+        font-size: 14px;
+        text-transform: uppercase;
+        margin-left: 1rem;
+        font-weight: 400;
+    }
+}
+
+.facet {
+    height: 100px;
+    overflow: visible;
+    margin: 5rem 0 -2.5rem;
+    font-size: 14px;
+}

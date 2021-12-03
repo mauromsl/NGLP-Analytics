@@ -1,0 +1,79 @@
+.edges-bs3-multidaterangecombineselector_input {
+    background-color: $brand10bg;
+    padding-top: 0;
+    padding-bottom: 0;
+    border: none;
+    border-radius: 0;
+
+    span {
+        line-height: 34px;
+    }
+}
+
+.edges-bs3-multidaterangecombineselector_label {
+    color: $white;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.edges-bs3-fixedselectioncheckboxortermselector_label {
+    margin-left: 1rem;
+}
+
+.edges-bs3-checkboxortermselector_label {
+    margin-left: 1rem;
+}
+
+.edges-bs3-checkboxortermselector_header {
+    text-transform: uppercase;
+    color: $title-text;
+}
+
+.edges-bs3-fixedselectioncheckboxortermselector_header {
+    text-transform: uppercase;
+    color: $title-text;
+}
+
+.edges-bs3-chartdatatable_table {
+    table-layout: fixed;
+    width: 100%;
+    font-size: 14px;
+
+    thead {
+        font-weight: bold;
+        text-transform: uppercase;
+        color: $title-text;
+    }
+
+    tbody tr {
+        border-bottom: 1px solid $table-divider;
+
+        td {
+            padding: 5px;
+
+            &:first-of-type {
+                font-weight: bold;
+                color: $title-text
+            }
+        }
+    }
+}
+
+.edges-html-relativesizebars_table {
+    td {
+        font-weight: 400;
+        font-size: 14px;
+        text-transform: uppercase;
+    }
+}
+
+.edges-html-relativesizebars_title {
+    font-weight: bold;
+    color: $title-text;
+    text-transform: uppercase;
+}
+
+progress {
+    border: none;
+}
