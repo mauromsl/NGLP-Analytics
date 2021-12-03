@@ -1,0 +1,78 @@
+{
+  "name": "nglp-analytics",
+  "version": "1.0.0-SNAPSHOT",
+  "description": "NGLP Analytics Visualisation Dashboards",
+  "scripts": {
+    "clean": "rm -rf ./.parcel-cache && rm -rf ./dist",
+    "jquery-external": "cd vendor/edges2 && npm run jquery-external && cd ../..",
+    "jquery-bundled": "cd vendor/edges2 && npm run jquery-bundled && cd ../..",
+    "es7x": "cd vendor/edges2 && npm run es7x && cd ../..",
+    "es-external": "cd vendor/edges2 && npm run es-external && cd ../..",
+    "google-external": "cd vendor/edges2 && npm run google-external && cd ../..",
+    "nvd3-external": "cd vendor/edges2 && npm run nvd3-external && cd ../..",
+    "d3-external": "cd vendor/edges2 && npm run d3-external && cd ../..",
+    "serve-g001": "npm run jquery-bundled && npm run es7x && parcel serve views/g001.html -p 8000",
+    "target-g001": "parcel build --target g001",
+    "build-g001": "npm run jquery-external && npm run es7x && npm run google-external && npm run nvd3-external && npm run d3-external && npm run clean && npm run target-g001",
+    "serve-g014": "npm run jquery-bundled && npm run es7x && parcel serve views/g014.html -p 8000",
+    "target-g014": "parcel build --target g014",
+    "build-g014": "npm run jquery-external && npm run es7x && npm run nvd3-external && npm run d3-external && npm run clean && npm run target-g014"
+  },
+  "alias": {
+    "d3": {
+      "global": "d3"
+    },
+    "nv": {
+      "global": "nv"
+    }
+  },
+  "targets": {
+    "g001": {
+      "source": "src/g001.js",
+      "engines": {
+        "browsers": "> 0.5%, last 2 versions, not dead"
+      },
+      "isLibrary": false,
+      "optimize": false,
+      "outputFormat": "global",
+      "distDir": "../nglp/static/js"
+    },
+    "g014": {
+      "source": "src/g014.js",
+      "engines": {
+        "browsers": "> 0.5%, last 2 versions, not dead"
+      },
+      "isLibrary": false,
+      "optimize": false,
+      "outputFormat": "global",
+      "distDir": "../nglp/static/js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NGLPteam/NGLP-Analytics.git"
+  },
+  "keywords": [
+    "data",
+    "visualisation"
+  ],
+  "author": "Cottage Labs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NGLPteam/NGLP-Analytics/issues"
+  },
+  "homepage": "https://github.com/NGLPteam/NGLP-Analytics#readme",
+  "devDependencies": {
+    "@babel/core": "^7.15.5",
+    "@babel/plugin-transform-runtime": "^7.15.0",
+    "parcel": "latest",
+    "sass": "^1.42.1"
+  },
+  "dependencies": {
+    "@babel/runtime-corejs2": "^7.15.4",
+    "@googlemaps/markerclusterer": "^1.0.12",
+    "@parcel/transformer-sass": "^2.0.0-rc.0",
+    "jquery": "^3.6.0",
+    "latlon-geohash": "^2.0.0"
+  }
+}

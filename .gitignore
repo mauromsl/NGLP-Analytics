@@ -16,7 +16,6 @@ store/pipeline/*.log
 
 *.pyc
 *.egg-info/*
-src*
 .Python
 build/*
 dist/*
@@ -35,7 +34,7 @@ htmlcov/*
 dev.cfg
 app.cfg
 
-# Logs created while debugging
+# Logs created while debugging or running the consumer container
 *.log
 
 # ipython and jupyter related files
@@ -66,3 +65,7 @@ app.cfg
 Network Trash Folder
 Temporary Items
 
+# Parcel build stuff
+js/.parcel-cache
+js/dist
+js/node_modules

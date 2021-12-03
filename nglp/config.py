@@ -62,6 +62,13 @@ class Settings(BaseSettings):
         }
     }
 
+    ###########################################
+    ## Kafka Broker configuration
+    kafka_broker = "KAFKA URL"
+
+    # Precompute wait time in seconds
+    precompute_wait_time = 30
+
     class Config:
         env_file = paths.rel2abs(__file__, "..", ".env")
 
