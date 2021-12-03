@@ -5,6 +5,7 @@ from nglp.lib import es_data_mapping
 
 
 class ReportingContextObject(SeamlessMixin, BaseDAO):
+
     __index_type__ = "reporting_context"
 
     __SEAMLESS_COERCE__ = reporting_context_structs.COERCE
@@ -29,6 +30,34 @@ class ReportingContextObject(SeamlessMixin, BaseDAO):
     @source_id.setter
     def source_id(self, val):
         self.__seamless__.set_with_struct("source_id", val)
+
+    @property
+    def data(self):
+        return self.__seamless__.data
+
+    @property
+    def id(self):
+        return self.__seamless__.get_single("id")
+
+    @id.setter
+    def id(self, val):
+        self.__seamless__.set_with_struct("id", val)
+
+    @property
+    def last_updated(self):
+        return self.__seamless__.get_single("record_last_updated")
+
+    @last_updated.setter
+    def last_updated(self, val):
+        self.__seamless__.set_with_struct("record_last_updated", val)
+
+    @property
+    def created_date(self):
+        return self.__seamless__.get_single("record_created")
+
+    @created_date.setter
+    def created_date(self, val):
+        self.__seamless__.set_with_struct("record_created", val)
 
 
 class Publisher(ReportingContextObject):
@@ -132,9 +161,9 @@ class Organisation(ReportingContextObject):
 class ReportingContextFactory:
     map = {
         Publisher.TYPE: Publisher,
-        Journal.Type: Journal,
+        Journal.TYPE: Journal,
         Issue.TYPE: Issue,
-        Article.Type: Article,
+        Article.TYPE: Article,
         Author.TYPE: Author,
         User.TYPE: User,
         GenericContainer.TYPE: GenericContainer,
@@ -144,3 +173,9 @@ class ReportingContextFactory:
     @classmethod
     def get(cls, t):
         return cls.map.get(t)
+
+    @classmethod
+    def make(cls, raw):
+        t = raw.get("type")
+        clazz = cls.get(t)
+        return clazz(raw)

@@ -16,6 +16,9 @@ COERCE = {
 
 ENTITY_STRUCT = {
     "fields" : {
+        "id" : {"coerce" : "unicode"},
+        "record_created" : {"coerce" : "datetime"},
+        "record_last_updated" : {"coerce" : "datetime"},
         "type" : {"coerce" : "unicode"},
         "source_id" : {"coerce" : "unicode"},
     },
