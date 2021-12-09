@@ -106,12 +106,18 @@ nglp.g001.init = function (params) {
         components : [
             new MultiDateRangeEntry({
                 id : "g001-date-range",
-                display: "REPORT PERIOD:<br>",
                 fields : [
                     {field : "occurred_at", display: "Event Date"}
                 ],
                 autoLookupRange: true,
-                renderer : new MultiDateRangeCombineSelector({})
+                forceLatest: true,
+                defaultLatest: new Date(),
+                renderer : new MultiDateRangeCombineSelector({
+                    ranges: {
+                        'Last Year' : [moment().subtract(1, "year"), moment()],
+                        'Last 30 Days': [moment().subtract(29, 'days'), moment()]
+                    }
+                })
             }),
             new Chart({
                 id: "g001-interactions-chart",

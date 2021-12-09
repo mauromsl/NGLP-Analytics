@@ -8807,6 +8807,7 @@ var $8ff5b3d2c2ab6201$export$6d5fb309d07d7299 = /*#__PURE__*/ function(Renderer)
                     bottom: that.marginBottom,
                     left: that.marginLeft
                 }).showValues(that.showValues).tooltips(that.toolTips).showControls(that.controls).showLegend(that.legend).showXAxis(that.showXAxis).showYAxis(that.showYAxis);
+                if (that.barColor) chart.barColor(that.barColor);
                 if (that.stacked) chart.multibar.stacked(that.stacked);
                 if (that.yTickFormat) {
                     var fn = that.yTickFormat;
@@ -8956,23 +8957,6 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
 }($6cf4dc301226cb87$export$a695173e2ecfa9b);
 
 
-function $4002aa3570a5e3f8$export$7cabc94322a2c22(sheetName) {
-    var palette = {
-        investigation: false,
-        export: false,
-        request: false
-    };
-    for(var i = 0; i < document.styleSheets.length; i++){
-        var sheet = document.styleSheets[i];
-        if (sheet.href && sheet.href.includes(sheetName)) for(var j = 0; j < sheet.rules.length; j++){
-            var rule = sheet.rules[j];
-            if (rule.selectorText === "#palette #investigations") palette.investigation = rule.style.color;
-            else if (rule.selectorText === "#palette #exports") palette.export = rule.style.color;
-            else if (rule.selectorText === "#palette #requests") palette.request = rule.style.color;
-        }
-    }
-    return palette;
-}
 function $4002aa3570a5e3f8$export$8e8129eda99077(sheetName, paletteSelector) {
     if (!paletteSelector) paletteSelector = "#palette";
     var palette = {
@@ -9095,6 +9079,8 @@ var $bcaf9e61a70b299d$export$eac301b83a14e1b7 = /*#__PURE__*/ function(Component
         _this.defaultEarliest = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "defaultEarliest", new Date(0));
         // default latest date to use in all cases (defaults to now)
         _this.defaultLatest = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "defaultLatest", new Date());
+        // use this to force a latest date, even if the auto lookup on the range is set
+        _this.forceLatest = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "forceLatest", false);
         ///////////////////////////////////////////////
         // fields used to track internal state
         _this.currentField = false;
@@ -9135,7 +9121,7 @@ var $bcaf9e61a70b299d$export$eac301b83a14e1b7 = /*#__PURE__*/ function(Component
                     var min = this.defaultEarliest;
                     var max = this.defaultLatest;
                     if (agg.min !== null) min = new Date(agg.min);
-                    if (agg.max !== null) max = new Date(agg.max);
+                    if (agg.max !== null && !this.forceLatest) max = new Date(agg.max);
                     this.dateOptions[field] = {
                         earliest: min,
                         latest: max
@@ -9150,7 +9136,7 @@ var $bcaf9e61a70b299d$export$eac301b83a14e1b7 = /*#__PURE__*/ function(Component
                         this.currentField = field;
                         var filter = filters[0];
                         this.fromDate = filter.gte;
-                        this.toDate = filter.lt;
+                        this.toDate = filter.lte;
                     }
                 }
                 if (!this.currentField && this.fields.length > 0) this.currentField = this.fields[0].field;
@@ -9236,6 +9222,7 @@ var $bcaf9e61a70b299d$export$eac301b83a14e1b7 = /*#__PURE__*/ function(Component
                     this.edge.cycle();
                     return true;
                 }
+                return false;
             }
         },
         {
@@ -9342,15 +9329,16 @@ var $d626902615431ef9$export$4d567bc36d967c12 = /*#__PURE__*/ function(Renderer)
                 this.selectId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, dre.id + "_date-type", this);
                 this.rangeId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, dre.id + "_range", this);
                 var pluginId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, dre.id + "_plugin", this);
-                var options = "";
-                for(var i = 0; i < dre.fields.length; i++){
-                    var field = dre.fields[i];
-                    var selected = dre.currentField === field.field ? ' selected="selected" ' : "";
-                    options += '<option value="' + field.field + '"' + selected + '>' + field.display + '</option>';
-                }
                 var frag = '<div class="form-inline">';
-                if (dre.display) frag += '<span class="' + prefixClass + '">' + dre.display + '</span>';
-                frag += '<div class="form-group"><select class="' + selectClass + ' form-control" name="' + this.selectId + '" id="' + this.selectId + '">' + options + '</select></div>';
+                if (dre.fields.length > 1) {
+                    var options = "";
+                    for(var i = 0; i < dre.fields.length; i++){
+                        var field = dre.fields[i];
+                        var selected = dre.currentField === field.field ? ' selected="selected" ' : "";
+                        options += '<option value="' + field.field + '"' + selected + '>' + field.display + '</option>';
+                    }
+                    frag += '<div class="form-group"><select class="' + selectClass + ' form-control" name="' + this.selectId + '" id="' + this.selectId + '">' + options + '</select></div>';
+                }
                 frag += '<div id="' + this.rangeId + '" class="' + inputClass + ' form-control">\
             <i class="glyphicon glyphicon-calendar"></i>&nbsp;\
             <span></span> <b class="caret"></b>\
@@ -9402,7 +9390,7 @@ var $d626902615431ef9$export$4d567bc36d967c12 = /*#__PURE__*/ function(Renderer)
                 var date_type = null;
                 if (this.useSelect2) date_type = this.selectJq.select2("val");
                 else date_type = this.selectJq.val();
-                this.component.changeField(date_type);
+                if (date_type) this.component.changeField(date_type);
                 this.component.setFrom(start.toDate());
                 this.component.setTo(end.toDate());
                 this.dateRangeDisplay(params);
@@ -9576,7 +9564,6 @@ nglp.g001.init = function(params) {
         components: [
             new $bcaf9e61a70b299d$export$eac301b83a14e1b7({
                 id: "g001-date-range",
-                display: "REPORT PERIOD:<br>",
                 fields: [
                     {
                         field: "occurred_at",
@@ -9584,7 +9571,19 @@ nglp.g001.init = function(params) {
                     }
                 ],
                 autoLookupRange: true,
+                forceLatest: true,
+                defaultLatest: new Date(),
                 renderer: new $d626902615431ef9$export$4d567bc36d967c12({
+                    ranges: {
+                        'Last Year': [
+                            $bccd1ba82d89ceaa$export$137cea99ac96085().subtract(1, "year"),
+                            $bccd1ba82d89ceaa$export$137cea99ac96085()
+                        ],
+                        'Last 30 Days': [
+                            $bccd1ba82d89ceaa$export$137cea99ac96085().subtract(29, 'days'),
+                            $bccd1ba82d89ceaa$export$137cea99ac96085()
+                        ]
+                    }
                 })
             }),
             new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
