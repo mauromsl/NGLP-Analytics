@@ -9,6 +9,7 @@ import {htmlID, numFormat, idSelector, on, getParam} from "../vendor/edges2/src/
 import {GeohashedZoomableMap} from "../vendor/edges2/src/components/GeohashedZoomableMap";
 import {GoogleMapView} from "../vendor/edges2/src/renderers/googlemap/GoogleMapView";
 import {ORTermSelector} from "../vendor/edges2/src/components/ORTermSelector";
+import {UpdatingORTermSelector} from "../vendor/edges2/src/components/UpdatingORTermSelector";
 import {CheckboxORTermSelector} from "../vendor/edges2/src/renderers/bs3/CheckboxORTermSelector";
 import {FixedSelectionCheckboxORTermSelector} from "../vendor/edges2/src/renderers/bs3/FixedSelectionCheckboxORTermSelector";
 import {HorizontalMultibarRenderer} from "../vendor/edges2/src/renderers/nvd3/HorizontalMultibarRenderer";
@@ -215,7 +216,7 @@ nglp.g001.init = function (params) {
                     }
                 })
             }),
-            new ORTermSelector({
+            new UpdatingORTermSelector({
                 id: "g001-interactions",
                 field: "event.exact",
                 syncCounts: false,
@@ -231,6 +232,7 @@ nglp.g001.init = function (params) {
                     showCount: true,
                     countFormat: countFormat,
                     fixedTerms : presentationOrder
+
                 })
             }),
             new ORTermSelector({
