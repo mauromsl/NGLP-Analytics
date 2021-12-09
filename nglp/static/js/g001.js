@@ -3288,6 +3288,7 @@ function $ae46249d8a2a7b6d$export$8c0eec9b15d1897d(params) {
 function $ae46249d8a2a7b6d$export$d99c821b0fb86668(params) {
     var histogramAgg = params.histogramAgg;
     var termsAgg = params.termsAgg;
+    var seriesNameMap = params.seriesNameMap;
     return function(component) {
         var series = {
         };
@@ -3309,8 +3310,9 @@ function $ae46249d8a2a7b6d$export$d99c821b0fb86668(params) {
         var seriesNames = Object.keys(series);
         for(var i1 = 0; i1 < seriesNames.length; i1++){
             var seriesName = seriesNames[i1];
+            var displaySeriesName = seriesNameMap ? seriesNameMap[seriesName] || seriesName : seriesName;
             dataSeries.push({
-                key: seriesName,
+                key: displaySeriesName,
                 values: series[seriesName]
             });
         }
@@ -7938,9 +7940,14 @@ var $eec1dd49d0c67d6b$export$a0bd1dffd4b583c = /*#__PURE__*/ function(Renderer) 
                     // make sure we set the centre right
                     this.map.setCenter(centre);
                 }
-                // clear any existing markers
+                // clear any existing markers/clusters
+                if (this.cluster && this.markerCluster) this.markerCluster.clearMarkers();
                 for(i = 0; i < this.markers.length; i++)this.markers[i].setMap(null);
                 this.markers = [];
+                // if (this.cluster) {
+                //     this.markerCluster.clearMarkers();
+                //     this.markerCluster = false;
+                // }
                 for(var i = 0; i < this.component.locations.length; i++){
                     var loc = this.component.locations[i];
                     var myLatlng = new $5cab7f24a6cc18af$export$b2f13e228c542ebb.maps.LatLng(loc.lat, loc.lon);
@@ -8157,12 +8164,6 @@ var $2c48e414d79136ba$export$845e14b82c9a4f95 = /*#__PURE__*/ function(Component
         {
             key: "synchronise",
             value: function synchronise() {
-                this._synchroniseForResult(this.edge.result);
-            }
-        },
-        {
-            key: "_synchroniseForResult",
-            value: function _synchroniseForResult(result) {
                 // reset the internal properties
                 this.selected = [];
                 // extract all the filter values that pertain to this selector
@@ -8175,8 +8176,8 @@ var $2c48e414d79136ba$export$845e14b82c9a4f95 = /*#__PURE__*/ function(Component
                         this.selected.push(val);
                     }
                 }
-                if (this.syncCounts && result && this.terms) this._synchroniseTerms({
-                    result: result
+                if (this.syncCounts && this.edge.result && this.terms) this._synchroniseTerms({
+                    result: this.edge.result
                 });
             }
         },
@@ -8266,8 +8267,9 @@ var $2c48e414d79136ba$export$845e14b82c9a4f95 = /*#__PURE__*/ function(Component
             value: function doUpdateQuerySuccess(params) {
                 var result = params.result;
                 this.latestResult = result;
-                this._synchroniseForResult(result);
-                // this._synchroniseTerms({result: result});
+                this._synchroniseTerms({
+                    result: result
+                });
                 // turn off the update flag
                 this.updating = false;
                 // since this happens asynchronously, we may want to draw
@@ -8455,41 +8457,9 @@ var $58e70bcc9ea9714f$export$6175c660df807dd = /*#__PURE__*/ function(Component)
                 // now merge the aggTerms and the this.all values according to the appropriate algorithm
                 if (this.updateType === "mergeInitial") this._makeTermsMergeInitial();
                 else this._makeTermsFresh();
-            // if (this.syncCounts && this.edge.result && this.terms) {
-            //     this._synchroniseTerms({result: result});
-            // }
             }
         },
         {
-            // _synchroniseTerms(params) {
-            //     if (this.updateType === "mergeInitial") {
-            //         this._synchroniseTermsMergeInitial(params);
-            //     } else {
-            //         this._synchroniseTermsFresh(params);
-            //     }
-            // };
-            // _synchroniseTermsMergeInitial(params) {
-            //     var result = params.result;
-            //
-            //     // mesh the terms in the aggregation with the terms in the terms list
-            //     var buckets = result.buckets(this.id);
-            //
-            //     for (var i = 0; i < this.terms.length; i++) {
-            //         var t = this.terms[i];
-            //         var found = false;
-            //         for (var j = 0; j < buckets.length; j++) {
-            //             var b = buckets[j];
-            //             if (t.term === b.key) {
-            //                 t.count = b.doc_count;
-            //                 found = true;
-            //                 break;
-            //             }
-            //         }
-            //         if (!found) {
-            //             t.count = 0;
-            //         }
-            //     }
-            // }
             key: "_makeTermsMergeInitial",
             value: function _makeTermsMergeInitial() {
                 // mesh the terms in the aggregation with the terms in the terms list
@@ -8510,16 +8480,6 @@ var $58e70bcc9ea9714f$export$6175c660df807dd = /*#__PURE__*/ function(Component)
             }
         },
         {
-            // _synchroniseTermsFresh(params) {
-            //     var result = params.result;
-            //
-            //     this.terms = [];
-            //     var buckets = result.buckets(this.id);
-            //     for (var i = 0; i < buckets.length; i++) {
-            //         var bucket = buckets[i];
-            //         this.terms.push({term: bucket.key, display: this.translate(bucket.key), count: bucket.doc_count});
-            //     }
-            // }
             key: "_makeTermsFresh",
             value: function _makeTermsFresh() {
                 var buckets = this.latestResult.buckets(this.id);
@@ -8532,14 +8492,6 @@ var $58e70bcc9ea9714f$export$6175c660df807dd = /*#__PURE__*/ function(Component)
                         count: bucket.doc_count
                     });
                 }
-            // var result = params.result;
-            //
-            // this.terms = [];
-            // var buckets = result.buckets(this.id);
-            // for (var i = 0; i < buckets.length; i++) {
-            //     var bucket = buckets[i];
-            //     this.terms.push({term: bucket.key, display: this.translate(bucket.key), count: bucket.doc_count});
-            // }
             }
         },
         {
@@ -8833,7 +8785,7 @@ var $135bcb32af9eb45d$export$4b392426dd40333d = /*#__PURE__*/ function(Renderer)
                         var filt = ts.selected[i];
                         var def = this._getFilterDef(filt);
                         if (def) {
-                            var display = this.component._translate(filt);
+                            var display = this.component.translate(filt);
                             var id = $d48cc3604bf30e24$export$63ba8ea1e92c906(filt);
                             var count = "";
                             if (this.showCount) {
@@ -9905,6 +9857,12 @@ nglp.g001.init = function(params) {
         "export": "EXPORTS",
         "request": "DOWNLOADS"
     };
+    // this is the reverse of the above, which is required to map the palette onto the
+    var valueInteractionMap = {
+        "VIEWS": "investigation",
+        "EXPORTS": "export",
+        "DOWNLOADS": "request"
+    };
     var presentationOrder = [
         "investigation",
         "export",
@@ -10010,7 +9968,8 @@ nglp.g001.init = function(params) {
                 id: "g001-interactions-chart",
                 dataFunction: $ae46249d8a2a7b6d$export$d99c821b0fb86668({
                     histogramAgg: "occurred_at",
-                    termsAgg: "events"
+                    termsAgg: "events",
+                    seriesNameMap: interactionValueMap
                 }),
                 rectangulate: true,
                 seriesSort: function seriesSort(values) {
@@ -10025,7 +9984,7 @@ nglp.g001.init = function(params) {
                         return d3.time.format('%b %y')(new Date(d));
                     },
                     color: function color(d, i) {
-                        return palette[d.key];
+                        return palette[valueInteractionMap[d.key]];
                     },
                     yTickFormat: ",.0f",
                     showLegend: false,
@@ -10093,8 +10052,6 @@ nglp.g001.init = function(params) {
             new $58e70bcc9ea9714f$export$6175c660df807dd({
                 id: "g001-interactions",
                 field: "event.exact",
-                syncCounts: false,
-                lifecycle: "update",
                 updateType: "fresh",
                 orderBy: "term",
                 orderDir: "asc",
@@ -10108,12 +10065,10 @@ nglp.g001.init = function(params) {
                     fixedTerms: presentationOrder
                 })
             }),
-            new $2c48e414d79136ba$export$845e14b82c9a4f95({
+            new $58e70bcc9ea9714f$export$6175c660df807dd({
                 id: "g001-format",
                 field: "format.exact",
-                size: 10,
-                syncCounts: false,
-                lifecycle: "static",
+                updateType: "fresh",
                 orderBy: "count",
                 orderDir: "desc",
                 valueFunction: function(v) {
@@ -10144,30 +10099,6 @@ nglp.g001.init = function(params) {
                     ],
                     seriesName: "request"
                 }),
-                // renderer: new HorizontalMultibarRenderer({
-                //     title: "Downloads",
-                //     legend: false,
-                //     valueFormat: countFormat,
-                //     color: function(d, i) {
-                //         return palette[d.key]
-                //     },
-                //     showXAxis: true,
-                //     showYAxis: false,
-                //     marginLeft: 0,
-                //     marginRight: 0,
-                //     marginTop: 0,
-                //     marginBottom: 0,
-                //     groupSpacing: 0.7,
-                //     onUpdate: () => {
-                //         let ticks = $("#g001-top-downloads .tick text");
-                //         for (let i = 0; i < ticks.length; i++) {
-                //             let tick = $(ticks[i]);
-                //             tick.attr("x", 0);
-                //             tick.attr("y", 20);
-                //             tick.css("text-anchor", "start");
-                //         }
-                //     }
-                // })
                 renderer: new $beec1707b43a9eb2$export$2a05ec748c9cb22d({
                     title: "Downloads",
                     countFormat: countFormat
