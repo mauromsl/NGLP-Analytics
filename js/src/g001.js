@@ -9,6 +9,7 @@ import {htmlID, numFormat, idSelector, on, getParam} from "../vendor/edges2/src/
 import {GeohashedZoomableMap} from "../vendor/edges2/src/components/GeohashedZoomableMap";
 import {GoogleMapView} from "../vendor/edges2/src/renderers/googlemap/GoogleMapView";
 import {ORTermSelector} from "../vendor/edges2/src/components/ORTermSelector";
+import {UpdatingORTermSelector} from "../vendor/edges2/src/components/UpdatingORTermSelector";
 import {CheckboxORTermSelector} from "../vendor/edges2/src/renderers/bs3/CheckboxORTermSelector";
 import {FixedSelectionCheckboxORTermSelector} from "../vendor/edges2/src/renderers/bs3/FixedSelectionCheckboxORTermSelector";
 import {HorizontalMultibarRenderer} from "../vendor/edges2/src/renderers/nvd3/HorizontalMultibarRenderer";
@@ -40,6 +41,13 @@ nglp.g001.init = function (params) {
         "investigation" : "VIEWS",
         "export" : "EXPORTS",
         "request" : "DOWNLOADS"
+    }
+
+    // this is the reverse of the above, which is required to map the palette onto the
+    let valueInteractionMap = {
+        "VIEWS" : "investigation",
+        "EXPORTS" : "export",
+        "DOWNLOADS" : "request"
     }
 
     let presentationOrder = [
@@ -106,18 +114,25 @@ nglp.g001.init = function (params) {
         components : [
             new MultiDateRangeEntry({
                 id : "g001-date-range",
-                display: "REPORT PERIOD:<br>",
                 fields : [
                     {field : "occurred_at", display: "Event Date"}
                 ],
                 autoLookupRange: true,
-                renderer : new MultiDateRangeCombineSelector({})
+                forceLatest: true,
+                defaultLatest: new Date(),
+                renderer : new MultiDateRangeCombineSelector({
+                    ranges: {
+                        'Last Year' : [moment().subtract(1, "year"), moment()],
+                        'Last 30 Days': [moment().subtract(29, 'days'), moment()]
+                    }
+                })
             }),
             new Chart({
                 id: "g001-interactions-chart",
                 dataFunction: termSplitDateHistogram({
                     histogramAgg: "occurred_at",
-                    termsAgg: "events"
+                    termsAgg: "events",
+                    seriesNameMap: interactionValueMap
                 }),
                 rectangulate: true,
                 seriesSort: function(values) {
@@ -134,7 +149,7 @@ nglp.g001.init = function (params) {
                 renderer : new MultibarRenderer({
                     xTickFormat: function(d) { return d3.time.format('%b %y')(new Date(d))},
                     color: function(d, i) {
-                        return palette[d.key]
+                        return palette[valueInteractionMap[d.key]]
                     },
                     yTickFormat : ",.0f",
                     showLegend: false,
@@ -209,11 +224,9 @@ nglp.g001.init = function (params) {
                     }
                 })
             }),
-            new ORTermSelector({
+            new UpdatingORTermSelector({
                 id: "g001-interactions",
                 field: "event.exact",
-                syncCounts: false,
-                lifecycle: "update",
                 updateType: "fresh",
                 orderBy: "term",
                 orderDir: "asc",
@@ -225,14 +238,13 @@ nglp.g001.init = function (params) {
                     showCount: true,
                     countFormat: countFormat,
                     fixedTerms : presentationOrder
+
                 })
             }),
-            new ORTermSelector({
+            new UpdatingORTermSelector({
                 id: "g001-format",
                 field: "format.exact",
-                size: 10,
-                syncCounts: false,
-                lifecycle: "static",
+                updateType: "fresh",
                 orderBy: "count",
                 orderDir: "desc",
                 valueFunction : (v) => {
@@ -254,30 +266,6 @@ nglp.g001.init = function (params) {
                     ],
                     seriesName: "request"
                 }),
-                // renderer: new HorizontalMultibarRenderer({
-                //     title: "Downloads",
-                //     legend: false,
-                //     valueFormat: countFormat,
-                //     color: function(d, i) {
-                //         return palette[d.key]
-                //     },
-                //     showXAxis: true,
-                //     showYAxis: false,
-                //     marginLeft: 0,
-                //     marginRight: 0,
-                //     marginTop: 0,
-                //     marginBottom: 0,
-                //     groupSpacing: 0.7,
-                //     onUpdate: () => {
-                //         let ticks = $("#g001-top-downloads .tick text");
-                //         for (let i = 0; i < ticks.length; i++) {
-                //             let tick = $(ticks[i]);
-                //             tick.attr("x", 0);
-                //             tick.attr("y", 20);
-                //             tick.css("text-anchor", "start");
-                //         }
-                //     }
-                // })
                 renderer: new RelativeSizeBars({
                     title: "Downloads",
                     countFormat: countFormat
@@ -295,30 +283,6 @@ nglp.g001.init = function (params) {
                     title: "Exports",
                     countFormat: countFormat
                 })
-                // renderer: new HorizontalMultibarRenderer({
-                //     title: "Exports",
-                //     legend: false,
-                //     valueFormat: countFormat,
-                //     color: function(d, i) {
-                //         return palette[d.key]
-                //     },
-                //     showXAxis: true,
-                //     showYAxis: false,
-                //     marginLeft: 0,
-                //     marginRight: 0,
-                //     marginTop: 0,
-                //     marginBottom: 0,
-                //     groupSpacing: 0.7,
-                //     onUpdate: () => {
-                //         let ticks = $("#g001-top-exports .tick text");
-                //         for (let i = 0; i < ticks.length; i++) {
-                //             let tick = $(ticks[i]);
-                //             tick.attr("x", 0);
-                //             tick.attr("y", 20);
-                //             tick.css("text-anchor", "start");
-                //         }
-                //     }
-                // })
             })
         ]
     })

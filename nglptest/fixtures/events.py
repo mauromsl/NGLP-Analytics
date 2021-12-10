@@ -76,7 +76,7 @@ class EventFixtureFactory(object):
 
 REQUEST_EVENT = {
     "event" : "request",
-    "object_type" : "File",
+    "object_type" : "file",
     "object_id": ["12345", "doi:10.12345/hello"],
     "format" : "application/pdf",
     "url" : "/article/12345/download.pdf",

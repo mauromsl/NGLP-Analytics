@@ -6,7 +6,6 @@
         "../vendor/edges2/sass/renderers/bs3/fixed-selection-checkbox-or-term-selector",
         "../vendor/edges2/sass/renderers/googlemap/google-map-view",
         "../vendor/edges2/sass/renderers/html/relative-size-bars";
-@import "../node_modules/bootstrap/scss/bootstrap";
 @import "base/grid",
         "base/body",
         "base/navbar",
@@ -16,16 +15,16 @@
 // export the key bits of the palette as stylesheet rules, to be read by the JS
 // for injection into visualisation components
 #palette {
-    #investigations {
-        background: $investigations;
+    #investigation {
+        color: $investigations;
     }
 
-    #requests {
-        background: $requests;
+    #request {
+        color: $requests;
     }
 
-    #exports {
-        background: $exports;
+    #export {
+        color: $exports;
     }
 }
 

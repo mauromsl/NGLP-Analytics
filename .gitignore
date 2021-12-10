@@ -71,3 +71,4 @@ node_modules
 js/.parcel-cache
 js/dist
 js/node_modules
+error_sass.txt

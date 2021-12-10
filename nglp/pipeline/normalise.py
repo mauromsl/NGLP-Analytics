@@ -1,7 +1,13 @@
-from nglp.pipeline.pipeline import PipelineProcessor, UnacceptableEvent
+from nglp.pipeline.pipeline import PipelineProcessor
 from nglp.models.events import PipelineEvent
-from nglp.config import settings
-import regex
+from nglp.pipeline import regex
+
+ID_MAPPING = {
+    "DOI": regex.DOI_COMPILED,
+    "Handle": regex.HANDLE_COMPILED,
+    "ISSN": regex.ISSN_COMPILED,
+    "URL": regex.HTTP_URL_COMPILED,
+}
 
 
 class Normalise(PipelineProcessor):
@@ -15,25 +21,48 @@ class Normalise(PipelineProcessor):
         return event
         """
 
-        if not event:
+        if not event.object_ids:
+            # Would return no normalised anything
             return event
-        if not event.object_id:
-            return  event
 
-        if regex.DOI.search(event.object_id) is not None:
-            # then the object_id matches a DOI
-            # normalise the doi
-            # set event.object_id as normalised DOI
-            # return event
-        elif regex.HANDLE.search(event.object_id) is not None:
-            # then the object_id matches a handle
-        elif regex.ISSN.search(event.object_id) is not None:
-            # then the object_id matches an ISSN
-        elif regex.HTTP_URL.search(event.object_id) is not None:
-            # the object_id matches an HTTP URL
+        id_list = []
 
-        # determine if object_id is doi, url, issn or handle by comparing to regex
+        for objid in event.object_ids:
+            oid = objid.strip()
+            if regex.DOI_COMPILED.search(oid) is not None:
+                # then the object_id matches a DOI
+                normalised_id = self.normalise(_type="DOI", objid=oid)
+                id_list.append(normalised_id)
+
+            elif regex.HANDLE_COMPILED.search(oid) is not None:
+                # then the object_id matches a handle
+                normalised_id = self.normalise(_type="Handle", objid=oid)
+                id_list.append(normalised_id)
+
+            elif regex.ISSN_COMPILED.search(oid) is not None:
+                # then the object_id matches an ISSN
+                normalised_id = self.normalise(_type="ISSN", objid=oid)
+                id_list.append(normalised_id)
+
+            elif regex.HTTP_URL_COMPILED.search(oid) is not None:
+                # the object_id matches an HTTP URL
+                normalised_id = self.normalise(_type="URL", objid=oid)
+                id_list.append(normalised_id)
+
+            else:
+                id_list.append(oid)
+
+        event.object_ids = id_list
+        return event
 
         # for each, depending on type, return an edited version
+    def normalise(self, _type, objid):
+        # object_id matches a regex string
+        # object_id should be normalised and returned.
+        norm = regex.group_match(ID_MAPPING[_type], objid, "id")
+        if norm is None:
+            return objid
+        else:
+            norm_id = norm
 
-        # if that is not possible, return an exception
+        return norm_id

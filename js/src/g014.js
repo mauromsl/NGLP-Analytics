@@ -3,7 +3,7 @@ import {es} from "../vendor/edges2/dependencies/es"
 
 import {Edge, Template} from "../vendor/edges2/src/core"
 import {Chart} from "../vendor/edges2/src/components/Chart";
-import {htmlID, numFormat, idSelector, on, getParam, jsClasses, jsClassSelector} from "../vendor/edges2/src/utils";
+import {htmlID, numFormat, idSelector, on, getParam, jsClasses, jsClassSelector, allClasses} from "../vendor/edges2/src/utils";
 import {HorizontalMultibarRenderer} from "../vendor/edges2/src/renderers/nvd3/HorizontalMultibarRenderer";
 import {ChartDataTable} from "../vendor/edges2/src/renderers/bs3/ChartDataTable";
 import {ImportantNumbers} from "../vendor/edges2/src/components/ImportantNumbers";
@@ -28,8 +28,7 @@ nglp.g014.init = function (params) {
         thousandsSeparator: ","
     });
 
-    let palette = extractPalette("g014.css");
-
+    // FIXME: we'll need to draw this stage progression from configuration somewhere along the line
     var stateProgression = getParam(params, "stateProgression", [
         ["submit", "Submitted"],
         ["first_decision", "First Decision"],
@@ -37,6 +36,24 @@ nglp.g014.init = function (params) {
         ["accept", "Accepted"],
         ["publish", "Published"]
     ]);
+
+    let wfPalette = extractPalette("g014.css", "#workflowpalette");
+    let wfPaletteKeys = Object.keys(wfPalette);
+    wfPaletteKeys = wfPaletteKeys.sort();
+
+    // distribute the palette cyclically over the state progressions
+    for (let i = 0; i < stateProgression.length; i++) {
+        let state = stateProgression[i];
+        state.push(wfPalette[wfPaletteKeys[i % wfPaletteKeys.length]]);
+    }
+
+    let agePalette = extractPalette("g014.css", "#agepalette");
+    let agePaletteKeys = Object.keys(agePalette);
+    agePaletteKeys = agePaletteKeys.sort();
+    let ageBarColours = [];
+    for (let i = 0; i < agePaletteKeys.length; i++) {
+        ageBarColours.push(agePalette[agePaletteKeys[i]]);
+    }
 
     // Current workflow load
     let currentComponents = [];
@@ -93,7 +110,7 @@ nglp.g014.init = function (params) {
 
     // Note: I've moved this out to a separate function, because the parcel compiler
     // was having trouble with it inline (for reasons unknown https://github.com/parcel-bundler/parcel/issues/7252 )
-    let ageComponents = getAgeComponents(stateProgression, countFormat);
+    let ageComponents = getAgeComponents(stateProgression, countFormat, ageBarColours);
 
     // workflow capacity
     let yearmillis = 1000*60*60*24*365;
@@ -123,7 +140,16 @@ nglp.g014.init = function (params) {
                 xTickFormat: function(d) {
                     return d3.time.format('%B %Y')(new Date(d))
                 },
-                controls: false
+                controls: false,
+                showLegend: false,
+                color: function(d, i) {
+                    for (let j = 0; j < stateProgression.length; j++) {
+                        let state = stateProgression[j];
+                        if (state[0] === d.key) {
+                            return state[2];
+                        }
+                    }
+                }
             })
         }),
         new Chart({
@@ -247,8 +273,11 @@ nglp.g014.G014Template = class extends Template {
         let ageId = htmlID(this.namespace, "age-show-as-table");
         let capacityId = htmlID(this.namespace, "capacity-show-as-table");
         let tableClasses = styleClasses(this.namespace, "stats");
-        let ageChartClasses = jsClasses(this.namespace, "age-chart");
+        let ageChartClasses = allClasses(this.namespace, "age-chart");
         let ageTableClasses = jsClasses(this.namespace, "age-table");
+        let legendClasses = allClasses(this.namespace, "legend");
+        let legendBoxClasses = styleClasses(this.namespace, "legend-box");
+        let showAsTableClasses = styleClasses(this.namespace, "sat");
 
         let tableRows = "";
         for (let i = 0; i < this.stateProgression.length; i++) {
@@ -264,6 +293,17 @@ nglp.g014.G014Template = class extends Template {
                     </td>
                 </tr>
             `;
+        }
+
+        let capacityChartLegend = "";
+        for (let i = 0; i < this.stateProgression.length; i++) {
+            let state = this.stateProgression[i];
+            capacityChartLegend += `
+                <div class="col-md-2 ${legendClasses}">
+                    <div class="${legendBoxClasses}" style="color: ${state[2]};">&#9632;</div>
+                    ${state[1]}
+                </div>
+            `
         }
 
         let frame = `<div class="row header">
@@ -303,7 +343,11 @@ nglp.g014.G014Template = class extends Template {
                 </table>
                 
                 <h3>Workflow Capacity</h3>
-                <p><input type="checkbox" name="${capacityId}" id="${capacityId}"> Show as table</p>
+                <div class="row ${showAsTableClasses}">
+                    <div class="col-md-2"><input type="checkbox" name="${capacityId}" id="${capacityId}"> Show as table</div>
+                    ${capacityChartLegend}
+                </div>
+                
                 <div id="g014-workflow-capacity-chart"></div>
                 <div id="g014-workflow-capacity-table" style="display: none"></div>
                 
@@ -320,15 +364,21 @@ nglp.g014.G014Template = class extends Template {
     }
 
     toggleCapacityTable() {
+        let legendSelector = jsClassSelector(this.namespace, "legend");
+
         let chart = this.edge.jq("#g014-workflow-capacity-chart");
         let table = this.edge.jq("#g014-workflow-capacity-table");
+        let legend = this.edge.jq(legendSelector);
+
         if (this.showingCapacity === "chart") {
             chart.hide();
             table.show();
+            legend.hide();
             this.showingCapacity = "table"
         } else {
             table.hide();
             chart.show();
+            legend.show();
             this.showingCapacity = "chart"
         }
     }
@@ -387,7 +437,7 @@ function stateDataFunction(state) {
     }
 }
 
-function getAgeComponents(stateProgression, countFormat) {
+function getAgeComponents(stateProgression, countFormat, ageBarColours) {
     // Age distribution
     let ageComponents = [];
     for (let j = 0; j < stateProgression.length; j++) {
@@ -396,11 +446,15 @@ function getAgeComponents(stateProgression, countFormat) {
                 id: "g014-age-chart-" + stateProgression[j][0],
                 dataFunction: stateDataFunction(stateProgression[j][0]),
                 renderer: new HorizontalMultibarRenderer({
-                    // barColor: ["#1e9dd8"],
                     legend: false,
                     controls: false,
                     valueFormat: countFormat,
-                    marginLeft: 80
+                    marginLeft: 80,
+                    marginTop: 10,
+                    marginBottom: 10,
+                    marginRight: 0,
+                    barColor: ageBarColours
+                    // barColor: [stateProgression[j][2]]
                 })
             })
         );
