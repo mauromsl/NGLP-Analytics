@@ -3944,7 +3944,6 @@ nglp.g014.init = function(params) {
     var countFormat = $d48cc3604bf30e24$export$48334dba1de70fbe({
         thousandsSeparator: ","
     });
-    // FIXME: we'll need to draw this stage progression from configuration somewhere along the line
     var stateProgression = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "stateProgression", [
         [
             "submit",
@@ -3967,6 +3966,9 @@ nglp.g014.init = function(params) {
             "Published"
         ]
     ]);
+    // FIXME: if there's no source we default to the test source, which is probably
+    // fine but a bit weird
+    var source = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "source", "http://cottagelabs.com");
     var wfPalette = $4002aa3570a5e3f8$export$8e8129eda99077("g014.css", "#workflowpalette");
     var wfPaletteKeys = Object.keys(wfPalette);
     wfPaletteKeys = wfPaletteKeys.sort();
@@ -4108,6 +4110,16 @@ nglp.g014.init = function(params) {
         }),
         searchUrl: search_url,
         manageUrl: false,
+        baseQuery: new $8d94b5f2509b6cf5$export$8b446892c82de644.Query({
+            must: [
+                new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsFilter({
+                    field: "source.identifier.exact",
+                    values: [
+                        source
+                    ]
+                })
+            ]
+        }),
         openingQuery: new $8d94b5f2509b6cf5$export$8b446892c82de644.Query({
             must: [
                 new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsFilter({

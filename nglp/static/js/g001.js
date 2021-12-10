@@ -8807,6 +8807,7 @@ var $8ff5b3d2c2ab6201$export$6d5fb309d07d7299 = /*#__PURE__*/ function(Renderer)
                     bottom: that.marginBottom,
                     left: that.marginLeft
                 }).showValues(that.showValues).tooltips(that.toolTips).showControls(that.controls).showLegend(that.legend).showXAxis(that.showXAxis).showYAxis(that.showYAxis);
+                if (that.barColor) chart.barColor(that.barColor);
                 if (that.stacked) chart.multibar.stacked(that.stacked);
                 if (that.yTickFormat) {
                     var fn = that.yTickFormat;
@@ -8956,23 +8957,6 @@ var $26b66f4c4ad5f83b$export$dda19d2613327857 = /*#__PURE__*/ function(Renderer)
 }($6cf4dc301226cb87$export$a695173e2ecfa9b);
 
 
-function $4002aa3570a5e3f8$export$7cabc94322a2c22(sheetName) {
-    var palette = {
-        investigation: false,
-        export: false,
-        request: false
-    };
-    for(var i = 0; i < document.styleSheets.length; i++){
-        var sheet = document.styleSheets[i];
-        if (sheet.href && sheet.href.includes(sheetName)) for(var j = 0; j < sheet.rules.length; j++){
-            var rule = sheet.rules[j];
-            if (rule.selectorText === "#palette #investigations") palette.investigation = rule.style.color;
-            else if (rule.selectorText === "#palette #exports") palette.export = rule.style.color;
-            else if (rule.selectorText === "#palette #requests") palette.request = rule.style.color;
-        }
-    }
-    return palette;
-}
 function $4002aa3570a5e3f8$export$8e8129eda99077(sheetName, paletteSelector) {
     if (!paletteSelector) paletteSelector = "#palette";
     var palette = {

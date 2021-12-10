@@ -205,6 +205,14 @@ class CoreEventInterfaceMixin:
         )
 
     @property
+    def source_id(self):
+        return self.__seamless__.get_single("source.identifier")
+
+    @source_id.setter
+    def source_id(self, val):
+        self.__seamless__.set_with_struct("source.identifier", val)
+
+    @property
     def archive_id(self):
         return self.__seamless__.get_single("source.archive_id")
 

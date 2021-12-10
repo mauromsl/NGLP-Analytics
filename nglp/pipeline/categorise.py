@@ -14,6 +14,8 @@ class Categorise(PipelineProcessor):
         return event
 
     def _get_category(self, event: PipelineEvent) -> str:
-        if event.event in settings.workflow_transitions:
-            return CATEGORY_TYPES.get("workflow_transition")
+        source = event.source_id
+        if source:
+            if event.event in settings.workflow_transitions[source]:
+                return CATEGORY_TYPES.get("workflow_transition")
         return CATEGORY_TYPES.get(event.event)

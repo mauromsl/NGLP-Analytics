@@ -28,7 +28,6 @@ nglp.g014.init = function (params) {
         thousandsSeparator: ","
     });
 
-    // FIXME: we'll need to draw this stage progression from configuration somewhere along the line
     var stateProgression = getParam(params, "stateProgression", [
         ["submit", "Submitted"],
         ["first_decision", "First Decision"],
@@ -36,6 +35,10 @@ nglp.g014.init = function (params) {
         ["accept", "Accepted"],
         ["publish", "Published"]
     ]);
+
+    // FIXME: if there's no source we default to the test source, which is probably
+    // fine but a bit weird
+    let source = getParam(params, "source", "http://cottagelabs.com")
 
     let wfPalette = extractPalette("g014.css", "#workflowpalette");
     let wfPaletteKeys = Object.keys(wfPalette);
@@ -176,6 +179,11 @@ nglp.g014.init = function (params) {
         template: new nglp.g014.G014Template({stateProgression: stateProgression}),
         searchUrl: search_url,
         manageUrl : false,
+        baseQuery: new es.Query({
+            must : [
+                new es.TermsFilter({field: "source.identifier.exact", values: [source]})
+            ]
+        }),
         openingQuery: new es.Query({
             must : [
                 new es.TermsFilter({field: "category.exact", values: ["workflow"]}),
