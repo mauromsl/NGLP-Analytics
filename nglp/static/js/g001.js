@@ -3288,6 +3288,7 @@ function $ae46249d8a2a7b6d$export$8c0eec9b15d1897d(params) {
 function $ae46249d8a2a7b6d$export$d99c821b0fb86668(params) {
     var histogramAgg = params.histogramAgg;
     var termsAgg = params.termsAgg;
+    var seriesNameMap = params.seriesNameMap;
     return function(component) {
         var series = {
         };
@@ -3309,8 +3310,9 @@ function $ae46249d8a2a7b6d$export$d99c821b0fb86668(params) {
         var seriesNames = Object.keys(series);
         for(var i1 = 0; i1 < seriesNames.length; i1++){
             var seriesName = seriesNames[i1];
+            var displaySeriesName = seriesNameMap ? seriesNameMap[seriesName] || seriesName : seriesName;
             dataSeries.push({
-                key: seriesName,
+                key: displaySeriesName,
                 values: series[seriesName]
             });
         }
@@ -7938,9 +7940,14 @@ var $eec1dd49d0c67d6b$export$a0bd1dffd4b583c = /*#__PURE__*/ function(Renderer) 
                     // make sure we set the centre right
                     this.map.setCenter(centre);
                 }
-                // clear any existing markers
+                // clear any existing markers/clusters
+                if (this.cluster && this.markerCluster) this.markerCluster.clearMarkers();
                 for(i = 0; i < this.markers.length; i++)this.markers[i].setMap(null);
                 this.markers = [];
+                // if (this.cluster) {
+                //     this.markerCluster.clearMarkers();
+                //     this.markerCluster = false;
+                // }
                 for(var i = 0; i < this.component.locations.length; i++){
                     var loc = this.component.locations[i];
                     var myLatlng = new $5cab7f24a6cc18af$export$b2f13e228c542ebb.maps.LatLng(loc.lat, loc.lon);
@@ -8368,6 +8375,357 @@ var $2c48e414d79136ba$export$845e14b82c9a4f95 = /*#__PURE__*/ function(Component
 
 
 
+
+var $58e70bcc9ea9714f$export$6175c660df807dd = /*#__PURE__*/ function(Component) {
+    "use strict";
+    $bca7673885229bfd$export$9099ad97b570f7c($58e70bcc9ea9714f$export$6175c660df807dd, Component);
+    function $58e70bcc9ea9714f$export$6175c660df807dd(params) {
+        $10cfaf3f2f812eb4$export$9099ad97b570f7c(this, $58e70bcc9ea9714f$export$6175c660df807dd);
+        var _this;
+        _this = $6981eb4a4ce0a3e0$export$9099ad97b570f7c(this, $da23c25529bb1df4$export$9099ad97b570f7c($58e70bcc9ea9714f$export$6175c660df807dd).call(this, params));
+        // field upon which to build the selector
+        _this.field = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "field");
+        // whether the facet should be displayed at all (e.g. you may just want the data for a callback)
+        _this.active = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "active", true);
+        // if the update type is "update", then how should this component update the facet values
+        // * mergeInitial - always keep the initial list in the original order, and merge the bucket counts onto the correct terms
+        // * fresh - just use the values in the most recent aggregation, ignoring the initial values
+        _this.updateType = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "updateType", "mergeInitial");
+        // which ordering to use term/count and asc/desc
+        _this.orderBy = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "orderBy", "term");
+        _this.orderDir = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "orderDir", "asc");
+        // number of results that we should display - remember that this will only
+        // be used once, so should be large enough to gather all the values that might
+        // be in the index
+        _this.size = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "size", 10);
+        // provide a map of values for terms to displayable terms, or a function
+        // which can be used to translate terms to displyable values
+        _this.valueMap = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "valueMap", false);
+        _this.valueFunction = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "valueFunction", false);
+        //////////////////////////////////////////
+        // properties used to store internal state
+        // a place to store the raw result from the last query made for data
+        _this.latestQuery = false;
+        _this.latestResult = false;
+        // an explicit list of terms to be displayed.
+        // [{term: "<value>", display: "<display value>", count: <number of records>}]
+        _this.terms = false;
+        // values of terms that have been selected from this.terms
+        // this is just a plain list of the values
+        _this.selected = [];
+        // the list of all available terms
+        _this.all = false;
+        // is the object currently updating itself
+        _this.updating = false;
+        _this.reQueryAfterListAll = false;
+        return _this;
+    }
+    $67866ae5f3a26802$export$9099ad97b570f7c($58e70bcc9ea9714f$export$6175c660df807dd, [
+        {
+            key: "init",
+            value: function init(edge) {
+                // first kick the request up to the superclass
+                $17c4d4a7c863d924$export$9099ad97b570f7c($da23c25529bb1df4$export$9099ad97b570f7c($58e70bcc9ea9714f$export$6175c660df807dd.prototype), "init", this).call(this, edge);
+                // now trigger a request for the terms to present, if not explicitly provided
+                if (this.updateType) {
+                    if (this.edge.openingQuery || this.edge.urlQuery) this.reQueryAfterListAll = true;
+                }
+                this.listAll();
+            }
+        },
+        {
+            key: "synchronise",
+            value: function synchronise() {
+                // we can't synchronise if this.all has not yet been populated and the doUpdate function
+                // has not given us a latest result.  This effectively prevents the main edges lifecycle from
+                // ever successfully executing this function, which is the result we want.  This component
+                // is entirely dependent on its own internal lifecycle
+                if (this.all === false || this.latestResult === false) return;
+                // reset the internal properties
+                this.selected = [];
+                this.terms = [];
+                // extract all the filter values that pertain to this selector
+                if (this.edge.currentQuery) {
+                    var filters = this.edge.currentQuery.listMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsFilter({
+                        field: this.field
+                    }));
+                    for(var i = 0; i < filters.length; i++)for(var j = 0; j < filters[i].values.length; j++){
+                        var val = filters[i].values[j];
+                        this.selected.push(val);
+                    }
+                }
+                // now merge the aggTerms and the this.all values according to the appropriate algorithm
+                if (this.updateType === "mergeInitial") this._makeTermsMergeInitial();
+                else this._makeTermsFresh();
+            }
+        },
+        {
+            key: "_makeTermsMergeInitial",
+            value: function _makeTermsMergeInitial() {
+                // mesh the terms in the aggregation with the terms in the terms list
+                var buckets = this.latestResult.buckets(this.id);
+                for(var i = 0; i < this.terms.length; i++){
+                    var t = this.terms[i];
+                    var found = false;
+                    for(var j = 0; j < buckets.length; j++){
+                        var b = buckets[j];
+                        if (t.term === b.key) {
+                            t.count = b.doc_count;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) t.count = 0;
+                }
+            }
+        },
+        {
+            key: "_makeTermsFresh",
+            value: function _makeTermsFresh() {
+                var buckets = this.latestResult.buckets(this.id);
+                this.terms = [];
+                for(var i = 0; i < buckets.length; i++){
+                    var bucket = buckets[i];
+                    this.terms.push({
+                        term: bucket.key,
+                        display: this.translate(bucket.key),
+                        count: bucket.doc_count
+                    });
+                }
+            }
+        },
+        {
+            /////////////////////////////////////////////////
+            // query handlers for getting the full list of terms to display
+            key: "listAll",
+            value: function listAll() {
+                // to list all possible terms, build off the base query
+                var bq = this.edge.cloneBaseQuery();
+                bq.clearAggregations();
+                bq.size = 0;
+                // now add the aggregation that we want
+                var params = {
+                    name: this.id,
+                    field: this.field,
+                    orderBy: this.orderBy,
+                    orderDir: this.orderDir,
+                    size: this.size
+                };
+                bq.addAggregation(new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsAggregation(params));
+                this.latestQuery = bq;
+                // issue the query to elasticsearch
+                this.edge.queryAdapter.doQuery({
+                    edge: this.edge,
+                    query: bq,
+                    success: $d48cc3604bf30e24$export$367047a567f2342b(this, "listAllQuerySuccess", [
+                        "result"
+                    ]),
+                    error: $d48cc3604bf30e24$export$367047a567f2342b(this, "listAllQueryFail")
+                });
+            }
+        },
+        {
+            key: "listAllQuerySuccess",
+            value: function listAllQuerySuccess(params) {
+                var result = params.result;
+                // get the terms out of the aggregation
+                this.all = [];
+                var buckets = result.buckets(this.id);
+                for(var i = 0; i < buckets.length; i++){
+                    var bucket = buckets[i];
+                    this.all.push({
+                        term: bucket.key,
+                        display: this.translate(bucket.key),
+                        count: bucket.doc_count
+                    });
+                }
+                // allow the event handler to be set up
+                this.setupEvent();
+                if (this.reQueryAfterListAll) this.doUpdate();
+                else {
+                    // once we have listed all the values, we may be able to synchronise and draw
+                    this.latestResult = result;
+                    this.synchronise();
+                    this.draw();
+                }
+            }
+        },
+        {
+            key: "listAllQueryFail",
+            value: function listAllQueryFail() {
+                this.all = false;
+            }
+        },
+        {
+            key: "setupEvent",
+            value: function setupEvent() {
+                this.edge.context.on("edges:pre-query", $d48cc3604bf30e24$export$866a93d0ccff8292(this, "doUpdate"));
+            }
+        },
+        {
+            ///////////////////////////////////////////
+            // query handlers for repeat queries
+            key: "doUpdate",
+            value: function doUpdate() {
+                // is an update already happening?
+                if (this.updating) return;
+                this.udpating = true;
+                // to list all current terms, build off the current query
+                var bq = this.edge.cloneQuery();
+                // remove any constraint on this field, and clear the aggregations and set size to 0 for performance
+                bq.removeMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsFilter({
+                    field: this.field
+                }));
+                bq.clearAggregations();
+                bq.size = 0;
+                // now add the aggregation that we want
+                var params = {
+                    name: this.id,
+                    field: this.field,
+                    orderBy: this.orderBy,
+                    orderDir: this.orderDir,
+                    size: this.size
+                };
+                bq.addAggregation(new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsAggregation(params));
+                this.latestQuery = bq;
+                // issue the query to elasticsearch
+                this.edge.queryAdapter.doQuery({
+                    edge: this.edge,
+                    query: bq,
+                    success: $d48cc3604bf30e24$export$367047a567f2342b(this, "doUpdateQuerySuccess", [
+                        "result"
+                    ]),
+                    error: $d48cc3604bf30e24$export$367047a567f2342b(this, "doUpdateQueryFail")
+                });
+            }
+        },
+        {
+            key: "doUpdateQuerySuccess",
+            value: function doUpdateQuerySuccess(params) {
+                this.latestResult = params.result;
+                this.synchronise();
+                // turn off the update flag
+                this.updating = false;
+                // since this happens asynchronously, we may want to draw
+                this.draw();
+            }
+        },
+        {
+            key: "doUpdateQueryFail",
+            value: function doUpdateQueryFail() {
+                // just do nothing, hopefully the next request will be successful
+                this.latestResult = false;
+                this.updating = false;
+            }
+        },
+        {
+            ///////////////////////////////////////////
+            // state change functions
+            key: "selectTerms",
+            value: function selectTerms(params) {
+                var terms = params.terms;
+                var clearOthers = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "clearOthers", false);
+                var nq = this.edge.cloneQuery();
+                // first find out if there was a terms filter already in place
+                var filters = nq.listMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsFilter({
+                    field: this.field
+                }));
+                // if there is, just add the term to it
+                if (filters.length > 0) {
+                    var filter = filters[0];
+                    if (clearOthers) filter.clear_terms();
+                    var hadTermAlready = 0;
+                    for(var i = 0; i < terms.length; i++){
+                        var term = terms[i];
+                        if (filter.has_term(term)) hadTermAlready++;
+                        else filter.add_term(term);
+                    }
+                    // if all we did was remove terms that we're then going to re-add, just do nothing
+                    if (filter.has_terms() && hadTermAlready === terms.length) return false;
+                    else if (!filter.has_terms()) nq.removeMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsFilter({
+                        field: this.field
+                    }));
+                } else // otherwise, set the Terms Filter
+                nq.addMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsFilter({
+                    field: this.field,
+                    values: terms
+                }));
+                // reset the search page to the start and then trigger the next query
+                this.latestResult = false;
+                nq.from = 0;
+                this.edge.pushQuery(nq);
+                this.edge.cycle();
+                return true;
+            }
+        },
+        {
+            key: "selectTerm",
+            value: function selectTerm(term) {
+                return this.selectTerms({
+                    terms: [
+                        term
+                    ]
+                });
+            }
+        },
+        {
+            key: "removeFilter",
+            value: function removeFilter(term) {
+                var nq = this.edge.cloneQuery();
+                // first find out if there was a terms filter already in place
+                var filters = nq.listMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsFilter({
+                    field: this.field
+                }));
+                if (filters.length > 0) {
+                    var filter = filters[0];
+                    if (filter.has_term(term)) filter.remove_term(term);
+                    if (!filter.has_terms()) nq.removeMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsFilter({
+                        field: this.field
+                    }));
+                }
+                // reset the search page to the start and then trigger the next query
+                this.latestResult = false;
+                nq.from = 0;
+                this.edge.pushQuery(nq);
+                this.edge.cycle();
+            }
+        },
+        {
+            key: "clearFilters",
+            value: function clearFilters(params) {
+                var triggerQuery = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "triggerQuery", true);
+                if (this.selected.length > 0) {
+                    var nq = this.edge.cloneQuery();
+                    nq.removeMust(new $8d94b5f2509b6cf5$export$8b446892c82de644.TermsFilter({
+                        field: this.field
+                    }));
+                    this.edge.pushQuery(nq);
+                }
+                if (triggerQuery) {
+                    this.latestResult = false;
+                    this.edge.cycle();
+                }
+            }
+        },
+        {
+            //////////////////////////////////////////
+            // convenience functions
+            key: "translate",
+            value: function translate(term) {
+                if (this.valueMap) {
+                    if (term in this.valueMap) return this.valueMap[term];
+                } else if (this.valueFunction) return this.valueFunction(term);
+                return term;
+            }
+        }
+    ]);
+    return $58e70bcc9ea9714f$export$6175c660df807dd;
+}($6cf4dc301226cb87$export$ea71c44d9cb0d048);
+
+
+
+
+
 var $135bcb32af9eb45d$export$4b392426dd40333d = /*#__PURE__*/ function(Renderer) {
     "use strict";
     $bca7673885229bfd$export$9099ad97b570f7c($135bcb32af9eb45d$export$4b392426dd40333d, Renderer);
@@ -8427,7 +8785,7 @@ var $135bcb32af9eb45d$export$4b392426dd40333d = /*#__PURE__*/ function(Renderer)
                         var filt = ts.selected[i];
                         var def = this._getFilterDef(filt);
                         if (def) {
-                            var display = this.component._translate(filt);
+                            var display = this.component.translate(filt);
                             var id = $d48cc3604bf30e24$export$63ba8ea1e92c906(filt);
                             var count = "";
                             if (this.showCount) {
@@ -8604,9 +8962,11 @@ var $2039d36394fce070$export$d3ad1026b19abbfd = /*#__PURE__*/ function(Renderer)
                 var results = "";
                 for(var i = 0; i < this.fixedTerms.length; i++){
                     var ft = this.fixedTerms[i];
+                    var found = false;
                     for(var j = 0; j < ts.terms.length; j++){
                         var val = ts.terms[j];
                         if (val.term === ft) {
+                            found = true;
                             var active = $.inArray(val.term.toString(), ts.selected) > -1;
                             var checked = "";
                             if (active) checked = " checked=\"checked\" ";
@@ -8618,6 +8978,14 @@ var $2039d36394fce070$export$d3ad1026b19abbfd = /*#__PURE__*/ function(Renderer)
                         <label for="' + id + '" class="' + labelClass + '">' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(val.display) + count + '</label>\
                     </li>';
                         }
+                    }
+                    if (!found) {
+                        var display = this.component.translate(ft);
+                        var id = $d48cc3604bf30e24$export$63ba8ea1e92c906(ft);
+                        results += '<li>\
+                    <input class="' + checkboxClass + '" data-key="' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(ft) + '" id="' + id + '" type="checkbox" name="' + id + '" disabled="disabled">\
+                    <label for="' + id + '" class="' + labelClass + '">' + $d48cc3604bf30e24$export$5e20d0a3120d6c07(display) + '</label>\
+                </li>';
                     }
                 }
                 // this is what's displayed in the body if there are no results or the page is loading
@@ -8698,6 +9066,10 @@ var $2039d36394fce070$export$d3ad1026b19abbfd = /*#__PURE__*/ function(Renderer)
                 var term = this.component.jq(element).attr("data-key");
                 var checked = this.component.jq(element).is(":checked");
                 if (checked) this.component.selectTerm(term);
+                else // if the last fixed term is removed, then all the fixed terms are re-selected
+                if (this.component.selected.length === 1 && this.component.selected.includes(term)) this.component.selectTerms({
+                    terms: this.fixedTerms
+                });
                 else this.component.removeFilter(term);
             }
         },
@@ -9079,6 +9451,8 @@ var $bcaf9e61a70b299d$export$eac301b83a14e1b7 = /*#__PURE__*/ function(Component
         _this.defaultEarliest = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "defaultEarliest", new Date(0));
         // default latest date to use in all cases (defaults to now)
         _this.defaultLatest = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "defaultLatest", new Date());
+        // use this to force a latest date, even if the auto lookup on the range is set
+        _this.forceLatest = $d48cc3604bf30e24$export$f628537ca2c78f9d(params, "forceLatest", false);
         ///////////////////////////////////////////////
         // fields used to track internal state
         _this.currentField = false;
@@ -9119,7 +9493,7 @@ var $bcaf9e61a70b299d$export$eac301b83a14e1b7 = /*#__PURE__*/ function(Component
                     var min = this.defaultEarliest;
                     var max = this.defaultLatest;
                     if (agg.min !== null) min = new Date(agg.min);
-                    if (agg.max !== null) max = new Date(agg.max);
+                    if (agg.max !== null && !this.forceLatest) max = new Date(agg.max);
                     this.dateOptions[field] = {
                         earliest: min,
                         latest: max
@@ -9134,7 +9508,7 @@ var $bcaf9e61a70b299d$export$eac301b83a14e1b7 = /*#__PURE__*/ function(Component
                         this.currentField = field;
                         var filter = filters[0];
                         this.fromDate = filter.gte;
-                        this.toDate = filter.lt;
+                        this.toDate = filter.lte;
                     }
                 }
                 if (!this.currentField && this.fields.length > 0) this.currentField = this.fields[0].field;
@@ -9220,6 +9594,7 @@ var $bcaf9e61a70b299d$export$eac301b83a14e1b7 = /*#__PURE__*/ function(Component
                     this.edge.cycle();
                     return true;
                 }
+                return false;
             }
         },
         {
@@ -9326,15 +9701,16 @@ var $d626902615431ef9$export$4d567bc36d967c12 = /*#__PURE__*/ function(Renderer)
                 this.selectId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, dre.id + "_date-type", this);
                 this.rangeId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, dre.id + "_range", this);
                 var pluginId = $d48cc3604bf30e24$export$bf52b203d82ff901(this.namespace, dre.id + "_plugin", this);
-                var options = "";
-                for(var i = 0; i < dre.fields.length; i++){
-                    var field = dre.fields[i];
-                    var selected = dre.currentField === field.field ? ' selected="selected" ' : "";
-                    options += '<option value="' + field.field + '"' + selected + '>' + field.display + '</option>';
-                }
                 var frag = '<div class="form-inline">';
-                if (dre.display) frag += '<span class="' + prefixClass + '">' + dre.display + '</span>';
-                frag += '<div class="form-group"><select class="' + selectClass + ' form-control" name="' + this.selectId + '" id="' + this.selectId + '">' + options + '</select></div>';
+                if (dre.fields.length > 1) {
+                    var options = "";
+                    for(var i = 0; i < dre.fields.length; i++){
+                        var field = dre.fields[i];
+                        var selected = dre.currentField === field.field ? ' selected="selected" ' : "";
+                        options += '<option value="' + field.field + '"' + selected + '>' + field.display + '</option>';
+                    }
+                    frag += '<div class="form-group"><select class="' + selectClass + ' form-control" name="' + this.selectId + '" id="' + this.selectId + '">' + options + '</select></div>';
+                }
                 frag += '<div id="' + this.rangeId + '" class="' + inputClass + ' form-control">\
             <i class="glyphicon glyphicon-calendar"></i>&nbsp;\
             <span></span> <b class="caret"></b>\
@@ -9386,7 +9762,7 @@ var $d626902615431ef9$export$4d567bc36d967c12 = /*#__PURE__*/ function(Renderer)
                 var date_type = null;
                 if (this.useSelect2) date_type = this.selectJq.select2("val");
                 else date_type = this.selectJq.val();
-                this.component.changeField(date_type);
+                if (date_type) this.component.changeField(date_type);
                 this.component.setFrom(start.toDate());
                 this.component.setTo(end.toDate());
                 this.dateRangeDisplay(params);
@@ -9481,6 +9857,12 @@ nglp.g001.init = function(params) {
         "export": "EXPORTS",
         "request": "DOWNLOADS"
     };
+    // this is the reverse of the above, which is required to map the palette onto the
+    var valueInteractionMap = {
+        "VIEWS": "investigation",
+        "EXPORTS": "export",
+        "DOWNLOADS": "request"
+    };
     var presentationOrder = [
         "investigation",
         "export",
@@ -9560,7 +9942,6 @@ nglp.g001.init = function(params) {
         components: [
             new $bcaf9e61a70b299d$export$eac301b83a14e1b7({
                 id: "g001-date-range",
-                display: "REPORT PERIOD:<br>",
                 fields: [
                     {
                         field: "occurred_at",
@@ -9568,14 +9949,27 @@ nglp.g001.init = function(params) {
                     }
                 ],
                 autoLookupRange: true,
+                forceLatest: true,
+                defaultLatest: new Date(),
                 renderer: new $d626902615431ef9$export$4d567bc36d967c12({
+                    ranges: {
+                        'Last Year': [
+                            $bccd1ba82d89ceaa$export$137cea99ac96085().subtract(1, "year"),
+                            $bccd1ba82d89ceaa$export$137cea99ac96085()
+                        ],
+                        'Last 30 Days': [
+                            $bccd1ba82d89ceaa$export$137cea99ac96085().subtract(29, 'days'),
+                            $bccd1ba82d89ceaa$export$137cea99ac96085()
+                        ]
+                    }
                 })
             }),
             new $ae46249d8a2a7b6d$export$7decb792461ef5a9({
                 id: "g001-interactions-chart",
                 dataFunction: $ae46249d8a2a7b6d$export$d99c821b0fb86668({
                     histogramAgg: "occurred_at",
-                    termsAgg: "events"
+                    termsAgg: "events",
+                    seriesNameMap: interactionValueMap
                 }),
                 rectangulate: true,
                 seriesSort: function seriesSort(values) {
@@ -9590,7 +9984,7 @@ nglp.g001.init = function(params) {
                         return d3.time.format('%b %y')(new Date(d));
                     },
                     color: function color(d, i) {
-                        return palette[d.key];
+                        return palette[valueInteractionMap[d.key]];
                     },
                     yTickFormat: ",.0f",
                     showLegend: false,
@@ -9655,11 +10049,9 @@ nglp.g001.init = function(params) {
                     }
                 })
             }),
-            new $2c48e414d79136ba$export$845e14b82c9a4f95({
+            new $58e70bcc9ea9714f$export$6175c660df807dd({
                 id: "g001-interactions",
                 field: "event.exact",
-                syncCounts: false,
-                lifecycle: "update",
                 updateType: "fresh",
                 orderBy: "term",
                 orderDir: "asc",
@@ -9673,12 +10065,10 @@ nglp.g001.init = function(params) {
                     fixedTerms: presentationOrder
                 })
             }),
-            new $2c48e414d79136ba$export$845e14b82c9a4f95({
+            new $58e70bcc9ea9714f$export$6175c660df807dd({
                 id: "g001-format",
                 field: "format.exact",
-                size: 10,
-                syncCounts: false,
-                lifecycle: "static",
+                updateType: "fresh",
                 orderBy: "count",
                 orderDir: "desc",
                 valueFunction: function(v) {
@@ -9709,30 +10099,6 @@ nglp.g001.init = function(params) {
                     ],
                     seriesName: "request"
                 }),
-                // renderer: new HorizontalMultibarRenderer({
-                //     title: "Downloads",
-                //     legend: false,
-                //     valueFormat: countFormat,
-                //     color: function(d, i) {
-                //         return palette[d.key]
-                //     },
-                //     showXAxis: true,
-                //     showYAxis: false,
-                //     marginLeft: 0,
-                //     marginRight: 0,
-                //     marginTop: 0,
-                //     marginBottom: 0,
-                //     groupSpacing: 0.7,
-                //     onUpdate: () => {
-                //         let ticks = $("#g001-top-downloads .tick text");
-                //         for (let i = 0; i < ticks.length; i++) {
-                //             let tick = $(ticks[i]);
-                //             tick.attr("x", 0);
-                //             tick.attr("y", 20);
-                //             tick.css("text-anchor", "start");
-                //         }
-                //     }
-                // })
                 renderer: new $beec1707b43a9eb2$export$2a05ec748c9cb22d({
                     title: "Downloads",
                     countFormat: countFormat
