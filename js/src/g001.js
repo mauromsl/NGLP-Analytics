@@ -305,25 +305,27 @@ nglp.g001.G001Template = class extends Template {
 <div class="header header--main">
     <div class="container">   
         <div class="row">
-            <h1>G001: Article  Downloads for  Unit Administrators</h1>
-            <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2>
+            <div class="col-md-12">
+                <h1>G001: Article  Downloads for  Unit Administrators</h1>
+                <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2>
+            </div>
         </div>
     </div>
 </div>
 <div class="header header--secondary">
     <div class="container">
-        <nav class="navbar navbar-expand-md">
-            <div class="navbar">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
+        <nav class="navbar">
+            <div class="navbar navbar-default">
+                <ul class="nav navbar-nav">
+                    <li>
                         <a class="nav-link" href="#">Go back to Dashboard</a>
                     </li>
-                    <li class="nav-item">
+                    <li>
                         <a class="nav-link" href="#">Print this view to PDF</a>
                     </li>
                 </ul>
-                <form class="form-inline ms-2">
-                    <div id="g001-date-range"></div>
+                <form class="navbar-form navbar-right">
+                    <div class="form-group" id="g001-date-range"></div>
                 </form>
             </div>
         </nav>

@@ -8,7 +8,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-weight: 400;
 
-  .row > h1 {
+  h1 {
     line-height: inherit;
     margin: 2.5rem 0 0;
     font-weight: 700;
@@ -16,7 +16,7 @@ body {
     color: $white;
   }
 
-  .row > h2 {
+  h2 {
     line-height: inherit;
     margin: 0 0 2.5rem;
     font-weight: 700;
