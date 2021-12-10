@@ -3288,6 +3288,7 @@ function $9cbb252f768bd5d6$export$8c0eec9b15d1897d(params) {
 function $9cbb252f768bd5d6$export$d99c821b0fb86668(params) {
     var histogramAgg = params.histogramAgg;
     var termsAgg = params.termsAgg;
+    var seriesNameMap = params.seriesNameMap;
     return function(component) {
         var series = {
         };
@@ -3309,8 +3310,9 @@ function $9cbb252f768bd5d6$export$d99c821b0fb86668(params) {
         var seriesNames = Object.keys(series);
         for(var i1 = 0; i1 < seriesNames.length; i1++){
             var seriesName = seriesNames[i1];
+            var displaySeriesName = seriesNameMap ? seriesNameMap[seriesName] || seriesName : seriesName;
             dataSeries.push({
-                key: seriesName,
+                key: displaySeriesName,
                 values: series[seriesName]
             });
         }
@@ -7580,7 +7582,7 @@ PERFORMANCE OF THIS SOFTWARE.
             -90,
             180,
             90
-        ], Math.round(map.getZoom())).map(this.transformCluster.bind(this));
+        ], map.getZoom()).map(this.transformCluster.bind(this));
     }
     transformCluster({ geometry: { coordinates: [lng, lat] ,  } , properties: properties ,  }) {
         if (properties.cluster) return new $3e67a706eb58e4f4$export$4b200d2f979b5b40({
@@ -7938,7 +7940,11 @@ var $a6afb27f79910c9a$export$a0bd1dffd4b583c = /*#__PURE__*/ function(Renderer) 
                     // make sure we set the centre right
                     this.map.setCenter(centre);
                 }
-                // clear any existing markers
+                // clear any existing markers/clusters
+                if (this.cluster && this.markerCluster) {
+                    this.markerCluster.clearMarkers();
+                    this.markerCluster = false;
+                }
                 for(i = 0; i < this.markers.length; i++)this.markers[i].setMap(null);
                 this.markers = [];
                 for(var i = 0; i < this.component.locations.length; i++){
@@ -8427,7 +8433,7 @@ var $908df9636949411c$export$4b392426dd40333d = /*#__PURE__*/ function(Renderer)
                         var filt = ts.selected[i];
                         var def = this._getFilterDef(filt);
                         if (def) {
-                            var display = this.component._translate(filt);
+                            var display = this.component.translate(filt);
                             var id = $988cca1a6a01f734$export$63ba8ea1e92c906(filt);
                             var count = "";
                             if (this.showCount) {
@@ -8604,9 +8610,11 @@ var $29578ea610930bce$export$d3ad1026b19abbfd = /*#__PURE__*/ function(Renderer)
                 var results = "";
                 for(var i = 0; i < this.fixedTerms.length; i++){
                     var ft = this.fixedTerms[i];
+                    var found = false;
                     for(var j = 0; j < ts.terms.length; j++){
                         var val = ts.terms[j];
                         if (val.term === ft) {
+                            found = true;
                             var active = $.inArray(val.term.toString(), ts.selected) > -1;
                             var checked = "";
                             if (active) checked = " checked=\"checked\" ";
@@ -8618,6 +8626,14 @@ var $29578ea610930bce$export$d3ad1026b19abbfd = /*#__PURE__*/ function(Renderer)
                         <label for="' + id + '" class="' + labelClass + '">' + $988cca1a6a01f734$export$5e20d0a3120d6c07(val.display) + count + '</label>\
                     </li>';
                         }
+                    }
+                    if (!found) {
+                        var display = this.component.translate(ft);
+                        var id = $988cca1a6a01f734$export$63ba8ea1e92c906(ft);
+                        results += '<li>\
+                    <input class="' + checkboxClass + '" data-key="' + $988cca1a6a01f734$export$5e20d0a3120d6c07(ft) + '" id="' + id + '" type="checkbox" name="' + id + '" disabled="disabled">\
+                    <label for="' + id + '" class="' + labelClass + '">' + $988cca1a6a01f734$export$5e20d0a3120d6c07(display) + '</label>\
+                </li>';
                     }
                 }
                 // this is what's displayed in the body if there are no results or the page is loading
@@ -8698,6 +8714,10 @@ var $29578ea610930bce$export$d3ad1026b19abbfd = /*#__PURE__*/ function(Renderer)
                 var term = this.component.jq(element).attr("data-key");
                 var checked = this.component.jq(element).is(":checked");
                 if (checked) this.component.selectTerm(term);
+                else // if the last fixed term is removed, then all the fixed terms are re-selected
+                if (this.component.selected.length === 1 && this.component.selected.includes(term)) this.component.selectTerms({
+                    terms: this.fixedTerms
+                });
                 else this.component.removeFilter(term);
             }
         },
@@ -8807,6 +8827,7 @@ var $bd1d5a355545d6ff$export$6d5fb309d07d7299 = /*#__PURE__*/ function(Renderer)
                     bottom: that.marginBottom,
                     left: that.marginLeft
                 }).showValues(that.showValues).tooltips(that.toolTips).showControls(that.controls).showLegend(that.legend).showXAxis(that.showXAxis).showYAxis(that.showYAxis);
+                if (that.barColor) chart.barColor(that.barColor);
                 if (that.stacked) chart.multibar.stacked(that.stacked);
                 if (that.yTickFormat) {
                     var fn = that.yTickFormat;
@@ -9079,6 +9100,8 @@ var $cae255fdf19eeff1$export$eac301b83a14e1b7 = /*#__PURE__*/ function(Component
         _this.defaultEarliest = $988cca1a6a01f734$export$f628537ca2c78f9d(params, "defaultEarliest", new Date(0));
         // default latest date to use in all cases (defaults to now)
         _this.defaultLatest = $988cca1a6a01f734$export$f628537ca2c78f9d(params, "defaultLatest", new Date());
+        // use this to force a latest date, even if the auto lookup on the range is set
+        _this.forceLatest = $988cca1a6a01f734$export$f628537ca2c78f9d(params, "forceLatest", false);
         ///////////////////////////////////////////////
         // fields used to track internal state
         _this.currentField = false;
@@ -9119,7 +9142,7 @@ var $cae255fdf19eeff1$export$eac301b83a14e1b7 = /*#__PURE__*/ function(Component
                     var min = this.defaultEarliest;
                     var max = this.defaultLatest;
                     if (agg.min !== null) min = new Date(agg.min);
-                    if (agg.max !== null) max = new Date(agg.max);
+                    if (agg.max !== null && !this.forceLatest) max = new Date(agg.max);
                     this.dateOptions[field] = {
                         earliest: min,
                         latest: max
@@ -9134,7 +9157,7 @@ var $cae255fdf19eeff1$export$eac301b83a14e1b7 = /*#__PURE__*/ function(Component
                         this.currentField = field;
                         var filter = filters[0];
                         this.fromDate = filter.gte;
-                        this.toDate = filter.lt;
+                        this.toDate = filter.lte;
                     }
                 }
                 if (!this.currentField && this.fields.length > 0) this.currentField = this.fields[0].field;
@@ -9220,6 +9243,7 @@ var $cae255fdf19eeff1$export$eac301b83a14e1b7 = /*#__PURE__*/ function(Component
                     this.edge.cycle();
                     return true;
                 }
+                return false;
             }
         },
         {
@@ -9320,24 +9344,25 @@ var $0fdc25b451091025$export$4d567bc36d967c12 = /*#__PURE__*/ function(Renderer)
             key: "draw",
             value: function draw() {
                 var dre = this.component;
-                var labelClass = $988cca1a6a01f734$export$8820e1fbe507f6aa(this.namespace, "label", this);
+                var selectClass = $988cca1a6a01f734$export$8820e1fbe507f6aa(this.namespace, "select", this);
                 var inputClass = $988cca1a6a01f734$export$8820e1fbe507f6aa(this.namespace, "input", this);
                 var prefixClass = $988cca1a6a01f734$export$8820e1fbe507f6aa(this.namespace, "prefix", this);
-                this.labelId = $988cca1a6a01f734$export$bf52b203d82ff901(this.namespace, dre.id + "_date-type", this);
+                this.selectId = $988cca1a6a01f734$export$bf52b203d82ff901(this.namespace, dre.id + "_date-type", this);
                 this.rangeId = $988cca1a6a01f734$export$bf52b203d82ff901(this.namespace, dre.id + "_range", this);
                 var pluginId = $988cca1a6a01f734$export$bf52b203d82ff901(this.namespace, dre.id + "_plugin", this);
-                var options = "";
-                for(var i = 0; i < dre.fields.length; i++){
-                    var field = dre.fields[i];
-                    var selected = dre.currentField === field.field ? ' selected="selected" ' : "";
-                    options += '<option value="' + field.field + '"' + selected + '>' + field.display + '</option>';
-                }
                 var frag = '<div class="form-inline">';
-                if (dre.display) frag += '<span class="' + prefixClass + '">' + dre.display + '</span>';
-                frag += '<div><span class="' + labelClass + '" name="' + this.labelId + '" id="' + this.labelId + '">' + field.display + '</span></div>';
+                if (dre.fields.length > 1) {
+                    var options = "";
+                    for(var i = 0; i < dre.fields.length; i++){
+                        var field = dre.fields[i];
+                        var selected = dre.currentField === field.field ? ' selected="selected" ' : "";
+                        options += '<option value="' + field.field + '"' + selected + '>' + field.display + '</option>';
+                    }
+                    frag += '<div class="form-group"><select class="' + selectClass + ' form-control" name="' + this.selectId + '" id="' + this.selectId + '">' + options + '</select></div>';
+                }
                 frag += '<div id="' + this.rangeId + '" class="' + inputClass + ' form-control">\
-            <i class="far fa-calendar"></i>&nbsp;\
-            <span></span>\
+            <i class="glyphicon glyphicon-calendar"></i>&nbsp;\
+            <span></span> <b class="caret"></b>\
         </div>';
                 frag += "</div>";
                 dre.context.html(frag);
@@ -9351,10 +9376,9 @@ var $0fdc25b451091025$export$4d567bc36d967c12 = /*#__PURE__*/ function(Renderer)
                 ]);
                 var props = {
                     locale: {
-                        format: 'DD/MM/YYYY'
+                        format: "DD/MM/YYYY"
                     },
-                    showDropdowns: true,
-                    opens: "right"
+                    opens: "left"
                 };
                 if (this.ranges) props["ranges"] = this.ranges;
                 // clear out any old version of the plugin, as these are appended to the document
@@ -9387,7 +9411,7 @@ var $0fdc25b451091025$export$4d567bc36d967c12 = /*#__PURE__*/ function(Renderer)
                 var date_type = null;
                 if (this.useSelect2) date_type = this.selectJq.select2("val");
                 else date_type = this.selectJq.val();
-                this.component.changeField(date_type);
+                if (date_type) this.component.changeField(date_type);
                 this.component.setFrom(start.toDate());
                 this.component.setTo(end.toDate());
                 this.dateRangeDisplay(params);
