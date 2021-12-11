@@ -339,7 +339,7 @@ nglp.g001.G001Template = class extends Template {
                 <div class="facet" id="g001-format"></div>
             </div>
             <div class="col-md-9">
-                <p class="showtable"><input type="checkbox" name="${checkboxId}" id="${checkboxId}"><label for="${checkboxId}">Show as table</label></p>
+                <p class="showtable"><input type="checkbox" name="${checkboxId}" id="${checkboxId}" class="css-checkbox brand"><label class="css-label brand" for="${checkboxId}">Show as table</label></p>
                 <div class="data-area" id="g001-interactions-chart"></div>
                 <div class="data-area" id="g001-interactions-table" style="display:none">TABLE HERE</div>
                 <div class="data-area" id="g001-interactions-map"></div>
