@@ -18,6 +18,8 @@
 }
 
 .edges-bs3-checkboxortermselector_label {
+    @extend .css-label;
+    @extend .green;
     margin-left: 1rem;
 }
 
@@ -73,3 +75,61 @@
 progress {
     border: none;
 }
+
+#investigation {
+    @extend .green;
+    @extend .css-checkbox;
+}
+
+#investigation_label{
+    @extend .green;
+    @extend .css-label;
+}
+
+#investigation:disabled {
+    @extend .checkbox-disabled;
+    @extend .css-checkbox;
+    + label {
+        @extend .checkbox-disabled;
+        @extend .css-label;
+    }
+}
+
+#export {
+    @extend .dark;
+    @extend .css-checkbox;
+}
+
+#export_label{
+    @extend .dark;
+    @extend .css-label;
+}
+
+#export:disabled {
+    @extend .checkbox-disabled;
+    @extend .css-checkbox;
+    + label {
+        @extend .checkbox-disabled;
+        @extend .css-label;
+    }
+}
+
+#request {
+    @extend .blue;
+    @extend .css-checkbox;
+}
+
+#request_label{
+    @extend .blue;
+    @extend .css-label;
+}
+
+#request:disabled {
+    @extend .checkbox-disabled;
+    @extend .css-checkbox;
+    + label {
+        @extend .checkbox-disabled;
+        @extend .css-label;
+    }
+}
+

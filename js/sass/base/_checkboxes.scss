@@ -46,9 +46,13 @@ input[type=checkbox].css-checkbox:checked + label.css-label {
 /*specific classes related to Checkbox skins*/
 
 .green{background-image:url("/static/img/checkbox_green.png");}
-.blue{background-image:url("/static/img/checkbox_blue.png");}
+.blue{background-image:url("/static/img/checkbox_blue2.png");}
 .dark{background-image:url("/static/img/checkbox_dark.png");}
 .brand{background-image:url("/static/img/checkbox_brand.png");}
+
+.checkbox-disabled {
+	background-image:url("/static/img/checkbox_disabled.png");
+}
 
 
 input[type=checkbox].css-checkbox.med + label.css-label.med {
