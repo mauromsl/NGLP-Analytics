@@ -24,23 +24,27 @@ input[type=checkbox].css-checkbox {
 }
 
 input[type=checkbox].css-checkbox + label.css-label {
+	font-size: 14px;
+	line-height: 20px;
+	/* identical to box height, or 143% */
+
+	text-transform: uppercase;
+
+	/* Neutral/5 */
+
+	color: #1D1D1F;
+
 	padding-left:2.5rem;
 	height:15px;
 	display:inline-block;
-	line-height:15px;
 	background-repeat:no-repeat;
 	background-position: 0 0;
-	font-size:15px;
 	vertical-align:middle;
 	cursor:pointer;
 }
 
 input[type=checkbox].css-checkbox:checked + label.css-label {
 	background-position: 0 -15px;
-}
-
-.css-label{
-	background-image:url(http://csscheckbox.com/checkboxes/dark-check-green.png);
 }
 
 /*specific classes related to Checkbox skins*/
@@ -52,54 +56,4 @@ input[type=checkbox].css-checkbox:checked + label.css-label {
 
 .checkbox-disabled {
 	background-image:url("/static/img/checkbox_disabled.png");
-}
-
-
-input[type=checkbox].css-checkbox.med + label.css-label.med {
-	padding-left:22px;
-    height:17px;
-	display:inline-block;
-	line-height:17px;
-	background-repeat:no-repeat;
-	background-position: 0 0;
-	font-size:15px;
-	vertical-align:middle;
-    cursor:pointer;
-}
-
-input[type=checkbox].css-checkbox.med:checked + label.css-label.med {
-
-    background-position: 0 -17px;
-}
-input[type=checkbox].css-checkbox.sme + label.css-label.sme {
-	padding-left:22px;
-    height:16px;
-	display:inline-block;
-	line-height:16px;
-	background-repeat:no-repeat;
-	background-position: 0 0;
-	font-size:15px;
-	vertical-align:middle;
-    cursor:pointer;
-}
-
-input[type=checkbox].css-checkbox.sme:checked + label.css-label.sme{
-
-    background-position: 0 -16px;
-}
-input[type=checkbox].css-checkbox.lrg + label.css-label.lrg {
-	padding-left:22px;
-    height:20px;
-	display:inline-block;
-	line-height:20px;
-	background-repeat:no-repeat;
-	background-position: 0 0;
-	font-size:15px;
-	vertical-align:middle;
-    cursor:pointer;
-}
-
-input[type=checkbox].css-checkbox.lrg:checked + label.css-label.lrg{
-
-    background-position: 0 -20px;
 }

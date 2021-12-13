@@ -17,12 +17,6 @@
     text-transform: uppercase;
 }
 
-.edges-bs3-checkboxortermselector_label {
-    @extend .css-label;
-    @extend .green;
-    margin-left: 1rem;
-}
-
 .edges-bs3-checkboxortermselector_header {
     text-transform: uppercase;
     color: $title-text;
@@ -81,6 +75,11 @@ progress {
     @extend .css-checkbox;
 }
 
+#investigation:checked {
+    @extend .green;
+    @extend .css-checkbox;
+}
+
 #investigation_label{
     @extend .green;
     @extend .css-label;
@@ -133,3 +132,12 @@ progress {
     }
 }
 
+.edges-bs3-checkboxortermselector_g001-format_selector {
+    @extend .brand;
+    @extend .css-checkbox;
+}
+
+.edges-bs3-checkboxortermselector_g001-format_label {
+    @extend .brand;
+    @extend .css-label;
+}

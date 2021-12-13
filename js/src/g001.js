@@ -336,7 +336,7 @@ nglp.g001.G001Template = class extends Template {
         <div class="row report-area justify-content-between">
             <div class="col-md-3">
                 <div class="facet" id="g001-interactions"></div>
-                <div class="facet" id="g001-format"></div>
+                <div class="facet facet-format" id="g001-format"></div>
             </div>
             <div class="col-md-9">
                 <p class="showtable"><input type="checkbox" name="${checkboxId}" id="${checkboxId}" class="css-checkbox brand"><label class="css-label brand" for="${checkboxId}">Show as table</label></p>
