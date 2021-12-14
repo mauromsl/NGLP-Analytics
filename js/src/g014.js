@@ -435,7 +435,7 @@ function stateDataFunction(state) {
             }
         } else {
             for (let k = 0; k < ageRanges.length - 1; k++) {
-                values.push({label: ageRanges[i], value: 0});
+                values.push({label: ageRanges[k], value: 0});
             }
         }
 
