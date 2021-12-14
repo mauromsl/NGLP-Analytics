@@ -20,7 +20,9 @@
         <script type="text/javascript">
         jQuery (document).ready (function($) {
             nglp.g014.init({
-                searchUrl : '{{ url_for("query", path="public/event") }}'
+                searchUrl : '{{ url_for("query", path="public/event") }}',
+                stateProgression: {{ config.workflow_transitions_ui_labels[source]|tojson|safe }},
+                source: "{{ source }}"
             });
         });
         </script>

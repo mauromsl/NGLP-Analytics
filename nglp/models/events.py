@@ -205,12 +205,28 @@ class CoreEventInterfaceMixin:
         )
 
     @property
+    def source_id(self):
+        return self.__seamless__.get_single("source.identifier")
+
+    @source_id.setter
+    def source_id(self, val):
+        self.__seamless__.set_with_struct("source.identifier", val)
+
+    @property
     def archive_id(self):
         return self.__seamless__.get_single("source.archive_id")
 
     @archive_id.setter
     def archive_id(self, val):
         self.__seamless__.set_with_struct("source.archive_id", val)
+
+    @property
+    def container(self):
+        return self.__seamless__.get_list("container")
+
+    @container.setter
+    def container(self, val):
+        self.__seamless__.set_with_struct("container", val)
 
 
 class PipelineEvent(SeamlessMixin, CoreEventInterfaceMixin):

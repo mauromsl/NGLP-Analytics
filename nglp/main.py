@@ -34,7 +34,8 @@ async def g001(request: Request):
 
 @app.get("/g014", include_in_schema=False)
 async def g014(request: Request):
-    return templates.TemplateResponse("g014.html", {"request" : request, "config" : settings})
+    source = request.get("source", "http://example.com/wdp")    # Defaults to an example source for testing
+    return templates.TemplateResponse("g014.html", {"request" : request, "config" : settings, "source" : source})
 
 
 @app.get("/favicon.ico", include_in_schema=False)

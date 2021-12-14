@@ -82,7 +82,7 @@ ARTICLE = {
         "doi:10.1234/xxjhh"
     ],
     "contained_by" : [
-        "https://example.com/1234-5678/issue7"
+        "https://example.com/1234-5678/issue7",
         "1234-5678",
         "9876-987X"
     ],

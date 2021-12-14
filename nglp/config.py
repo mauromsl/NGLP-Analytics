@@ -52,22 +52,107 @@ class Settings(BaseSettings):
 
     ##########################################
     ## Source systems
-    sources: List[dict] = [ # for reasons unclear, I have been unable to override this in .env
+
+    # The list of sources that can send events to the system.  This list
+    # of sources should be reflected in the workflow events configuration
+    # below too
+    #
+    # NOTE: this entire configuration is for testing, you need to set your own
+    # in your .env
+    sources: List[dict] = [
         {
             "type" : "WDP",
+            "identifier": "http://wdp.example.com/"
+        },
+        {
+            "type": "WDP",
             "identifier": "http://example.com/wdp"
+        },
+        {
+            "type": "Janeway",
+            "identifier": "http://janeway.example.com"
+        },
+        {
+            "type": "Test",
+            "identifier": "http://cottagelabs.com"
         }
     ]
 
     ##########################################
     ## Workflow events configuration
-    workflow_transitions: List[str] = [
-        "submit",
-        "first_decision",
-        "review",
-        "accept",
-        "publish"
-    ]
+
+    # This holds all the workflow events that can be emitted / recorded by
+    # the specified source.  If you are adding a source you MUST update the
+    # configuration to reflect its workflow, otherwise workflow events will
+    # not be detected and categorised
+    #
+    # NOTE: this entire configuration is just for testing, you need to set your
+    # own in your .env
+    workflow_transitions: dict = {
+        "http://cottagelabs.com" : [
+            "submit",
+            "first_decision",
+            "review",
+            "accept",
+            "publish"
+        ],
+        "http://example.com/wdp": [
+            "submit",
+            "first_decision",
+            "review",
+            "accept",
+            "publish"
+        ],
+        "http://janeway.example.com" : [
+            "submit",
+            "review",
+            "accept",
+            "publish"
+        ],
+        "http://wdp.example.com/" : [
+            "submit",
+            "publish"
+        ]
+    }
+
+    # This holds a slightly different set of information to the above workflow_transitions
+    # configuration, directed specifically at the UI.  Note that it MUST have the same structure
+    # as the workflow_transitions configuration, except that each workflow label must be in a
+    # 2 element array with the second element being the label to appear in the UI.
+    #
+    # TODO: I don't love that this is a separate but almost identical configuration, but as it
+    # is for the UI rather than the backend pipeline/precompute cycles, it also feels like
+    # it should be separate.  For now we just have to take care that they match, and in the future
+    # maybe we will merge them
+    #
+    # NOTE: this entire configuration is just for testing, you need to set your
+    # own in your .env
+    workflow_transitions_ui_labels: dict = {
+        "http://cottagelabs.com" : [
+            ["submit", "Submitted"],
+            ["first_decision", "First Decision"],
+            ["review", "Reviewed"],
+            ["accept", "Accepted"],
+            ["publish", "Published"]
+        ],
+        "http://example.com/wdp": [
+            ["submit", "Submitted"],
+            ["first_decision", "First Decision"],
+            ["review", "Reviewed"],
+            ["accept", "Accepted"],
+            ["publish", "Published"]
+        ],
+        "http://janeway.example.com" : [
+            ["submit", "Submitted"],
+            ["review", "Reviewed"],
+            ["accept", "Accepted"],
+            ["publish", "Published"]
+        ],
+        "http://wdp.example.com/" : [
+            ["submit", "Submitted"],
+            ["publish", "Published"]
+        ]
+    }
 
     ###########################################
     ## Query route configuration

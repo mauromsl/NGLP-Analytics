@@ -20,7 +20,7 @@ class Workflow(Precompute):
 
         pos = 0
         while True:
-            first, second, pos = self._scan(events, pos)
+            first, second, pos = self._scan(events, pos, source)
             if second is None:
                 break
             self._annotate_events(first, second)
@@ -51,14 +51,14 @@ class Workflow(Precompute):
         except:
             raise ValueError("Could not convert string {val} to UTC Datetime".format(val=date_expr))
 
-    def _scan(self, events, start_pos):
+    def _scan(self, events, start_pos, source):
         start = events[start_pos]
         next = None
         next_pos = start_pos
         offset = 0
         while next is None:
             offset += 1
-            next_type = self._get_next_event_type(start.event, offset)
+            next_type = self._get_next_event_type(start.event, offset, source)
             if next_type is None:
                 break
             for i, e in enumerate(events[start_pos + 1:]):
@@ -67,8 +67,10 @@ class Workflow(Precompute):
                     next_pos = i + start_pos + 1
         return start, next, next_pos
 
-    def _get_next_event_type(self, current_type, offset):
-        pos = settings.workflow_transitions.index(current_type)
-        if len(settings.workflow_transitions) > pos + offset:
-            return settings.workflow_transitions[pos + offset]
+    def _get_next_event_type(self, current_type, offset, source):
+        source_id = source.get("identifier")
+        transitions = settings.workflow_transitions[source_id]
+        pos = transitions.index(current_type)
+        if len(transitions) > pos + offset:
+            return transitions[pos + offset]
         return None

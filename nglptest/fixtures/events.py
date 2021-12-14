@@ -1,6 +1,7 @@
 from copy import deepcopy
 from datetime import datetime, timedelta
 
+
 class EventFixtureFactory(object):
 
     @classmethod
@@ -12,11 +13,13 @@ class EventFixtureFactory(object):
         return deepcopy(INVESTIGATION_EVENT)
 
     @classmethod
-    def workflow_transition_event(cls, state="first_decision", occurred_at=None):
+    def workflow_transition_event(cls, state="first_decision", occurred_at=None, source_id=None):
         event = deepcopy(WORKFLOW_TRANSITION_EVENT)
         event["event"] = state
         if occurred_at is not None:
             event["occurred_at"] = occurred_at
+        if source_id:
+            event["source"] = {"identifier" : source_id}
         return event
 
     @classmethod
@@ -208,7 +211,7 @@ WORKFLOW_TRANSITION_CORE_EVENT = {
     "city" : "Edinburgh",
     "country" : "gbr",
     "source" : {
-        "identifier" : "https://cdl.dspace.org",
+        "identifier" : "http://cottagelabs.com",
         "type": "DSpace",
         "archive_id" : "12345"
     }
@@ -235,7 +238,7 @@ EXPORT_CORE_EVENT = {
     "city" : "Edinburgh",
     "country" : "gbr",
     "source" : {
-        "identifier" : "https://cdl.dspace.org",
+        "identifier" : "http://cottagelabs.com",
         "type": "DSpace",
         "archive_id" : "12345"
     }
@@ -262,7 +265,7 @@ JOIN_CORE_EVENT = {
     "city" : "Edinburgh",
     "country" : "gbr",
     "source" : {
-        "identifier" : "https://cdl.dspace.org",
+        "identifier" : "http://cottagelabs.com",
         "type": "DSpace",
         "archive_id" : "12345"
     }
@@ -289,7 +292,7 @@ LEAVE_CORE_EVENT = {
     "city" : "Edinburgh",
     "country" : "gbr",
     "source" : {
-        "identifier" : "https://cdl.dspace.org",
+        "identifier" : "http://cottagelabs.com",
         "type": "DSpace",
         "archive_id" : "12345"
     }

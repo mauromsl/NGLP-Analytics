@@ -59,6 +59,21 @@ class ReportingContextObject(SeamlessMixin, BaseDAO):
     def created_date(self, val):
         self.__seamless__.set_with_struct("record_created", val)
 
+    @property
+    def contained_by(self):
+        # NOTE: not all ReportingContextObjects support contained_by, and
+        # in those cases this will just return None
+        return self.__seamless__.get_single("contained_by", None)
+
+    @classmethod
+    def find_by_identifiers(cls, identifiers):
+        # FIXME: we are just doing a single page query, assuming that we're going to get everything with 100
+        # containers.  That's almost certainly true, but depending on what happens with the reporting
+        # context later, we may need to scroll these values to get everything out
+        q = FindByIdentifiers(identifiers, size=100)
+        res = cls.query(q.query())
+        return [ReportingContextFactory.make(o.get("_source")) for o in res.get("hits", {}).get("hits", [])]
+
 
 class Publisher(ReportingContextObject):
     TYPE = "publisher"
@@ -179,3 +194,24 @@ class ReportingContextFactory:
         t = raw.get("type")
         clazz = cls.get(t)
         return clazz(raw)
+
+
+#######################################################
+# ES Queries
+
+class FindByIdentifiers:
+    def __init__(self, identifiers, size=100):
+        self._identifiers = identifiers
+        self._size = size
+
+    def query(self):
+        return {
+            "query" : {
+                "bool" : {
+                    "must" : [
+                        {"terms" : {"identifiers.exact" : self._identifiers}}
+                    ]
+                }
+            },
+            "size" : self._size
+        }
