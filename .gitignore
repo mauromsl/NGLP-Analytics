@@ -73,6 +73,6 @@ js/dist
 js/node_modules
 error_sass.txt
 
-nglp/static/css
-nglp/static/js
+nglp/static/css/*
+nglp/static/js/*
 
