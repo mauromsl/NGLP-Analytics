@@ -66,13 +66,6 @@ Network Trash Folder
 Temporary Items
 
 # Parcel build stuff
-.parcel-cache
-node_modules
 js/.parcel-cache
 js/dist
 js/node_modules
-error_sass.txt
-
-nglp/static/css/*
-nglp/static/js/*
-
