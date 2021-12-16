@@ -16,9 +16,22 @@
     }
 }
 
-.showtable{
-    margin: 5rem 0 -7rem;
-    label {
+#g014-template_capacity-legend--container {
+    margin-top: 10rem;
+
+}
+
+#g014-workflow-capacity-table--container{
+    margin-left: 0;
+    margin-right: 0;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.g014-template_legend {
+    padding-left: 0;
+    margin-bottom: 1rem;
+    &-box-label {
         font-size: 14px;
         text-transform: uppercase;
         margin-left: 1rem;
@@ -35,4 +48,9 @@
 
 .facet-format {
     width: max-content;
+}
+
+#g014-template_capacity-legend--container {
+    display: flex;
+    flex-direction: column;
 }

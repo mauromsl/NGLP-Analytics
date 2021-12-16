@@ -280,6 +280,7 @@ nglp.g014.G014Template = class extends Template {
         this.edge = edge;
         let ageId = htmlID(this.namespace, "age-show-as-table");
         let capacityId = htmlID(this.namespace, "capacity-show-as-table");
+        let capacityLegendId = htmlID(this.namespace, "capacity-legend--container")
         let printId = htmlID(this.namespace, "print");
         let tableClasses = styleClasses(this.namespace, "stats");
         let ageChartClasses = allClasses(this.namespace, "age-chart");
@@ -308,9 +309,8 @@ nglp.g014.G014Template = class extends Template {
         for (let i = 0; i < this.stateProgression.length; i++) {
             let state = this.stateProgression[i];
             capacityChartLegend += `
-                <div class="col-md-2 ${legendClasses}">
-                    <div class="${legendBoxClasses}" style="color: ${state[2]};">&#9632;</div>
-                    ${state[1]}
+                <div class="${legendClasses}">
+                    <div class="${legendBoxClasses}"><span style="color: ${state[2]};">&#9632;</span><span class="${legendBoxClasses}-label">${state[1]}</span></div>
                 </div>
             `
         }
@@ -366,13 +366,26 @@ nglp.g014.G014Template = class extends Template {
                 </div>
                 <div>
                     <h3 class="data-label">Workflow Capacity</h3>
-                    <div class="row ${showAsTableClasses}">
-                        ${capacityChartLegend}
-                        <input type="checkbox" name="${capacityId}" id="${capacityId}" class="css-checkbox brand"><label class="css-label brand" for="${capacityId}">Show as table</label>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input type="checkbox" name="${capacityId}" id="${capacityId}" class="css-checkbox brand"><label class="css-label brand" for="${capacityId}">Show as table</label>
+                        </div>
                     </div>
-                
-                    <div class="data-area" id="g014-workflow-capacity-chart"></div>
-                    <div class="data-area" id="g014-workflow-capacity-table" style="display: none"></div>
+                    <div class="row" class="${showAsTableClasses}" id="g014-workflow-capacity-chart--container">
+                        <div class="col-md-2">
+                            <div id="${capacityLegendId}">
+                                ${capacityChartLegend}
+                            </div>  
+                        </div>
+                        <div class="col-md-10">
+                            <div class="data-area" id="g014-workflow-capacity-chart"></div>
+                        </div>
+                    </div>
+                    <div class="row" id="g014-workflow-capacity-table--container" style="display: none">
+                        <div class="col-md-12">
+                            <div class="data-area" id="g014-workflow-capacity-table"></div>
+                        </div>
+                    </div>
                 </div>
             
             </div>
@@ -412,19 +425,17 @@ nglp.g014.G014Template = class extends Template {
     toggleCapacityTable() {
         let legendSelector = jsClassSelector(this.namespace, "legend");
 
-        let chart = this.edge.jq("#g014-workflow-capacity-chart");
-        let table = this.edge.jq("#g014-workflow-capacity-table");
+        let chart = this.edge.jq("#g014-workflow-capacity-chart--container");
+        let table = this.edge.jq("#g014-workflow-capacity-table--container");
         let legend = this.edge.jq(legendSelector);
 
         if (this.showingCapacity === "chart") {
             chart.hide();
             table.show();
-            legend.hide();
             this.showingCapacity = "table"
         } else {
             table.hide();
             chart.show();
-            legend.show();
             this.showingCapacity = "chart"
         }
     }
