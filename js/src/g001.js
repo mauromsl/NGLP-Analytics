@@ -319,12 +319,12 @@ nglp.g001.G001Template = class extends Template {
             <nav class="navbar">
                 <div class="navbar navbar-default">
                     <ul class="nav navbar-nav">
-                        <li>
+                        <!-- <li>
                             <a class="nav-link" href="#">Go back to Dashboard</a>
                         </li>
                         <li>
                             <a class="nav-link" id="${printId}" href="#">Print this view</a>
-                        </li>
+                        </li>-->
                     </ul>
                     <form class="navbar-form navbar-right">
                         <div class="form-group" id="g001-date-range"></div>
@@ -341,7 +341,7 @@ nglp.g001.G001Template = class extends Template {
                     <div class="facet facet-format" id="g001-format"></div>
                 </div>
                 <div class="col-md-9">
-                    <p class="showtable"><input type="checkbox" name="${checkboxId}" id="${checkboxId}" class="css-checkbox brand"><label class="css-label brand" for="${checkboxId}">Show as table</label></p>
+                    <p class="showtable"><input type="checkbox" name="${checkboxId}" id="${checkboxId}" class="css-checkbox brand"><label class="css-label brand" for="${checkboxId}" id="${checkboxId}_label">Show as table</label></p>
                     <div class="data-area" id="g001-interactions-chart"></div>
                     <div class="data-area" id="g001-interactions-table" style="display:none">TABLE HERE</div>
                     <div class="data-area" id="g001-interactions-map"></div>

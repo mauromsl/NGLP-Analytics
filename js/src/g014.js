@@ -331,12 +331,12 @@ nglp.g014.G014Template = class extends Template {
             <nav class="navbar">
                 <div class="navbar navbar-default">
                     <ul class="nav navbar-nav">
-                        <li>
+                        <!-- <li>
                             <a class="nav-link" href="#">Go back to Dashboard</a>
                         </li>
                         <li>
                             <a class="nav-link" id="${printId}" href="#">Print this view</a>
-                        </li>
+                        </li> -->
                     </ul>
                 </div>
             </nav>
