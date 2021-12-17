@@ -1,6 +1,6 @@
 {
   "name": "nglp-analytics",
-  "version": "1.0.0-SNAPSHOT",
+  "version": "1.0.0",
   "description": "NGLP Analytics Visualisation Dashboards",
   "scripts": {
     "clean": "rm -rf ./.parcel-cache && rm -rf ./dist",
