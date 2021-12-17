@@ -1,11 +1,17 @@
 @charset "utf-8";
 
-
-@import "base/palette",
-    "../vendor/edges2/sass/renderers/bs3/checkbox-or-term-selector",
-    "../vendor/edges2/sass/renderers/bs3/fixed-selection-checkbox-or-term-selector",
-    "../vendor/edges2/sass/renderers/googlemap/google-map-view",
-    "../vendor/edges2/sass/renderers/html/relative-size-bars";
+@import url('https://fonts.googleapis.com/css2?family=Karla:wght@400;700&display=swap');
+@import "base/palette";
+@import "../vendor/edges2/sass/renderers/bs3/checkbox-or-term-selector",
+        "../vendor/edges2/sass/renderers/bs3/fixed-selection-checkbox-or-term-selector",
+        "../vendor/edges2/sass/renderers/googlemap/google-map-view",
+        "../vendor/edges2/sass/renderers/html/relative-size-bars";
+@import "base/grid",
+        "base/body",
+        "base/navbar",
+        "vendors/edges",
+        "reports/body",
+        "base/checkboxes";
 
 // export the key bits of the palette as stylesheet rules, to be read by the JS
 // for injection into visualisation components
@@ -25,38 +31,6 @@
 
 
 #g001 {
-    .header {
-        background: $header;
-        color: $header-text;
-    }
-
-    .controls {
-        background: $control;
-        color: $header-text;
-        margin-bottom: 50px;
-    }
-
-    .nav {
-        list-style-type: none;
-
-        li {
-            float: left;
-            margin-right: 0.5em;
-
-            a {
-                color: $header-text;
-            }
-        }
-    }
-
-    .formats-header {
-        margin-top: 100px;
-        color: $title-text;
-
-        h3 {
-            font-weight: bold;
-        }
-    }
 
     #g001-interactions {
         margin-bottom: 50px;
@@ -110,39 +84,5 @@
         progress::-webkit-progress-bar {
             background: #ffffff
         }
-    }
-
-    .edges-bs3-checkboxortermselector_header {
-        text-transform: uppercase;
-        color: $title-text;
-    }
-
-    .edges-bs3-chartdatatable_table {
-        width: 100%;
-
-        thead {
-            font-weight: bold;
-            text-transform: uppercase;
-            color: $title-text;
-        }
-
-        tbody tr {
-            border-bottom: 1px solid $table-divider;
-
-            td {
-                padding: 5px;
-
-                &:first-of-type {
-                    font-weight: bold;
-                    color: $title-text
-                }
-            }
-        }
-    }
-
-    .edges-html-relativesizebars_title {
-        font-weight: bold;
-        color: $title-text;
-        text-transform: uppercase;
     }
 }

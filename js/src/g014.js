@@ -280,6 +280,8 @@ nglp.g014.G014Template = class extends Template {
         this.edge = edge;
         let ageId = htmlID(this.namespace, "age-show-as-table");
         let capacityId = htmlID(this.namespace, "capacity-show-as-table");
+        let capacityLegendId = htmlID(this.namespace, "capacity-legend--container")
+        let printId = htmlID(this.namespace, "print");
         let tableClasses = styleClasses(this.namespace, "stats");
         let ageChartClasses = allClasses(this.namespace, "age-chart");
         let ageTableClasses = jsClasses(this.namespace, "age-table");
@@ -307,60 +309,89 @@ nglp.g014.G014Template = class extends Template {
         for (let i = 0; i < this.stateProgression.length; i++) {
             let state = this.stateProgression[i];
             capacityChartLegend += `
-                <div class="col-md-2 ${legendClasses}">
-                    <div class="${legendBoxClasses}" style="color: ${state[2]};">&#9632;</div>
-                    ${state[1]}
+                <div class="${legendClasses}">
+                    <div class="${legendBoxClasses}"><span style="color: ${state[2]};">&#9632;</span><span class="${legendBoxClasses}-label">${state[1]}</span></div>
                 </div>
             `
         }
 
-        let frame = `<div class="row header">
-            <div class="col-xs-12">
-                <h1>G014: Progress of articles through the editorial workflow</h1>
-            </div>
-        </div>
-        <div class="row controls">
-            <div class="col-md-6">
-                <ul class="nav">
-                    <li><a href="#">Go back to Dashboard</a></li>
-                    <li><a href="#">Print this view to PDF</a></li>
-                </ul>
-            </div>
-            <div class="col-md-6">
-                <div id="g014-date-range"></div>
-            </div>
-        </div>
-        <div class="row report-area">
-            <div class="col-xs-12">
-                <h3>Statistics per workflow state</h3>
-                <table class="${tableClasses}">
-                    <thead>
-                        <tr>
-                            <td></td>
-                            <td>In Total Today</td>
-                            <td>Mean Time to Progress</td>
-                            <td>
-                                Age of Items
-                                <p><input type="checkbox" name="${ageId}" id="${ageId}"> Show as table</p>
-                            </td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tableRows}
-                    </tbody>
-                </table>
-                
-                <h3>Workflow Capacity</h3>
-                <div class="row ${showAsTableClasses}">
-                    <div class="col-md-2"><input type="checkbox" name="${capacityId}" id="${capacityId}"> Show as table</div>
-                    ${capacityChartLegend}
+        let frame = `
+<div id="divToPrint">
+    <div class="header header--main">
+        <div class="container">   
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>G014: Progress of articles through the editorial workflow</h1>
                 </div>
-                
-                <div id="g014-workflow-capacity-chart"></div>
-                <div id="g014-workflow-capacity-table" style="display: none"></div>
-                
             </div>
-        </div>`;
+        </div>
+    </div>
+    <div class="header header--secondary">
+        <div class="container">
+            <nav class="navbar">
+                <div class="navbar navbar-default">
+                    <ul class="nav navbar-nav">
+                        <!-- <li>
+                            <a class="nav-link" href="#">Go back to Dashboard</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" id="${printId}" href="#">Print this view</a>
+                        </li> -->
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row report-area justify-content-between">
+            <div class="col-md-12">
+                <div>
+                    <h3 class="data-label">Statistics per workflow state</h3>
+                    <table class="${tableClasses} data-area">
+                        <thead>
+                            <tr>
+                                <td></td>
+                                <td>In Total Today</td>
+                                <td>Mean Time to Progress</td>
+                                <td>
+                                    Age of Items<br/>
+                                    <input type="checkbox" name="${ageId}" id="${ageId}" class="css-checkbox brand"><label class="css-label brand" for="${ageId}">Show as table</label>
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h3 class="data-label">Workflow Capacity</h3>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <input type="checkbox" name="${capacityId}" id="${capacityId}" class="css-checkbox brand"><label class="css-label brand" for="${capacityId}">Show as table</label>
+                        </div>
+                    </div>
+                    <div class="row" class="${showAsTableClasses}" id="g014-workflow-capacity-chart--container">
+                        <div class="col-md-2">
+                            <div id="${capacityLegendId}">
+                                ${capacityChartLegend}
+                            </div>  
+                        </div>
+                        <div class="col-md-10">
+                            <div class="data-area" id="g014-workflow-capacity-chart"></div>
+                        </div>
+                    </div>
+                    <div class="row" id="g014-workflow-capacity-table--container" style="display: none">
+                        <div class="col-md-12">
+                            <div class="data-area" id="g014-workflow-capacity-table"></div>
+                        </div>
+                    </div>
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</div>`;
 
         edge.context.html(frame);
 
@@ -369,24 +400,42 @@ nglp.g014.G014Template = class extends Template {
 
         let capacitySelector = idSelector(this.namespace, "capacity-show-as-table");
         on(capacitySelector, "change", this, "toggleCapacityTable");
+
+        let printBtn = idSelector(this.namespace, "print");
+        $(printBtn).on("click", (e) => {
+            e.preventDefault();
+            // window.print();
+            var win = window.open('','','left=0,top=0,toolbar=0,status =0');
+
+            var content = "<html>";
+            content += `
+            <head>
+                <link rel="stylesheet" href="../sass/g001.scss" />
+                <link rel="stylesheet" href="../vendor/edges2/vendor/nvd3-1.8.6/nv.d3.css" />
+            </head>`
+            content += "<body onload=\"window.print(); window.close();\">";
+            content += document.getElementById("divToPrint").innerHTML ;
+            content += "</body>";
+            content += "</html>";
+            win.document.write(content);
+            win.document.close();
+        });
     }
 
     toggleCapacityTable() {
         let legendSelector = jsClassSelector(this.namespace, "legend");
 
-        let chart = this.edge.jq("#g014-workflow-capacity-chart");
-        let table = this.edge.jq("#g014-workflow-capacity-table");
+        let chart = this.edge.jq("#g014-workflow-capacity-chart--container");
+        let table = this.edge.jq("#g014-workflow-capacity-table--container");
         let legend = this.edge.jq(legendSelector);
 
         if (this.showingCapacity === "chart") {
             chart.hide();
             table.show();
-            legend.hide();
             this.showingCapacity = "table"
         } else {
             table.hide();
             chart.show();
-            legend.show();
             this.showingCapacity = "chart"
         }
     }

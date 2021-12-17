@@ -1,0 +1,60 @@
+.data-area {
+    margin: 7.5rem 0;
+
+    h1 {
+        margin-bottom: 2.5rem;
+        font-size: 30px;
+        font-weight: 700;
+        color: $title-text;
+    }
+
+    h4 {
+        color: $title-text;
+        font-weight: 700;
+        font-size: 14px;
+        text-transform: uppercase;
+    }
+}
+
+#g001-template_show-as-table_label {
+    margin-bottom: -7.5rem;
+}
+
+#g014-template_capacity-legend--container {
+    margin-top: 10rem;
+
+}
+
+#g014-workflow-capacity-table--container{
+    margin-left: 0;
+    margin-right: 0;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.g014-template_legend {
+    padding-left: 0;
+    margin-bottom: 1rem;
+    &-box-label {
+        font-size: 14px;
+        text-transform: uppercase;
+        margin-left: 1rem;
+        font-weight: 400;
+    }
+}
+
+.facet {
+    height: 100px;
+    overflow: visible;
+    margin: 5rem 0 -2.5rem;
+    font-size: 14px;
+}
+
+.facet-format {
+    width: max-content;
+}
+
+#g014-template_capacity-legend--container {
+    display: flex;
+    flex-direction: column;
+}

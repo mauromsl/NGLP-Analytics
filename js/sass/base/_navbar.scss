@@ -1,0 +1,26 @@
+nav.navbar {
+  margin-bottom: 0;
+  .navbar-default {
+    background-color: $brand-blue-1;
+    margin-bottom: 0;
+    border: none;
+    width: 100%;
+    .navbar-nav {
+      padding-top: 0;
+      padding-bottom: 0;
+      padding-left: 0;
+      & > li > a {
+        padding-left: 0;
+        color: $white;
+        font-size: 14px;
+        text-decoration: underline;
+        text-transform: uppercase;
+
+        &:focus &:hover {
+          font-weight: bold;
+        }
+      }
+    }
+  }
+}
+

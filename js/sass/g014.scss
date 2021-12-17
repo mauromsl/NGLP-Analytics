@@ -1,7 +1,13 @@
 @charset "utf-8";
 
-
-@import "base/palette";
+@import url('https://fonts.googleapis.com/css2?family=Karla:wght@400;700&display=swap');
+@import "base/palette",
+        "base/grid",
+        "base/body",
+        "base/navbar",
+        "vendors/edges",
+        "reports/body",
+        "base/checkboxes";
 
 // export the key bits of the palette as stylesheet rules, to be read by the JS
 // for injection into visualisation components
@@ -54,29 +60,6 @@
 }
 
 #g014 {
-    .header {
-        background: $header;
-        color: $header-text;
-    }
-
-    .controls {
-        background: $control;
-        color: $header-text;
-        margin-bottom: 50px;
-    }
-
-    .nav {
-        list-style-type: none;
-
-        li {
-            float: left;
-            margin-right: 0.5em;
-
-            a {
-                color: $header-text;
-            }
-        }
-    }
 
     .g014-template_stats {
         width: 100%;
@@ -109,6 +92,11 @@
                 font-weight: bold;
                 text-transform: uppercase;
                 color: $title-text
+            }
+
+            label {
+                font-weight: normal;
+                margin: 1rem 0 1rem 0;
             }
         }
     }

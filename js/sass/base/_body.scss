@@ -1,0 +1,48 @@
+body {
+  font-family: 'Karla', sans-serif;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+  background-color: $white;
+  color: $black;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
+
+  h1 {
+    line-height: inherit;
+    margin: 0;
+    font-weight: 700;
+    font-size: 30px;
+    color: $white;
+  }
+
+  h2 {
+    line-height: inherit;
+    margin: 0;
+    font-weight: 700;
+    font-size: 22px;
+    color: $white;
+  }
+
+  .data-label {
+    font-size: 30px;
+    line-height: 75px;
+
+    /* Brand/100 AAA */
+
+    color: #006087;
+  }
+
+}
+
+.header {
+
+  &--main {
+    background-color: $brand-blue-0;
+    padding: 2.5rem 0 2.5rem 0;
+  }
+  &--secondary {
+    background-color: $brand-blue-1;
+  }
+
+}

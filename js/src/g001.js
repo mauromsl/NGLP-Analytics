@@ -300,54 +300,90 @@ nglp.g001.G001Template = class extends Template {
     draw(edge) {
         this.edge = edge;
         let checkboxId = htmlID(this.namespace, "show-as-table");
+        let printId = htmlID(this.namespace, "print");
 
-        let frame = `<div class="row header">
-            <div class="col-xs-12">
-                <h1>G001: Article  Downloads for  Unit Administrators</h1>
-                <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2> 
-            </div>
-        </div>
-        <div class="row controls">
-            <div class="col-md-6">
-                <ul class="nav">
-                    <li><a href="#">Go back to Dashboard</a></li>
-                    <li><a href="#">Print this view to PDF</a></li>
-                </ul>
-            </div>
-            <div class="col-md-6">
-                <div id="g001-date-range"></div>
-            </div>
-        </div>
-        <div class="row report-area">
-            <div class="col-md-3">
-                <div id="g001-interactions"></div>
-                <div id="g001-format"></div>
-            </div>
-            <div class="col-md-9">
-                <p><input type="checkbox" name="${checkboxId}" id="${checkboxId}"> Show as table</p>
-                <div id="g001-interactions-chart"></div>
-                <div id="g001-interactions-table" style="display:none">TABLE HERE</div>
-                <div id="g001-interactions-map"></div>
-                <div class="row formats-header">
-                    <div class="col-xs-12">
-                        <h3>Top 3 Formats</h3>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div id="g001-top-downloads"></div>
-                    </div>
-                    <div class="col-md-6">
-                        <div id="g001-top-exports"></div>
-                    </div>
+        let frame = `
+<div id="divToPrint">
+    <div class="header header--main">
+        <div class="container">   
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>G001: Article  Downloads for  Unit Administrators</h1>
+                    <h2>Article downloads by format, including landing page and metadata exports in aggregate</h2>
                 </div>
             </div>
-        </div>`;
+        </div>
+    </div>
+    <div class="header header--secondary">
+        <div class="container">
+            <nav class="navbar">
+                <div class="navbar navbar-default">
+                    <ul class="nav navbar-nav">
+                        <!-- <li>
+                            <a class="nav-link" href="#">Go back to Dashboard</a>
+                        </li>
+                        <li>
+                            <a class="nav-link" id="${printId}" href="#">Print this view</a>
+                        </li>-->
+                    </ul>
+                    <form class="navbar-form navbar-right">
+                        <div class="form-group" id="g001-date-range"></div>
+                    </form>
+                </div>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="container">
+            <div class="row report-area justify-content-between">
+                <div class="col-md-3">
+                    <div class="facet" id="g001-interactions"></div>
+                    <div class="facet facet-format" id="g001-format"></div>
+                </div>
+                <div class="col-md-9">
+                    <p class="showtable"><input type="checkbox" name="${checkboxId}" id="${checkboxId}" class="css-checkbox brand"><label class="css-label brand" for="${checkboxId}" id="${checkboxId}_label">Show as table</label></p>
+                    <div class="data-area" id="g001-interactions-chart"></div>
+                    <div class="data-area" id="g001-interactions-table" style="display:none">TABLE HERE</div>
+                    <div class="data-area" id="g001-interactions-map"></div>
+                    <div class="data-area" class="row formats-header">
+                        <h3 class="data-label">Top 3 Formats</h3>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div id="g001-top-downloads"></div>
+                            </div>
+                            <div class="col-md-4 offset-md-1">
+                                <div id="g001-top-exports"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+</div>`;
 
         edge.context.html(frame);
 
         let checkboxSelector = idSelector(this.namespace, "show-as-table");
         on(checkboxSelector, "change", this, "toggleTable");
+        let printBtn = idSelector(this.namespace, "print");
+        $(printBtn).on("click", (e) => {
+            e.preventDefault();
+            // window.print();
+            var win = window.open('','','left=0,top=0,toolbar=0,status =0');
+
+            var content = "<html>";
+            content += `
+            <head>
+                <link rel="stylesheet" href="../sass/g001.scss" />
+                <link rel="stylesheet" href="../vendor/edges2/vendor/nvd3-1.8.6/nv.d3.css" />
+            </head>`
+            content += "<body onload=\"window.print(); window.close();\">";
+            content += document.getElementById("divToPrint").innerHTML ;
+            content += "</body>";
+            content += "</html>";
+            win.document.write(content);
+            win.document.close();
+        });
     }
 
     toggleTable() {
@@ -382,7 +418,7 @@ class MapPointRenderer {
                 text: String(sum)
             },
             // adjust zIndex to be above other markers
-            zIndex: Number(google.maps.Marker.MAX_ZINDEX) + sum,
+            //zIndex: Number(google.maps.Marker.MAX_ZINDEX) + sum,
         });
     }
 }
