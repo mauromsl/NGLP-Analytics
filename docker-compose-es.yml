@@ -32,3 +32,19 @@ services:
     restart: on-failure
     volumes:
       - ${PWD}/:/app
+
+  kafka:
+    environment:
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9103,EXTERNAL://kafka:9092,,INTERNAL://kafka:19092
+
+  nglp-events-consumer:
+    env_file: env.docker
+    restart: on-failure
+    volumes:
+      - ${PWD}/:/app
+
+  nglp-oids-consumer:
+    env_file: env.docker
+    restart: on-failure
+    volumes:
+      - ${PWD}/:/app
